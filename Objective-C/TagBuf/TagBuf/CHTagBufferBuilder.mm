@@ -45,10 +45,13 @@ using namespace std;
   ---------
  04: 1 represents integer was compressed by zigzag if write-type is about integer 
      or string's length. And the placeholder is valid only write-type is about
-     integer or string. 0 represents not.
+     integer or string. 0 represents not. 
+     If [04] equal 1, [04~06] will lose their meaning. And if that, [05~07] represents the
+     length of zigzag after compressed. In my code, I have already ensure the length less
+     than or equal 7. So, that is reasonable.
  05: 1 represents there is a data of container like array at next. 0 represents not.
- 06: 1 represents there is a tagBuf cell at next. 0 represents not.
- 07: 1 represents there is a tagBuf object at next. 0 represents not.
+ 06: 1 represents there is a tagBuffer object at next. 0 represents not.
+ 07: 1 represents there is a tagBuf cell at next. 0 represents not.
   ---------
  |03~00 bit| tagBuf write type
   ---------
