@@ -47,8 +47,8 @@
 
 @interface CHTagBuffer : NSObject
 
-+ (NSData *)toTagBuf;
+- (NSData *)toTagBuf;
 
-+ (instancetype)instanceWillTagBuf:(NSData *)tagBuf;
++ (instancetype)tagBufferWithTagBuf:(NSData *)tagBuf;
 
 @end
