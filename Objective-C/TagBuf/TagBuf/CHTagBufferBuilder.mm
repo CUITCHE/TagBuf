@@ -33,28 +33,43 @@ using namespace std;
   ---------
  |31~13 bit| field number
   ---------
+
   ---------
  |12~08 bit| tagBuf reserved
   ---------
- {
- If [04] = 1 and [08~10] is vaild only that.
- 08~10: The length of zigzag.
- }
+ Especially, [11] = 1 represents that the bytes of string or data's length has been
+ compressed by zigzag. And internal-tag != 4 is vaild.
   ---------
  |07~04 bit| tagBuf internal-tag
   ---------
- 04: 1 represents integer was compressed by zigzag if write-type is about integer 
-     or string's length. And the placeholder is valid only write-type is about
-     integer or string. 0 represents not. 
-     If [04] equal 1, [04~06] will lose their meaning. And if that, [05~07] represents the
-     length of zigzag after compressed. In my code, I have already ensure the length less
-     than or equal 7. So, that is reasonable.
- 05: 1 represents there is a data of container like array at next. 0 represents not.
- 06: 1 represents there is a tagBuffer object at next. 0 represents not.
- 07: 1 represents there is a tagBuf cell at next. 0 represents not.
+ Especially, if [07] = 1 represents there is a tagBuf at next, 0 represents not.
+
   ---------
  |03~00 bit| tagBuf write type
   ---------
+ If value = CHTagBufferWriteType for internal-tag[04~06]
+ - CHTagBufferWriteTypeVarint
+    internal-tag = 0, represents 8bits integer.
+    internal-tag = 1, represents 16bits integer.
+    internal-tag = 2, represents 32bits integer.
+    internal-tag = 3, represents 64bits integer.
+    internal-tag = 4, represents zigzag. [08~10] represents the length of zigzag.
+ - CHTagBufferWriteTypeDouble
+    internal-tag = 0, represents float.
+    internal-tag = 1, represents double.
+ - CHTagBufferWriteTypeContainer
+    internal-tag = 0, contains 8bits integer.
+    internal-tag = 1, contains 16bits integer.
+    internal-tag = 2, contains 32bits integer.
+    internal-tag = 3, contains 64bits integer.
+    internal-tag = 4, contains zigzag. [08~10] represents the length of zigzag.
+    internal-tag = 5, contains string or blob data.
+    internal-tag = 6, contains tagBuffer object.
+ - CHTagBufferWriteTypeblobStream
+    internal-tag = 0, represents non-encrypted.
+    internal-tag = 1, represents encrypted.
+ - CHTagBufferWriteTypeTagBuffer
+    none.
  */
 
 #define __tag32 0xFFE00000u

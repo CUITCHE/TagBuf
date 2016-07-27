@@ -20,7 +20,9 @@ typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
     /// container, such as NSArray
     CHTagBufferWriteTypeContainer   = 3,
     /// such as NSString, c-style string, NSData
-    CHTagBufferWriteTypeblobStream  = 4
+    CHTagBufferWriteTypeblobStream  = 4,
+    /// data from the object which is kind of CHTagBuffer Class.
+    CHTagBufferWriteTypeTagBuffer   = 5
 };
 
 #define FLOAT_FLAG (1 << 4)
