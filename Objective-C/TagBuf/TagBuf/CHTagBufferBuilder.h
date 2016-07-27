@@ -11,18 +11,14 @@
 #pragma once
 
 typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
-    /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type.
-    CHTagBufferWriteTypeVarint      = 0,
-    /// double value, 8 bytes
-    CHTagBufferWriteTypeDouble      = 1,
-    /// float value, 4 bytes.
-    CHTagBufferWriteTypeFloat       = 2,
+    /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes.
+    CHTagBufferWriteTypeVarintFixed = 0,
     /// container, such as NSArray
-    CHTagBufferWriteTypeContainer   = 3,
+    CHTagBufferWriteTypeContainer   = 1,
     /// such as NSString, c-style string, NSData
-    CHTagBufferWriteTypeblobStream  = 4,
+    CHTagBufferWriteTypeblobStream  = 2,
     /// data from the object which is kind of CHTagBuffer Class.
-    CHTagBufferWriteTypeTagBuffer   = 5
+    CHTagBufferWriteTypeTagBuffer   = 3
 };
 
 #define FLOAT_FLAG (1 << 4)
@@ -33,9 +29,9 @@ typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
     CHTagBufEncodingType16Bits = 2,
     CHTagBufEncodingType32Bits = 3,
     CHTagBufEncodingType64Bits = 4,
-    CHTagBufEncodingTypeObject = 5,
-    CHTagBufEncodingTypeFloat  = CHTagBufEncodingType32Bits | FLOAT_FLAG,
-    CHTagBufEncodingTypeDouble = CHTagBufEncodingType64Bits | FLOAT_FLAG
+    CHTagBufEncodingTypeFloat  = 5,
+    CHTagBufEncodingTypeDouble = 6,
+    CHTagBufEncodingTypeObject = 7
 };
 
 #define WriteAPI public
@@ -53,13 +49,9 @@ public:
     void maker(id instance);
 WriteAPI:
     void writeTag();
-    void writeCString(const char *str, uint32_t length);
-    void writeInteger(long long integer);
-    void writeFloat(float v);
-    void writeDouble(double v);
     void writeContainer(NSArray *container);
 
-    void decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType, CHTagBufferWriteType &writeType);
+    void decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType);
     void writeByEncodingType(CHTagBufEncodingType type, Ivar ivar, id instance);
     // Objc
     void writeObjcect(id obj);

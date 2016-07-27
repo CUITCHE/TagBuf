@@ -8,7 +8,7 @@
 
 #import "CHTagBufferBuilder.h"
 #include <objc/runtime.h>
-#include <vector>
+#include <type_traits>
 using namespace std;
 
 #define CHTAGBUFFER_CATEGORY 1
@@ -37,34 +37,32 @@ using namespace std;
   ---------
  |12~08 bit| tagBuf reserved
   ---------
- Especially, [11] = 1 represents that the bytes of string or data's length has been
+ [08~10] represents the length of zigzag.
+ [11] = 1 represents that the bytes of string or data's length has been
  compressed by zigzag. And internal-tag != 4 is vaild.
+ [12] = 1 represents tagBuf was compressed by zigzag if wirte-type is integer in array.
   ---------
  |07~04 bit| tagBuf internal-tag
   ---------
- Especially, if [07] = 1 represents there is a tagBuf at next, 0 represents not.
+ Especially, if [07] = 0 represents there is a tagBuf at next, 1 represents not.
 
   ---------
  |03~00 bit| tagBuf write type
   ---------
  If value = CHTagBufferWriteType for internal-tag[04~06]
- - CHTagBufferWriteTypeVarint
+ - CHTagBufferWriteTypeVarintFixed
     internal-tag = 0, represents 8bits integer.
     internal-tag = 1, represents 16bits integer.
     internal-tag = 2, represents 32bits integer.
     internal-tag = 3, represents 64bits integer.
-    internal-tag = 4, represents zigzag. [08~10] represents the length of zigzag.
- - CHTagBufferWriteTypeDouble
-    internal-tag = 0, represents float.
-    internal-tag = 1, represents double.
+    internal-tag = 4, represents 32bits float.
+    internal-tag = 5, represents 64bits double.
  - CHTagBufferWriteTypeContainer
-    internal-tag = 0, contains 8bits integer.
-    internal-tag = 1, contains 16bits integer.
-    internal-tag = 2, contains 32bits integer.
-    internal-tag = 3, contains 64bits integer.
-    internal-tag = 4, contains zigzag. [08~10] represents the length of zigzag.
-    internal-tag = 5, contains string or blob data.
-    internal-tag = 6, contains tagBuffer object.
+    internal-tag = 0, contains zigzag integer.
+    internal-tag = 1, represents 32bits float.
+    internal-tag = 2, represents 64bits double.
+    internal-tag = 3, contains string or blob data.
+    internal-tag = 4, contains tagBuffer object.
  - CHTagBufferWriteTypeblobStream
     internal-tag = 0, represents non-encrypted.
     internal-tag = 1, represents encrypted.
@@ -88,47 +86,71 @@ NS_INLINE bool isWorthZigzag(uint64_t integer)
 union __tag_buffer_flag {
     uint32_t itag;
     struct __tag_buffer_structure {
-        uint32_t writeType          : 03; // [0~3]
-        uint32_t isZigzag           : 01; // [04]
-        uint32_t nextIsDataOfList   : 01; // [05]
-        uint32_t next               : 01; // [06]
-        uint32_t isTagBufObject     : 01; // [07]
+        uint32_t writeType          : 03; // [00~03]
+// if writeType is CHTagBufferWriteTypeVarint
+#define varint_8bits    0
+#define varint_16bits   1
+#define varint_32bits   2
+#define varint_64bits   3
+#define varint_float    4
+#define varint_double   5
+
+// if writeType is CHTagBufferWriteTypeContainer
+#define container_8bits     varint_8bits
+#define container_16bits    varint_16bits
+#define container_32bits    varint_32bits
+#define container_64bits    varint_64bits
+#define container_float     varint_float
+#define container_double    varint_double
+#define container_stream    6
+#define container_tagBuffer 7
+
+// if writeType is CHTagBufferWriteTypeContainer
+#define stream_nonecrypt    0
+#define stream_encrypt      1
+        uint32_t internalTag        : 03; // [04~06]
+        uint32_t next               : 01; // [07]
         uint32_t lengthOfZigzag     : 03; // [08~10]
-        uint32_t reserved           : 02; // [11~12]
-        uint32_t field_number       : 19; // [13~31]
-    }tag;
+        uint32_t lengthCompressed   : 01; // [11]
+        uint32_t compressedInArray  : 01; // [12]
+        uint32_t fieldNumber        : 20; // [13~32]
+    } tag;
 };
 
 struct CHTagBufferBuilderPrivate
 {
-    vector<char> *buf = new vector<char>();
-    char *offset = 0;
-    union __tag_buffer_flag tag;
     static Class objc_class_tagbuffer;
+    static Protocol *objc_proto_optional;
+    static Protocol *objc_proto_required;
+    static Protocol *objc_proto_NSNumberInt32;
+    static Protocol *objc_proto_NSNumberInt64;
+    NSMutableData *buf;
+    union __tag_buffer_flag tag;
+    BOOL accessToWriteTag;
     CHTagBufferBuilderPrivate()
     {
         tag.itag = 0;
-        buf->resize(4098);
+        buf = [NSMutableData dataWithCapacity:4098];
+        accessToWriteTag = YES;
     }
-    ~CHTagBufferBuilderPrivate()
-    {delete buf;}
 
     void resetTagWithFieldNumber(uint32_t fieldNumber)
     {
         tag.itag = 0;
-        tag.tag.field_number = fieldNumber;
-        tag.tag.next = 1;
+        tag.tag.fieldNumber = fieldNumber;
     }
 };
 
 Class CHTagBufferBuilderPrivate::objc_class_tagbuffer = NSClassFromString(@"CHTagBuffer");
+Protocol *CHTagBufferBuilderPrivate::objc_proto_optional = NSProtocolFromString(@"optional");
+Protocol *CHTagBufferBuilderPrivate::objc_proto_required = NSProtocolFromString(@"required");
+Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt32 = NSProtocolFromString(@"NSNumberInt32");
+Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt64 = NSProtocolFromString(@"NSNumberInt64");
 
 struct CHInternalHelper
 {
     template <typename T>
-    WriteMemoryAPI(T) write_to_buffer(T zz,
-                                      Byte* buf,
-                                      CHTagBufferBuilder *builder)
+    WriteMemoryAPI(int) write_to_buffer(T zz, Byte* buf)
     {
         int i = 0;
         for (; i<sizeof(zz); ++i) {
@@ -144,9 +166,7 @@ struct CHInternalHelper
     }
 
     template <typename T>
-    ReadMemoryAPI(T) read_from_buffer(Byte* buf,
-                                      int max_size,
-                                      CHTagBufferBuilder *builder)
+    ReadMemoryAPI(T) read_from_buffer(Byte* buf, int max_size)
     {
         T ret = 0;
         Byte n = 0;
@@ -163,19 +183,18 @@ struct CHInternalHelper
     }
 
     template <typename T>
-    WriteMemoryAPI(char*) memoryCopyPod(char *dst, T value)
+    WriteMemoryAPI(void) memoryCopyPod(T value, NSMutableData *buf)
     {
-        static_assert(std::is_pointer<T>::value == false, "Must not be a pointer");
-        memcpy(dst, &value, sizeof(T));
-        return dst + sizeof(T);
+        static_assert(std::is_pod<T>::value == true, "Must not be a pointer");
+        [buf appendBytes:&value length:sizeof(T)];
     }
 
     template <typename T>
-    WriteMemoryAPI(char*) memoryCopyPointer(char *dst, T value)
+    WriteMemoryAPI(void) memoryCopyPointer(T value, NSMutableData *buf)
     {
         static_assert(std::is_pointer<T>::value == true, "Must not be a pod");
-        memcpy(dst, value, sizeof(typename std::remove_pointer<T>::type));
-        return dst + sizeof(typename std::remove_pointer<T>::type);
+        [buf appendBytes:&value length:sizeof(typename std::remove_pointer<T>::type)];
+
     }
 
     template <typename T>
@@ -197,12 +216,17 @@ struct CHInternalHelper
     {
         char objCType = number.objCType[0];
         if (objCType == 'f') { // float
-            builder->writeFloat(number.floatValue);
+            writeFloat(number.floatValue, builder);
         } else if (objCType == 'd') { // double
-            builder->writeDouble(number.doubleValue);
+            writeDouble(number.doubleValue, builder);
         } else {
             uint64_t _int64 = number.unsignedLongLongValue;
-            builder->writeInteger(_int64);
+            uint32_t _int32 = number.unsignedIntValue;
+            if (_int32 == _int64) {
+                writeInteger(_int32, builder);
+            } else {
+                writeInteger(_int64, builder);
+            }
         }
     }
 
@@ -212,35 +236,77 @@ struct CHInternalHelper
         tag.writeType = CHTagBufferWriteTypeblobStream;
         uint64_t length = data.length;
         if (isWorthZigzag(length)) {
-            tag.isZigzag = 1;
-            length = integerToZigzag(length);
+            tag.lengthCompressed = 1;
+            uint64_t compressed = integerToZigzag(length);
+            Byte buf[8] = {0};
+            tag.lengthOfZigzag = write_to_buffer(compressed, buf);
+            [builder->_d->buf appendBytes:buf length:tag.lengthOfZigzag];
+        } else {
+            memoryCopyPod(length, builder->_d->buf);
         }
-        char *&offset = builder->_d->offset;
-        offset = memoryCopyPod(offset, length);
-        [data enumerateByteRangesUsingBlock:^(const void *bytes, NSRange byteRange, BOOL *stop) {
-            memcpy(offset, bytes, sizeof(char) * byteRange.length);
-            offset += byteRange.length;
-        }];
+        [builder->_d->buf appendData:data];
     }
 
-    WriteMemoryAPI(void) writeNSString(NSString *aString, CHTagBufferBuilder *builder)
+    /*
+     c-style string's structure:
+     -------------------------------
+     |tag(4)|length(4)|string-data(N)|
+     -------------------------------
+     */
+    WriteMemoryAPI(void) writeCString(const char *str, CHTagBufferBuilder *builder)
     {
         auto &tag = builder->_d->tag.tag;
-        tag.writeType = CHTagBufferWriteTypeblobStream;
-        const char *buf = [aString UTF8String];
-        uint32_t length = buf ? (uint32_t)strlen(buf) : 0;
+        uint32_t length = str ? (uint32_t)strlen(str) : 0;
         if (isWorthZigzag(length)) {
-            tag.isZigzag = 1;
-            length = integerToZigzag(length);
+            uint32_t compressed = integerToZigzag(length);
+            Byte buf[4] = {0};
+            tag.lengthCompressed = 1;
+            tag.lengthOfZigzag = write_to_buffer(compressed, buf);
+            [builder->_d->buf appendBytes:buf length:tag.lengthOfZigzag];
+        } else {
+            memoryCopyPod(length, builder->_d->buf);
         }
         builder->writeTag();
-        char *&offset = builder->_d->offset;
-        offset = memoryCopyPod(offset, length);
-        memcpy(offset, buf, sizeof(char) * length);
-        offset += length;
+        [builder->_d->buf appendBytes:str length:sizeof(char) * length];
+    }
+
+    WriteMemoryAPI(void) writeFloat(float v, CHTagBufferBuilder *builder)
+    {
+        builder->writeTag();
+        memoryCopyPod(v, builder->_d->buf);
+    }
+
+    WriteMemoryAPI(void) writeDouble(double v, CHTagBufferBuilder *builder)
+    {
+        builder->writeTag();
+        memoryCopyPod(v, builder->_d->buf);
+    }
+
+    template <typename T>
+    WriteMemoryAPI(void) writeInteger(T integer, CHTagBufferBuilder *builder)
+    {
+        static_assert(std::is_pod<T>::value == true, "Must be a pod value");
+        do {
+            if (sizeof(T) < 4) {
+                builder->writeTag();
+                memoryCopyPod(integer, builder->_d->buf);
+                break;
+            }
+            if (isWorthZigzag((typename make_unsigned<T>::type)integer)) {
+                integer = integerToZigzag(integer);
+                Byte buf[sizeof(T)] = {0};
+                auto &tag = builder->_d->tag.tag;
+                tag.lengthCompressed = 1;
+                tag.lengthOfZigzag = write_to_buffer(integer, buf);
+                builder->writeTag();
+                [builder->_d->buf appendBytes:buf length:tag.lengthOfZigzag];
+            } else {
+                builder->writeTag();
+                memoryCopyPod(integer, builder->_d->buf);
+            }
+        } while (0);
     }
 };
-
 
 
 CHTagBufferBuilder::CHTagBufferBuilder() :_d(new struct CHTagBufferBuilderPrivate)
@@ -253,7 +319,9 @@ CHTagBufferBuilder::~CHTagBufferBuilder()
 
 void CHTagBufferBuilder::writeTag()
 {
-    memcpy(_d->offset, &_d->tag.itag, sizeof(uint32_t));
+    if (_d->accessToWriteTag) {
+        [_d->buf appendBytes:&_d->tag.itag length:sizeof(uint32_t)];
+    }
 }
 
 void CHTagBufferBuilder::maker(id instance)
@@ -269,118 +337,98 @@ void CHTagBufferBuilder::maker(id instance)
     Ivar *p = list;
     --count;
     CHTagBufEncodingType encodingType;
-    CHTagBufferWriteType writeType;
     for (uint32_t i=0; i<count; ++i, ++p) {
         const char *typeCoding = ivar_getTypeEncoding(*p);
-        this->decodeFromTypeEncoding(typeCoding, encodingType, writeType);
+        this->decodeFromTypeEncoding(typeCoding, encodingType);
         _d->resetTagWithFieldNumber(i);
         this->writeByEncodingType(encodingType, *p, instance);
     }
 }
 
-/*
- c-style string's structure:
-  -------------------------------
- |tag(4)|length(4)|string-data(N)|
-  -------------------------------
- */
-void CHTagBufferBuilder::writeCString(const char *str, uint32_t length)
-{
-    _d->tag.tag.writeType = CHTagBufferWriteTypeblobStream;
-    if (isWorthZigzag(length)) {
-        _d->tag.tag.isZigzag = 1;
-        length = CHInternalHelper::integerToZigzag(length);
-    }
-    writeTag();
-    _d->offset = CHInternalHelper::memoryCopyPod(_d->offset, length);
-    memcpy(_d->offset, str, sizeof(char) * length);
-    _d->offset += length;
-}
-
-void CHTagBufferBuilder::writeInteger(long long integer)
-{
-    _d->tag.tag.writeType = CHTagBufferWriteTypeVarint;
-    if (isWorthZigzag((make_unsigned<long long>::type)integer)) {
-        _d->tag.tag.isZigzag = 1;
-        integer = CHInternalHelper::integerToZigzag(integer);
-        Byte buf[8] = {0};
-        (void) CHInternalHelper::write_to_buffer(integer, buf, this);
-        writeTag();
-        char *src = (char *)buf;
-        while (*src) {
-            *_d->offset++ = *src++;
-        }
-    } else {
-        writeTag();
-        _d->offset = CHInternalHelper::memoryCopyPod(_d->offset, integer);
-    }
-}
-
-void CHTagBufferBuilder::writeFloat(float v)
-{
-    _d->tag.tag.writeType = CHTagBufferWriteTypeFloat;
-    writeTag();
-    _d->offset = CHInternalHelper::memoryCopyPod(_d->offset, v);
-}
-
-void CHTagBufferBuilder::writeDouble(double v)
-{
-    _d->tag.tag.writeType = CHTagBufferWriteTypeDouble;
-    writeTag();
-    _d->offset = CHInternalHelper::memoryCopyPod(_d->offset, v);
-}
-
 void CHTagBufferBuilder::writeContainer(NSArray *container)
 {
+    uint64_t count = (uint64_t)container.count;
+    if (!count) {
+        return;
+    }
+    if (isWorthZigzag(count)) {
+        uint64_t ncount = CHInternalHelper::integerToZigzag(count);
+        Byte buf[8] = {0};
+        _d->tag.tag.lengthCompressed = 1;
+        _d->tag.tag.lengthOfZigzag = CHInternalHelper::write_to_buffer(ncount, buf);
+        [_d->buf appendBytes:buf length:_d->tag.tag.lengthOfZigzag];
+    } else {
+        [_d->buf appendBytes:&count length:sizeof(count)];
+    }
+    id firstObject = container.firstObject;
+    if ([firstObject isKindOfClass:[NSNumber class]]) {
+        _d->accessToWriteTag = NO;
+        const char *type = [firstObject objCType];
+        if (*type == 'f') {
+            for (NSNumber *number in container) {
+                CHInternalHelper::writeFloat(number.floatValue, this);
+            }
+        } else if (*type == 'd') {
+            for (NSNumber *number in container) {
+                CHInternalHelper::writeFloat(number.doubleValue, this);
+            }
+        } else {
+            if (class_conformsToProtocol(container.class, CHTagBufferBuilderPrivate::objc_proto_NSNumberInt64)) {
+                for (NSNumber *number in container) {
+                    CHInternalHelper::writeInteger(number.unsignedLongLongValue, this);
+                }
+            } else {
+                for (NSNumber *number in container) {
+                    CHInternalHelper::writeInteger(number.unsignedIntValue, this);
+                }
+            }
+        }
+        return;
+    } else if ([firstObject isKindOfClass:[NSString class]]) {
+        ;
+    } else if ([firstObject isKindOfClass:CHTagBufferBuilderPrivate::objc_class_tagbuffer]) {
+        ;
+    } else if ([firstObject isKindOfClass:[NSData class]]) {
+        ;
+    } else if ([firstObject isKindOfClass:[NSArray class]]) {
+        NSCAssert(NO, @"Forbid to recursion NSArray.");
+        return;
+    }
     _d->tag.tag.writeType = CHTagBufferWriteTypeContainer;
     for (id obj in container) {
         this->writeObjcect(obj);
     }
 }
 
-/*
- R:readOnly
- C:copy
- &:strong or retain
- N:nonatomic
- 结构 T{type}[{类名}],[{R},{C},{N},{&}],V{变量的名字}
- */
-void CHTagBufferBuilder::decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType, CHTagBufferWriteType &writeType)
+void CHTagBufferBuilder::decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType)
 {
     char t = typeCoding[0];
-    encodingType = CHTagBufEncodingTypeNone;
     switch (t) {
         case 'c': // char
         case 'B': // C++ bool or C99 _Bool
         case 'C': // uchar
             encodingType = CHTagBufEncodingType8Bits;
-            writeType = CHTagBufferWriteTypeVarint;
             break;
         case 's': // short
         case 'S': // ushort
             encodingType = CHTagBufEncodingType16Bits;
-            writeType = CHTagBufferWriteTypeVarint;
             break;
         case 'l': // long
         case 'L': // ulong
         case 'i': // int
         case 'I': // uint
-            writeType = CHTagBufferWriteTypeVarint;
-        case 'f': // float
             encodingType = CHTagBufEncodingType32Bits;
-            writeType = CHTagBufferWriteTypeFloat;
+        case 'f': // float
+            encodingType = CHTagBufEncodingTypeFloat;
         case 'd': // double
-            encodingType = CHTagBufEncodingType64Bits;
-            writeType = CHTagBufferWriteTypeDouble;
+            encodingType = CHTagBufEncodingTypeDouble;
             break;
         case 'q': // long long
         case 'Q': // ulong long
             encodingType = CHTagBufEncodingType64Bits;
-            writeType = CHTagBufferWriteTypeVarint;
             break;
         case '@': // Objective-C object
             encodingType = CHTagBufEncodingTypeObject;
-            writeType = CHTagBufferWriteTypeblobStream;
             break;
         default:
             NSCAssert(NO, @"Unsupport type:%s", typeCoding);
@@ -391,16 +439,20 @@ void CHTagBufferBuilder::decodeFromTypeEncoding(const char *typeCoding, CHTagBuf
 void CHTagBufferBuilder::writeObjcect(id obj)
 {
     if ([obj isKindOfClass:[NSString class]]) {
+        _d->tag.tag.writeType = CHTagBufferWriteTypeblobStream;
         const char *buf = [obj UTF8String];
-        uint32_t length = buf ? (uint32_t)strlen(buf) : 0;
-        writeCString(buf, length);
+        CHInternalHelper::writeCString(buf, this);
     } else if ([obj isKindOfClass:[NSArray class]]) {
+        _d->tag.tag.writeType = CHTagBufferWriteTypeContainer;
         writeContainer(obj);
     } else if ([obj isKindOfClass:[NSNumber class]]) {
         CHInternalHelper::writeNSNumber(obj, this);
     } else if ([obj isKindOfClass:[NSData class]]) {
+        _d->tag.tag.writeType = CHTagBufferWriteTypeblobStream;
         CHInternalHelper::writeNSData(obj, this);
     } else if ([obj isKindOfClass:CHTagBufferBuilderPrivate::objc_class_tagbuffer]) {
+        _d->tag.tag.writeType = CHTagBufferWriteTypeTagBuffer;
+        this->writeTag();
         this->maker(obj);
     } else {
         NSCAssert(NO, @"tagBuf:Only support NSArray,NSString,NSNumber,NSData");
@@ -417,34 +469,63 @@ void CHTagBufferBuilder::writeByEncodingType(CHTagBufEncodingType type, Ivar iva
     using ptr16_t = uint16_t *;
     using ptr32_t = uint32_t *;
     using ptr64_t = uint64_t *;
+    using ptrf_t  = float    *;
+    using ptrd_t  = double   *;
     switch (type) {
         case CHTagBufEncodingType8Bits:
         {
             auto p = reinterpret_cast<ptr8_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
-            _d->offset = CHInternalHelper::memoryCopyPointer(_d->offset, p);
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_8bits;
+            CHInternalHelper::memoryCopyPointer(p, _d->buf);
         }
             break;
         case CHTagBufEncodingType16Bits:
         {
             auto p = reinterpret_cast<ptr16_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
-            _d->offset = CHInternalHelper::memoryCopyPointer(_d->offset, p);
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_16bits;
+            CHInternalHelper::memoryCopyPointer(p, _d->buf);
         }
             break;
         case CHTagBufEncodingType32Bits:
         {
             auto p = reinterpret_cast<ptr32_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
-            writeInteger(*p);
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_32bits;
+            CHInternalHelper::writeInteger(*p, this);
         }
             break;
         case CHTagBufEncodingType64Bits:
         {
             auto p = reinterpret_cast<ptr64_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
-            writeInteger(*p);
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_64bits;
+            CHInternalHelper::writeInteger(*p, this);
+        }
+            break;
+        case CHTagBufEncodingTypeFloat:
+        {
+            auto p = reinterpret_cast<ptrf_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_float;
+            CHInternalHelper::writeFloat(*p, this);
+        }
+            break;
+        case CHTagBufEncodingTypeDouble:
+        {
+            auto p = reinterpret_cast<ptrd_t>(reinterpret_cast<NSInteger>(instance) + ivar_getOffset(ivar));
+            _d->tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
+            _d->tag.tag.internalTag = varint_double;
+            CHInternalHelper::writeDouble(*p, this);
         }
             break;
         case CHTagBufEncodingTypeObject:
         {
             char *name = (char *)ivar_getName(ivar);
+            if (name[0] == '_') {
+                ++name;
+            }
             NSString *key = [NSString stringWithUTF8String:name];
             id value = [instance valueForKey:key];
             this->writeObjcect(value);
