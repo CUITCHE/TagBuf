@@ -44,5 +44,8 @@
     model.obj0 = 0x2340954;
     NSData *data = model.toTagBuf;
     XCTAssertNotNil(data, @"");
+
+    CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
+    XCTAssertEqual(model.obj0, model2.obj0);
 }
 @end

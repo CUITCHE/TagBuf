@@ -38,7 +38,6 @@ typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
 #define ReadAPI public
 
 typedef struct objc_ivar *Ivar;
-typedef struct objc_class *Class;
 
 class CHTagBufferBuilder
 {
@@ -59,5 +58,5 @@ WriteAPI:
     // Objc
     void writeObjcect(id obj);
 ReadAPI:
-    id readTagBuffer(NSData *data, Class cls);
+    id readTagBuffer(NSData *data, id instance);
 };

@@ -22,7 +22,9 @@ static CHTagBufferBuilder *___builder = new CHTagBufferBuilder();
 
 + (instancetype)tagBufferWithTagBuf:(NSData *)tagBuf
 {
-    return nil;
+    id instance = [[self alloc] init];
+    ___builder->readTagBuffer(tagBuf, instance);
+    return instance;
 }
 
 @end
