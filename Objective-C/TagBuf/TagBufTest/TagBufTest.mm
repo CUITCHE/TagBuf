@@ -41,11 +41,15 @@
 - (void)test1
 {
     CHDataModel *model = [CHDataModel new];
-    model.obj0 = 0x2340954;
+    model.obj0 = 0x100000;
+    model.prority = 2344.54423;
+    model.level = 335436343243.654743;
     NSData *data = model.toTagBuf;
     XCTAssertNotNil(data, @"");
 
     CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
     XCTAssertEqual(model.obj0, model2.obj0);
+    XCTAssertEqual(model.prority, model2.prority);
+    XCTAssertEqual(model.level, model2.level);
 }
 @end

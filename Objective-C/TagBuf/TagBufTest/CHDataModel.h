@@ -11,5 +11,7 @@
 @interface CHDataModel : CHTagBuffer
 
 @property (nonatomic) NSInteger obj0;
+@property float prority;
+@property double level;
 
 @end

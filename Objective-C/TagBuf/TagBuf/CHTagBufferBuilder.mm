@@ -175,7 +175,7 @@ struct CHInternalHelper
         Byte n = 0;
         for (int i=0, offset = 0; i<max_size; ++i, offset += 7) {
             n = buf[i];
-            if ((n & 0x80 ) != 0x80){
+            if ((n & 0x80 ) != 0x80) {
                 ret |= (n << offset);
                 break;
             } else {
@@ -382,37 +382,17 @@ struct CHInternalHelper
         uint32_t *p = (uint32_t *)buf;
         return *p;
     }
-    ReadMemoryAPI(int) readNSNumber(const char *buf,
-                                           CHTagBufferBuilder *builder,
-                                           NSNumber *&ret)
-    {
-        auto &tag = builder->_d->tag.tag;
-        int offset = 0;
-        if (tag.internalTag == varint_float) {
-            float *p = (float *)buf;
-            ret = @(*p);
-            offset = 4;
-        } else if (tag.internalTag == varint_double) {
-            double *p = (double *)buf;
-            ret = @(*p);
-            offset = 8;
-        } else if (tag.internalTag == varint_32bits) {
-            if (tag.lengthCompressed) {
-                ;
-            } else {
-                uint32_t *p = (uint32_t *)buf;
-                ret = @(*p);
-                offset = 4;
-            }
-        } else if (tag.internalTag == varint_64bits) {
-            if (tag.lengthCompressed) {
-                uint64_t *p = (uint64_t *)buf;
-                ret = @(*p);
-                offset = 8;
-            }
-        }
-        return offset;
+
+    ReadMemoryAPI(uint32_t) readFloat(float *dest, const char *buf) {
+        memcpy(dest, buf, sizeof(float));
+        return 4;
     }
+
+    ReadMemoryAPI(uint32_t) readDouble(double *dest, const char *buf) {
+        memcpy(dest, buf, sizeof(double));
+        return 8;
+    }
+
 };
 
 
@@ -714,12 +694,12 @@ uint32_t readByWriteType(__tag_detail__ tag, const char *buf, Ivar ivar, id inst
                     break;
                 case varint_float: {
                     auto p = (ptrf_t)instance_ptr;
-                    offset = CHInternalHelper::readInteger(p, tag, buf);
+                    offset = CHInternalHelper::readFloat(p, buf);
                 }
                     break;
                 case varint_double: {
                     auto p = (ptrd_t)instance_ptr;
-                    offset = CHInternalHelper::readInteger(p, tag, buf);
+                    offset = CHInternalHelper::readDouble(p, buf);
                 }
                     break;
                 default:
