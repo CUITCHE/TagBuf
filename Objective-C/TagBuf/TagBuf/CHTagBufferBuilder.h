@@ -11,7 +11,7 @@
 #pragma once
 
 typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
-    /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes.
+    /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes. And about bool value, specially it only takes up 1 bit.
     CHTagBufferWriteTypeVarintFixed = 0,
     /// container, such as NSArray
     CHTagBufferWriteTypeContainer   = 1,
@@ -25,13 +25,14 @@ typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
 
 typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
     CHTagBufEncodingTypeNone   = 0,
-    CHTagBufEncodingType8Bits  = 1,
-    CHTagBufEncodingType16Bits = 2,
-    CHTagBufEncodingType32Bits = 3,
-    CHTagBufEncodingType64Bits = 4,
-    CHTagBufEncodingTypeFloat  = 5,
-    CHTagBufEncodingTypeDouble = 6,
-    CHTagBufEncodingTypeObject = 7
+    CHTagBufEncodingTypeBool   = 1,
+    CHTagBufEncodingType8Bits  = 2,
+    CHTagBufEncodingType16Bits = 3,
+    CHTagBufEncodingType32Bits = 4,
+    CHTagBufEncodingType64Bits = 5,
+    CHTagBufEncodingTypeFloat  = 6,
+    CHTagBufEncodingTypeDouble = 7,
+    CHTagBufEncodingTypeObject = 8
 };
 
 #define WriteAPI public

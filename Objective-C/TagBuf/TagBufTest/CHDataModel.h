@@ -14,4 +14,8 @@
 @property float prority;
 @property double level;
 
+@property (nonatomic, strong) NSString *str;
+@property (nonatomic) char ch0;
+@property (nonatomic) short sh0;
+
 @end

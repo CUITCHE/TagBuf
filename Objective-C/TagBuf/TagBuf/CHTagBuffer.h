@@ -52,3 +52,10 @@
 + (instancetype)tagBufferWithTagBuf:(NSData *)tagBuf;
 
 @end
+
+@interface NSObject (CHTagBuffer)
+
+- (NSData *)toTagBuffer;
++ (instancetype)objectWithTagBuffer:(NSData *)tagBuffer;
+
+@end

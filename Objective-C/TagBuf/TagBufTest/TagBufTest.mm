@@ -44,6 +44,9 @@
     model.obj0 = 0x100000;
     model.prority = 2344.54423;
     model.level = 335436343243.654743;
+    model.str = @"abcdef___ddddd嘿嘿嘿哈哈哈哈哈";
+    model.ch0 = 'A';
+    model.sh0 = 353;
     NSData *data = model.toTagBuf;
     XCTAssertNotNil(data, @"");
 
@@ -51,5 +54,8 @@
     XCTAssertEqual(model.obj0, model2.obj0);
     XCTAssertEqual(model.prority, model2.prority);
     XCTAssertEqual(model.level, model2.level);
+    XCTAssertEqual(model.ch0, model2.ch0);
+    XCTAssertEqual(model.sh0, model2.sh0);
+    XCTAssertEqualObjects(model.str, model2.str);
 }
 @end

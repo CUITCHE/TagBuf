@@ -10,6 +10,9 @@
 #include <objc/runtime.h>
 #import "CHTagBufferBuilder.h"
 @interface Test : NSObject
+{
+    int abd;
+}
 
 @property (nonatomic, copy) NSString *str;
 @property (nonatomic, copy, readonly) NSString *str2;
@@ -46,10 +49,7 @@ void func1();
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        char *p = NULL;
-        int a = 0;
-        memcpy(&a, p, 0);
-        func1();
+        maker([Test new]);
     }
     return 0;
 }

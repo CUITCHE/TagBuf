@@ -28,3 +28,21 @@ static CHTagBufferBuilder *___builder = new CHTagBufferBuilder();
 }
 
 @end
+
+@implementation NSObject (CHTagBuffer)
+
+- (NSData *)toTagBuffer
+{
+    CHTagBufferBuilder *builder = new CHTagBufferBuilder();
+    return builder->buildedData();
+}
+
++ (instancetype)objectWithTagBuffer:(NSData *)tagBuffer
+{
+    CHTagBufferBuilder *builder = new CHTagBufferBuilder();
+    id instance = [[self alloc] init];
+    builder->readTagBuffer(tagBuffer, instance);
+    return instance;
+}
+
+@end
