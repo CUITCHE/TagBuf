@@ -8,6 +8,12 @@
 
 #import "CHDataModel.h"
 
+@implementation CHDataModel1
+
+@end
+
+
 @implementation CHDataModel
+
 
 @end
