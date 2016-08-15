@@ -35,10 +35,6 @@ typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
     CHTagBufEncodingTypeObject = 8
 };
 
-#define WriteAPI public
-#define ReadAPI public
-
-typedef struct objc_ivar *Ivar;
 
 class CHTagBufferBuilder
 {
@@ -47,17 +43,9 @@ class CHTagBufferBuilder
 public:
     CHTagBufferBuilder();
     ~CHTagBufferBuilder();
-    void startBuildingWithObject(id instance);
-    NSData *buildedData();
-WriteAPI:
-    void writeTagBuffer(id instance);
-    void writeTag();
-    void writeContainer(NSArray *container);
 
-    void decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType);
-    void writeByEncodingType(CHTagBufEncodingType type, Ivar ivar, id instance);
-    // Objc
-    void writeObjcect(id obj);
-ReadAPI:
+    void startBuildingWithObject(id instance);
     id readTagBuffer(NSData *data, id instance);
+
+    NSData *buildedData();
 };

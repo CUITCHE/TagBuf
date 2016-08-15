@@ -8,9 +8,12 @@
 
 #import "CHTagBuffer.h"
 
+@protocol CHDataModel1
+@end
+
 @interface CHDataModel1 : CHTagBuffer
 
-@property (nonatomic, strong) NSString *str;
+@property (nonatomic, strong) NSString *str11;
 
 @end
 
@@ -27,4 +30,6 @@
 @property (nonatomic) BOOL t_b;
 @property (nonatomic) BOOL f_b;
 @property (nonatomic, strong) CHDataModel1 *obj1;
+
+//@property (nonatomic, strong) NSArray<CHDataModel1> *array;
 @end

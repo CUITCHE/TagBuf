@@ -40,9 +40,10 @@
 
 - (void)test1
 {
-    [self measureBlock:^{
+    static NSMutableData *s_data = [NSMutableData dataWithCapacity:4096];
+//    [self measureBlock:^{
         CHDataModel *model = [CHDataModel new];
-        model.obj0 = 0x100000;
+        model.obj0 = 0x1234567890ffeeddll;
         model.prority = 2344.54423;
         model.level = 335436343243.654743;
         model.str = @"abcdef___ddddd嘿嘿嘿哈哈哈哈哈";
@@ -51,9 +52,15 @@
         model.t_b = YES;
         model.f_b = NO;
         model.obj1 = [CHDataModel1 new];
-        model.obj1.str = @"feferwvefsvw frewfrew f";
+        model.obj1.str11 = @"feferwvefsvw frewfrew f";
+//        model.array = (NSArray<CHDataModel1> *)(@[[CHDataModel1 new], [CHDataModel1 new], [CHDataModel1 new]]);
         NSData *data = model.toTagBuf;
-        XCTAssertNotNil(data, @"");
+        if (s_data.length == 0) {
+            [s_data setData:data];
+        } else {
+            XCTAssertEqualObjects(s_data, data, @"data wrong.");
+            [s_data setData:data];
+        }
 
         CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
         XCTAssertEqual(model.obj0, model2.obj0);
@@ -64,7 +71,8 @@
         XCTAssertEqual(model.t_b, model2.t_b);
         XCTAssertEqual(model.f_b, model2.f_b);
         XCTAssertEqualObjects(model.str, model2.str);
-        XCTAssertEqualObjects(model.obj1.str, model2.obj1.str);
-    }];
+        XCTAssertEqualObjects(model.obj1.str11, model2.obj1.str11);
+//        XCTAssertEqualObjects(model.array, model2.array);
+//    }];
 }
 @end

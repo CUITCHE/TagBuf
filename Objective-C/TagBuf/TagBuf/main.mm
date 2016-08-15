@@ -49,7 +49,11 @@ void func1();
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-        maker([Test new]);
+//        maker([Test new]);
+        uint32_t integer = 0x12345678;
+        auto integer_ptr = &integer;
+        auto p = (const char *)(integer_ptr);
+        printf("%x %x %x %x\n", p[0], p[1], p[2], p[3]);
     }
     return 0;
 }

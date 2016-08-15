@@ -9,7 +9,12 @@
 #import "CHDataModel.h"
 
 @implementation CHDataModel1
-
+- (instancetype)init
+{
+    self = [super init];
+    self.str11 = @"123243543";
+    return self;
+}
 @end
 
 
