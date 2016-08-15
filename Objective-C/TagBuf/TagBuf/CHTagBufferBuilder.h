@@ -39,7 +39,6 @@ typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
 class CHTagBufferBuilder
 {
     struct CHTagBufferBuilderPrivate *_d;
-    friend struct CHInternalHelper;
 public:
     CHTagBufferBuilder();
     ~CHTagBufferBuilder();

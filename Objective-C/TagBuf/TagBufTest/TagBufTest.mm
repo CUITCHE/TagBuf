@@ -41,38 +41,41 @@
 - (void)test1
 {
     static NSMutableData *s_data = [NSMutableData dataWithCapacity:4096];
-//    [self measureBlock:^{
-        CHDataModel *model = [CHDataModel new];
-        model.obj0 = 0x1234567890ffeeddll;
-        model.prority = 2344.54423;
-        model.level = 335436343243.654743;
-        model.str = @"abcdef___ddddd嘿嘿嘿哈哈哈哈哈";
-        model.ch0 = 'A';
-        model.sh0 = 353;
-        model.t_b = YES;
-        model.f_b = NO;
-        model.obj1 = [CHDataModel1 new];
-        model.obj1.str11 = @"feferwvefsvw frewfrew f";
-//        model.array = (NSArray<CHDataModel1> *)(@[[CHDataModel1 new], [CHDataModel1 new], [CHDataModel1 new]]);
-        NSData *data = model.toTagBuf;
-        if (s_data.length == 0) {
-            [s_data setData:data];
-        } else {
-            XCTAssertEqualObjects(s_data, data, @"data wrong.");
-            [s_data setData:data];
-        }
+    //    [self measureBlock:^{
+    CHDataModel *model = [CHDataModel new];
+    model.obj0 = 0x1234567890ffeeddll;
+    model.prority = 2344.54423;
+    model.level = 335436343243.654743;
+    model.str = @"abcdef___dddddfergew34534efewedddddddmmmmmmmmmm";
+    model.ch0 = 'A';
+    model.sh0 = 353;
+    model.t_b = YES;
+    model.f_b = NO;
+    model.obj1 = [CHDataModel1 new];
+    model.obj1.str11 = @"feferwvefsvw frewfrew f";
+    model.arrayString = @[@"12432543", @"dewf34ffw"];
+    model.array = (NSArray<CHDataModel1> *)(@[[CHDataModel1 new], [CHDataModel1 new], [CHDataModel1 new]]);
+    model.strEmbedArray = @[@[@"fefer", @"fert45t4", @"fergert"], @[@"freger", @"dewfre"], @[@"fersvt54 4t34_d34d3"]];
+    NSData *data = model.toTagBuf;
+    if (s_data.length == 0) {
+        [s_data setData:data];
+    } else {
+        XCTAssertEqualObjects(s_data, data, @"data wrong.");
+        [s_data setData:data];
+    }
+    NSLog(@"%@", data);
 
-        CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
-        XCTAssertEqual(model.obj0, model2.obj0);
-        XCTAssertEqual(model.prority, model2.prority);
-        XCTAssertEqual(model.level, model2.level);
-        XCTAssertEqual(model.ch0, model2.ch0);
-        XCTAssertEqual(model.sh0, model2.sh0);
-        XCTAssertEqual(model.t_b, model2.t_b);
-        XCTAssertEqual(model.f_b, model2.f_b);
-        XCTAssertEqualObjects(model.str, model2.str);
-        XCTAssertEqualObjects(model.obj1.str11, model2.obj1.str11);
-//        XCTAssertEqualObjects(model.array, model2.array);
-//    }];
+    CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
+    XCTAssertEqual(model.obj0, model2.obj0);
+    XCTAssertEqual(model.prority, model2.prority);
+    XCTAssertEqual(model.level, model2.level);
+    XCTAssertEqual(model.ch0, model2.ch0);
+    XCTAssertEqual(model.sh0, model2.sh0);
+    XCTAssertEqual(model.t_b, model2.t_b);
+    XCTAssertEqual(model.f_b, model2.f_b);
+    XCTAssertEqualObjects(model.str, model2.str);
+    XCTAssertEqualObjects(model.obj1.str11, model2.obj1.str11);
+    XCTAssertEqualObjects(model.arrayString, model2.arrayString);
+    XCTAssertEqualObjects(model.array, model2.array);
 }
 @end

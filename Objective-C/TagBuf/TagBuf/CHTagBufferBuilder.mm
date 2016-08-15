@@ -72,7 +72,7 @@ using namespace std;
     internal-tag = 0, represents NSString.
     internal-tag = 1, represents NSData.
  - CHTagBufferWriteTypeTagBuffer
-    none.
+    internal-tag = 1, represents object is nil.
  *
  * How about to support structure, sounds interesting.
  */
@@ -98,7 +98,7 @@ union __tag_buffer_flag {
     __tag_output_type__ itag;
     struct __tag_buffer_structure {
         uint32_t writeType          : 03; // [00~03]
-// if writeType is CHTagBufferWriteTypeVarint
+// if writeType is CHTagBufferWriteTypeVarintFixed
 #define varint_8bits    0
 #define varint_16bits   1
 #define varint_32bits   2
@@ -112,16 +112,17 @@ union __tag_buffer_flag {
 #define container_64bits    1
 #define container_float     2
 #define container_double    3
-#define container_stream    4
-        // modify to lengthOfZigzag
-        #define container_stream_nsstring   0
-        #define container_stream_nsdata     1
-#define container_object    5
-#define container_container 6
+#define container_stream_nsstring   4
+#define container_stream_nsdata     5
+#define container_object    6
+#define container_container 7
 
 // if writeType is CHTagBufferWriteTypeblobStream
 #define stream_nsstring     0
 #define stream_nsdata       1
+// if writeType is CHTagBufferWriteTypeTagBuffer
+#define object_is_exists    0
+#define object_is_nil       1
         uint32_t internalTag        : 03; // [04~06]
         uint32_t next               : 01; // [07]
         uint32_t lengthOfZigzag     : 03; // [08~10]
@@ -190,6 +191,23 @@ private:
         return str;
     }
 
+    NS_INLINE NSString *getClassNameInContainerByIvar(Ivar ivar)
+    {
+        const char *classname = ivar_getTypeEncoding(ivar);
+        const char *start = nullptr;
+        while (*++classname != '<') {
+            continue;
+        }
+        start = ++classname;
+        const char *end = nullptr;
+        while (*++classname != '>') {
+            continue;
+        }
+        end = classname;
+        NSString *str = [[NSString alloc] initWithBytes:start length:end - start encoding:NSUTF8StringEncoding];
+        return str;
+    }
+
     template<typename T>
     WriteMemoryAPI(void) integerToByte(T integer, Byte *_buf)
     {
@@ -224,24 +242,24 @@ private:
                                           const char *_buf)
     {
         static_assert(std::is_pointer<T>::value == true, "T Must be a pointer");
-        typedef typename std::remove_pointer<T>::type _pod_type;
-        if (sizeof(_pod_type) == 1) {
+        typedef typename std::remove_pointer<T>::type pod_type;
+        if (sizeof(pod_type) == 1) {
             *pod_ptr = _buf[0];
             return 1;
-        } else if (sizeof(_pod_type) == 2) {
+        } else if (sizeof(pod_type) == 2) {
             auto ptr = (char *)(pod_ptr);
             ptr[1] = _buf[0];
             ptr[0] = _buf[1];
             return 2;
         } else {
             auto ptr = (char *)pod_ptr;
-            if (sizeof(_pod_type) == 4) {
+            if (sizeof(pod_type) == 4) {
                 ptr[3] = _buf[0];
                 ptr[2] = _buf[1];
                 ptr[1] = _buf[2];
                 ptr[0] = _buf[3];
                 return 4;
-            } else if (sizeof(_pod_type) == 8) {
+            } else if (sizeof(pod_type) == 8) {
                 ptr[7] = _buf[0];
                 ptr[6] = _buf[1];
                 ptr[5] = _buf[2];
@@ -252,7 +270,7 @@ private:
                 ptr[0] = _buf[7];
                 return 8;
             } else {
-                NSCAssert(sizeof(_pod_type) > 8, @"Larger integer not supported");
+                NSCAssert(sizeof(pod_type) > 8, @"Larger integer not supported");
             }
         }
         return 0;
@@ -373,7 +391,7 @@ public:
     {
         static_assert(std::is_pod<WriteType>::value, "WriteType Must be a integer");
         static_assert(std::is_integral<WriteType>::value, "WriteType must be a integer");
-        static_assert(!(shouldCompressLength && !shouldWriteTag && !accessToExempt), "If you want to compress the length of integer, you must set shouldWriteTag to true! Please check your code, the invoke:[writeInteger<T, true, false>(...);] is illegal!");
+        static_assert(!(shouldCompressLength && !shouldWriteTag && !accessToExempt), "If you want to compress the length of integer, you must set shouldWriteTag to true! Please check your code, the invoke:[writeInteger<T, true, false>(...);] is illegal! If you really want to do that, please set accessToExempt to true.");
         Byte _buf[sizeof(WriteType)] = {0};
         auto &tag = _tag.tag;
         if (sizeof(WriteType) == 1) {
@@ -452,7 +470,7 @@ public:
     }
     WriteMemoryAPI(void) writeNSDataInList(NSData *data, NSMutableData *buf, __tag_buffer_flag__ &_tag)
     {
-        writeInteger<NSUInteger, false, false, false, false>(data.length, buf, _tag);
+        writeInteger<uint64_t, false, false, false, false>(data.length, buf, _tag);
         [buf appendData:data];
     }
 
@@ -571,10 +589,14 @@ public:
                 break;
             case CHTagBufEncodingTypeObject: {
                 id value = object_getIvar(instance, ivar);
-                if (!value) {
-                    @throw [NSException exceptionWithName:@"Param is nil." reason:[NSString stringWithFormat:@"Class:%@, property:%s", NSStringFromClass([instance class]), ivar_getName(ivar)] userInfo:nil];
+                if (value) {
+                    writeObjcect(value, buf, tag);
+                } else {
+                    // May remove blow all of code in the future.
+                    tag.tag.writeType = CHTagBufferWriteTypeTagBuffer;
+                    tag.tag.internalTag = object_is_nil;
+                    writeTag(tag, buf);
                 }
-                writeObjcect(value, buf, tag);
             }
                 break;
             default:
@@ -583,7 +605,7 @@ public:
         
     }
 
-    WriteMemoryAPI(void) writeObjcect(id obj, NSMutableData *buf, __tag_buffer_flag__ &_tag)
+    WriteMemoryAPI(void) writeObjcect(_Nonnull id obj, NSMutableData *buf, __tag_buffer_flag__ &_tag)
     {
         if ([obj isKindOfClass:[NSString class]]) {
             _tag.tag.writeType = CHTagBufferWriteTypeblobStream;
@@ -624,7 +646,8 @@ public:
         CHTagBufEncodingType encodingType;
         for (uint32_t i=0; i<=count; ++i, ++p) {
             const char *typeCoding = ivar_getTypeEncoding(*p);
-            CHInternalHelper::decodeFromTypeEncoding(typeCoding, encodingType);
+            decodeFromTypeEncoding(typeCoding, encodingType);
+            NSLog(@"%s", ivar_getName(*p));
             _tag.itag = 0;
             _tag.tag.fieldNumber = i;
             if (i == count) {
@@ -641,8 +664,14 @@ public:
         if (!count) {
             return;
         }
-        // write length of container.
-        writeInteger<uint64_t, true, false, true>(count, buf, _tag);
+
+        char _buf[8] = {0};
+        if (isWorthZigzag(count)) {
+            (void) writeIntegerToZigzag(count, _tag.tag, (Byte *)_buf);
+        } else {
+            integerToByte(count, (Byte *)_buf);
+        }
+
         auto &tag = _tag.tag;
         id firstObject = container.firstObject;
         if ([firstObject isKindOfClass:[NSNumber class]]) {
@@ -650,12 +679,14 @@ public:
             if (*type == 'f') {
                 tag.internalTag = container_float;
                 writeTag(_tag, buf);
+                [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                 for (NSNumber *number in container) {
                     writeFloatInList(number.floatValue, buf, _tag);
                 }
             } else if (*type == 'd') {
                 tag.internalTag = container_double;
                 writeTag(_tag, buf);
+                [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                 for (NSNumber *number in container) {
                     writeDoubleInList(number.doubleValue, buf, _tag);
                 }
@@ -663,35 +694,38 @@ public:
                 if (class_conformsToProtocol(container.class, CHTagBufferBuilderPrivate::objc_proto_NSNumberInt64)) {
                     tag.internalTag = container_64bits;
                     writeTag(_tag, buf);
+                    [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                     for (NSNumber *number in container) {
                         writeIntegerInList(number.unsignedLongLongValue, buf, _tag);
                     }
                 } else {
                     tag.internalTag = container_32bits;
                     writeTag(_tag, buf);
+                    [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                     for (NSNumber *number in container) {
                         writeIntegerInList(number.unsignedIntValue, buf, _tag);
                     }
                 }
             }
         } else if ([firstObject isKindOfClass:[NSString class]]) {
-            tag.internalTag = container_stream;
-            tag.lengthOfZigzag = container_stream_nsstring;
+            tag.internalTag = container_stream_nsstring;
             writeTag(_tag, buf);
+            [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
             for (NSString *str in container) {
                 const char *_buf = [str UTF8String];
                 writeCStringInList(_buf, buf, _tag);
             }
         } else if ([firstObject isKindOfClass:[NSData class]]) {
-            tag.internalTag = container_stream;
-            tag.lengthOfZigzag = container_stream_nsdata;
+            tag.internalTag = container_stream_nsdata;
             writeTag(_tag, buf);
+            [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
             for (NSData *data in container) {
                 writeNSDataInList(data, buf, _tag);
             }
         } else if ([firstObject isKindOfClass:[NSArray class]]) {
             tag.internalTag = container_container;
             writeTag(_tag, buf);
+            [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
             _tag.itag = 0;
             for (NSArray *a in container) {
                 writeContainer(a, buf, _tag);
@@ -699,6 +733,7 @@ public:
         } else {
             tag.internalTag = container_object;
             writeTag(_tag, buf);
+            [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
             _tag.itag = 0;
             for (id obj in container) {
                 writeTagBuffer(obj, buf, _tag);
@@ -706,25 +741,32 @@ public:
         }
     }
 
-    template<typename T>
+    template<typename T, bool accessToReadLength = false>
     ReadMemoryAPI(uint32_t) readInteger(T dest, __tag_detail__ tag, const char *buf)
     {
         uint32_t offset = 0;
         do {
-            if (sizeof(typename std::remove_pointer<T>::type) < 4) {
+            typedef typename std::remove_pointer<T>::type pod_type;
+            if (sizeof(pod_type) < 4) {
                 offset = byteToPodType(dest, buf);
                 break;
             }
             if (tag.lengthCompressed) {
                 offset = tag.lengthOfZigzag;
-                if (tag.internalTag == varint_32bits) {
-                    uint32_t t = read_from_buffer<uint32_t>((const Byte *)buf, offset);
-                    t = zigzagToInteger(t);
-                    (void) byteToPodType(dest, (const char *)&t);
-                } else if (tag.internalTag == varint_64bits) {
+                if (accessToReadLength) {
                     uint64_t t = read_from_buffer<uint64_t>((const Byte *)buf, offset);
                     t = zigzagToInteger(t);
-                    (void) byteToPodType(dest, (const char *)&t);
+                    *dest = t;
+                } else {
+                    if (tag.internalTag == varint_32bits) {
+                        uint32_t t = read_from_buffer<uint32_t>((const Byte *)buf, offset);
+                        t = zigzagToInteger(t);
+                        *dest = t;
+                    } else if (tag.internalTag == varint_64bits) {
+                        uint64_t t = read_from_buffer<uint64_t>((const Byte *)buf, offset);
+                        t = zigzagToInteger(t);
+                        *dest = (pod_type)t;
+                    }
                 }
             } else {
                 offset = byteToPodType(dest, buf);
@@ -757,117 +799,100 @@ public:
         return offset + length;
     }
 
-    ReadMemoryAPI(uint32_t) readBlobStreamInList(const char *&dest, uint32_t &length, const char *buf)
+    ReadMemoryAPI(uint64_t) readBlobStreamInList(const char *&dest, uint64_t &length, const char *buf)
     {
         byteToPodType(&length, buf);
-        dest = buf + 4;
-        return 4 + length;
+        dest = buf + 8;
+        return 8 + length;
     }
 
-    ReadMemoryAPI(uint32_t) readContainer(__tag_detail__ tag, const char *buf, Ivar ivar, id instance)
+    ReadMemoryAPI(uint32_t) readContainer(NSMutableArray **_array, __tag_detail__ tag, const char *buf, Ivar ivar)
     {
+        NSCAssert(_array, @"Param [_array] can't be nil!");
         uint64_t count = 0;
-        uint32_t offset = 0;
-        if (tag.lengthCompressed) {
-            offset = tag.lengthOfZigzag;
-            count = read_from_buffer<uint64_t>((Byte *)buf, offset);
-            count = zigzagToInteger(count);
-        } else {
-            offset = byteToPodType(&count, buf);
-        }
+        uint32_t offset = readInteger<uint64_t *, true>(&count, tag, buf);
+        NSMutableArray *array = [NSMutableArray arrayWithCapacity:count ?: 10];
+        *_array = array;
         switch (tag.internalTag) {
             case container_32bits: {
-                NSMutableArray<NSNumber *> *array = [NSMutableArray arrayWithCapacity:count];
                 uint32_t value = 0;
                 for (uint64_t i=0; i<count; ++i) {
                     offset += byteToPodType(&value, buf + offset);
                     [array addObject:@(value)];
                 }
-                object_setIvar(instance, ivar, array);
             }
                 break;
             case container_64bits: {
-                NSMutableArray<NSNumber *> *array = [NSMutableArray arrayWithCapacity:count];
                 uint64_t value = 0;
                 for (uint64_t i=0; i<count; ++i) {
                     offset += byteToPodType(&value, buf + offset);
                     [array addObject:@(value)];
                 }
-                object_setIvar(instance, ivar, array);
             }
                 break;
             case container_float: {
-                NSMutableArray<NSNumber *> *array = [NSMutableArray arrayWithCapacity:count];
                 float value = 0;
                 for (uint64_t i=0; i<count; ++i) {
                     offset += byteToPodType(&value, buf + offset);
                     [array addObject:@(value)];
                 }
-                object_setIvar(instance, ivar, array);
             }
                 break;
             case container_double: {
-                NSMutableArray<NSNumber *> *array = [NSMutableArray arrayWithCapacity:count];
                 double value = 0;
                 for (uint64_t i=0; i<count; ++i) {
                     offset += byteToPodType(&value, buf + offset);
                     [array addObject:@(value)];
                 }
-                object_setIvar(instance, ivar, array);
             }
                 break;
-            case container_stream: {
-                switch (tag.lengthOfZigzag) {
-                    case container_stream_nsstring: {
-                        NSMutableArray<NSString *> *array = [NSMutableArray arrayWithCapacity:count];
-                        NSString *str = nil;
-                        uint32_t length = 0;
-                        const char *dest = nullptr;
-                        for (uint64 i=0; i<count; ++i) {
-                            offset += readBlobStreamInList(dest, length, buf + offset);
-                            str = [[NSString alloc] initWithBytes:dest length:length encoding:NSUTF8StringEncoding];
-                            [array addObject:str];
-                        }
-                        object_setIvar(instance, ivar, array);
-                    }
-                        break;
-                    case container_stream_nsdata: {
-                        NSMutableArray<NSData *> *array = [NSMutableArray arrayWithCapacity:count];
-                        NSData *data = nil;
-                        uint32_t length = 0;
-                        const char *dest = nullptr;
-                        for (uint64 i=0; i<count; ++i) {
-                            offset += readBlobStreamInList(dest, length, buf + offset);
-                            data = [[NSData alloc] initWithBytes:dest length:length];
-                            [array addObject:data];
-                        }
-                        object_setIvar(instance, ivar, array);
-                    }
-                        break;
-                    default:
-                        NSCAssert(NO, @"Logic error.");
-                        break;
+            case container_stream_nsstring: {
+                NSString *str = nil;
+                uint64_t length = 0;
+                const char *dest = nullptr;
+                for (uint64 i=0; i<count; ++i) {
+                    offset += readBlobStreamInList(dest, length, buf + offset);
+                    str = [[NSString alloc] initWithBytes:dest length:length encoding:NSUTF8StringEncoding];
+                    [array addObject:str];
+                }
+            }
+                break;
+            case container_stream_nsdata: {
+                NSData *data = nil;
+                uint64_t length = 0;
+                const char *dest = nullptr;
+                for (uint64 i=0; i<count; ++i) {
+                    offset += readBlobStreamInList(dest, length, buf + offset);
+                    data = [[NSData alloc] initWithBytes:dest length:length];
+                    [array addObject:data];
                 }
             }
                 break;
             case container_object: {
-                NSString *classname = getClassNameByIvar(ivar);
+                NSString *classname = getClassNameInContainerByIvar(ivar);
                 Class cls = NSClassFromString(classname);
                 if (!cls) {
-                    @throw [NSException exceptionWithName:@"Class does not exist." reason:[NSString stringWithFormat:@"No such Class:%@", classname] userInfo:nil];
+                    NSCAssert(NO, @"No such Class:(%@)", classname);
+                    break;
                 }
-                NSMutableArray *array = [NSMutableArray arrayWithCapacity:count];
                 id value = nil;
                 for (uint64_t i=0; i<count; ++i) {
                     value = [[cls alloc] init];
                     offset += readObject(buf + offset, value);
                     [array addObject:value];
                 }
-                object_setIvar(instance, ivar, array);
             }
                 break;
             case container_container: {
-                // TODO: 递归解析container
+                NSMutableArray *embeddedArray = nil;
+                __tag_buffer_flag embeddeTag = {0};
+                offset += readTag(embeddeTag, buf + offset);
+                for (uint64_t i=0; i<count; ++i) {
+                    offset += readContainer(&embeddedArray, tag, buf + offset, ivar);
+                    if (embeddedArray) {
+                        [array addObject:embeddedArray];
+                    }
+                }
             }
                 break;
             default:
@@ -959,7 +984,9 @@ public:
             }
                 break;
             case CHTagBufferWriteTypeContainer: {
-                offset = readContainer(tag, buf, ivar, instance);
+                NSMutableArray *array = nil;
+                offset = readContainer(&array, tag, buf, ivar);
+                object_setIvar(instance, ivar, array);
             }
                 break;
             case CHTagBufferWriteTypeblobStream: {
@@ -982,14 +1009,16 @@ public:
             }
                 break;
             case CHTagBufferWriteTypeTagBuffer: {
-                NSString *classname = getClassNameByIvar(ivar);
-                Class cls = NSClassFromString(classname);
-                if (!cls) {
-                    @throw [NSException exceptionWithName:@"Class does not exist." reason:[NSString stringWithFormat:@"No such Class:%@", classname] userInfo:nil];
+                if (tag.internalTag == object_is_exists) {
+                    NSString *classname = getClassNameByIvar(ivar);
+                    Class cls = NSClassFromString(classname);
+                    if (!cls) {
+                        @throw [NSException exceptionWithName:@"Class does not exist." reason:[NSString stringWithFormat:@"No such Class:%@", classname] userInfo:nil];
+                    }
+                    id value = [[cls alloc] init];
+                    offset = readObject(buf, value);
+                    object_setIvar(instance, ivar, value);
                 }
-                id value = [[cls alloc] init];
-                offset = readObject(buf, value);
-                object_setIvar(instance, ivar, value);
             }
                 break;
             default:
@@ -1041,7 +1070,8 @@ id CHTagBufferBuilder::readTagBuffer(NSData *data, id instance)
         memcpy(cp + byteRange.location, bytes, sizeof(char) * byteRange.length);
     }];
 
-    (void) CHInternalHelper::readObject(cp, instance);
+    auto final = cp + CHInternalHelper::readObject(cp, instance);
+    NSCAssert(final = cp + data.length, @"");
 
     return instance;
 }

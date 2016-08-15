@@ -15,6 +15,11 @@
     self.str11 = @"123243543";
     return self;
 }
+
+- (BOOL)isEqual:(CHDataModel1 *)object
+{
+    return [object.str11 isEqualToString:self.str11];
+}
 @end
 
 

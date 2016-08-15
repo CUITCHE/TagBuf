@@ -30,6 +30,10 @@
 @property (nonatomic) BOOL t_b;
 @property (nonatomic) BOOL f_b;
 @property (nonatomic, strong) CHDataModel1 *obj1;
+@property (nonatomic, strong) NSArray *arrayString;
 
-//@property (nonatomic, strong) NSArray<CHDataModel1> *array;
+@property (nonatomic, strong) NSArray<CHDataModel1> *array;
+
+@property (nonatomic, strong) NSArray<NSArray *> *strEmbedArray;
+
 @end
