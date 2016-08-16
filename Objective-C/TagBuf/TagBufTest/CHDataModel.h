@@ -7,6 +7,7 @@
 //
 
 #import "CHTagBuffer.h"
+#import "tagBuf.h"
 
 @protocol CHDataModel1
 @end
@@ -23,7 +24,7 @@
 @property float prority;
 @property double level;
 
-@property (nonatomic, strong) NSString *str;
+@property (nonatomic, strong) NSString<required> *str;
 @property (nonatomic) char ch0;
 @property (nonatomic) short sh0;
 

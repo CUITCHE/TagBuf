@@ -9,6 +9,8 @@
 #import "CHTagBufferBuilder.h"
 #include <objc/runtime.h>
 #include <vector>
+#import "tagBuf.h"
+#import "CHClassProperty.h"
 using namespace std;
 
 #define CHTAGBUFFER_CATEGORY 1
@@ -146,7 +148,15 @@ struct CHTagBufferBuilderPrivate
     union __tag_buffer_flag tag{0};
     BOOL accessToWriteTag = YES;
     CHTagBufferBuilderPrivate()
-    {}
+    {
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            objc_proto_optional = objc_getProtocol("optional");
+            objc_proto_required = objc_getProtocol("required");
+            objc_proto_NSNumberInt32 = objc_getProtocol("NSNumberInt32");
+            objc_proto_NSNumberInt64 = objc_getProtocol("NSNumberInt64");
+        });
+    }
 
     ~CHTagBufferBuilderPrivate()
     {
@@ -161,11 +171,12 @@ struct CHTagBufferBuilderPrivate
     }
 };
 
-Protocol *CHTagBufferBuilderPrivate::objc_proto_optional = NSProtocolFromString(@"optional");
-Protocol *CHTagBufferBuilderPrivate::objc_proto_required = NSProtocolFromString(@"required");
-Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt32 = NSProtocolFromString(@"NSNumberInt32");
-Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt64 = NSProtocolFromString(@"NSNumberInt64");
+Protocol *CHTagBufferBuilderPrivate::objc_proto_optional = nil;
+Protocol *CHTagBufferBuilderPrivate::objc_proto_required = nil;
+Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt32 = nil;
+Protocol *CHTagBufferBuilderPrivate::objc_proto_NSNumberInt64 = nil;
 
+const char *const kTagBufferPropertyKey = nullptr;
 
 using ptr8_t  = uint8_t  *;
 using ptr16_t = uint16_t *;
@@ -178,6 +189,12 @@ using ptrd_t  = double   *;
 using tag_bool = BOOL;
 #elif __cplusplus
 using tag_bool = bool;
+#endif
+
+#ifdef DEBUG
+#define debug_condition(cond, relate) cond relate
+#else
+#define debug_condition(cond, relate)
 #endif
 
 struct CHInternalHelper
@@ -195,17 +212,127 @@ private:
     {
         const char *classname = ivar_getTypeEncoding(ivar);
         const char *start = nullptr;
-        while (*++classname != '<') {
+        while (debug_condition(*classname, &&) *++classname != '<') {
             continue;
         }
+        NSCAssert(*classname, @"No such class. Info:%s", ivar_getTypeEncoding(ivar));
         start = ++classname;
-        const char *end = nullptr;
-        while (*++classname != '>') {
+        while (debug_condition(*classname, &&) *++classname != '>') {
             continue;
         }
-        end = classname;
-        NSString *str = [[NSString alloc] initWithBytes:start length:end - start encoding:NSUTF8StringEncoding];
+        NSCAssert(*classname, @"No such class. Info:%s", ivar_getTypeEncoding(ivar));
+
+        NSString *str = [[NSString alloc] initWithBytes:start length:classname - start encoding:NSUTF8StringEncoding];
         return str;
+    }
+
+    NS_INLINE bool strcmp_specilly(const char *src, const char *boss)
+    {
+        while (debug_condition(*src && *boss, &&) *src == *boss) {
+            ++src, ++boss;
+        }
+        return *boss == '\0';
+    }
+
+    NS_INLINE CHTagBufObjectDetailType getNumberProtocolByPropertyAttributeType(NSString *typePart, NSScanner * _Nullable scanner)
+    {
+        NSString *type = [typePart substringFromIndex:7];
+        auto character = [type characterAtIndex:0];
+        switch (character) {
+            case 'I': {
+                NSUInteger number = [type characterAtIndex:type.length-1];
+                switch (number) {
+                    case '2':
+                        return CHTagBufObjectDetailTypeNSNumber32BitsInteger;
+                    case '4':
+                        return CHTagBufObjectDetailTypeNSNumber64BitsInteger;
+                    case '6':
+                        return CHTagBufObjectDetailTypeNSNumber16BitsInteger;
+                    case '8':
+                        return CHTagBufObjectDetailTypeNSNumber8BitsInteger;
+                    default:
+                        break;
+                }
+            }
+                break;
+            case 'B':
+                return CHTagBufObjectDetailTypeNSNumberBoolean;
+            case 'F':
+                return CHTagBufObjectDetailTypeNSNumberFloat;
+            case 'D':
+                return CHTagBufObjectDetailTypeNSNumberDouble;
+            default:
+                break;
+        }
+        NSCAssert(NO, @"Wrong type: %@", typePart);
+        return CHTagBufObjectDetailTypeNone;
+    }
+
+    NS_INLINE CHTagBufObjectDetailType getClassDetailTypeByPropertyAttributeType(NSString *typePart)
+    {
+        if ([typePart isEqualToString:@"NSString"]) {
+            return CHTagBufObjectDetailTypeNSString;
+        } else if ([typePart isEqualToString:@"NSArray"]) {
+            return CHTagBufObjectDetailTypeNSArray;
+        } else if ([typePart isEqualToString:@"NSData"]) {
+            return CHTagBufObjectDetailTypeNSData;
+        } else {
+            return CHTagBufObjectDetailTypeOtherObject;
+        }
+    }
+
+    NS_INLINE NSArray<CHClassProperty *>* getProperties(Class cls)
+    {
+        NSCAssert(cls, @"Class is nil.");
+        NSMutableArray<CHClassProperty *> *properties = nil;
+        uint32_t count = 0;
+        objc_property_t *pList = class_copyPropertyList(cls, &count);
+        objc_property_t *p = pList;
+        NSScanner *scaner = nil;
+        for (uint32_t i=0; i<count; ++i) {
+            objc_property_t property = *p;
+            const char *attrs = property_getAttributes(property);
+            NSString *propertyAttributes = @(attrs);
+            NSArray<NSString *> *attributeItems = [propertyAttributes componentsSeparatedByString:@","];
+            if ([attributeItems containsObject:@"R"]) {
+                continue;
+            }
+            CHClassProperty *cp = [CHClassProperty new];
+            cp.propertyName = @(property_getName(property));
+
+            scaner = [NSScanner scannerWithString:attributeItems.firstObject];
+            if ([scaner scanString:@"\"" intoString:nil]) {
+                NSString *propertyType = nil;
+                [scaner scanUpToCharactersFromSet:[NSCharacterSet characterSetWithCharactersInString:@"\"<"]
+                                       intoString:&propertyType];
+                cp.propertyClassType = NSClassFromString(propertyType);
+                NSString *protocolName = nil;
+                while ([scaner scanString:@"<" intoString:nil]) {
+                    [scaner scanUpToString:@">" intoString:&protocolName];
+                    if ([protocolName isEqualToString:@"optional"]) {
+                        cp.isOptional = YES;
+                    } else if ([protocolName containsString:@"NSNumber"]) {
+                        cp.detailType = getNumberProtocolByPropertyAttributeType(protocolName, nil);
+                    } else if ([protocolName containsString:@"ignore"]) {
+                        cp.isIgnore = YES;
+                    } else {
+                        cp.protocol = protocolName;
+                        if (cp.detailType == CHTagBufObjectDetailTypeNone) {
+                            cp.detailType = getClassDetailTypeByPropertyAttributeType(protocolName);
+                        }
+                    }
+                    [scaner scanString:@">" intoString:nil];
+                }
+                cp.encodingType = CHTagBufEncodingTypeObject;
+            } else {
+                CHTagBufEncodingType encodingType = CHTagBufEncodingTypeNone;
+                decodeFromTypeEncoding(attrs + 1, encodingType);
+                cp.encodingType = encodingType;
+            }
+            cp.fieldNumber = i;
+            [properties addObject:cp];
+        }
+        return properties;
     }
 
     template<typename T>
@@ -275,6 +402,7 @@ private:
         }
         return 0;
     }
+
 public:
     WriteMemoryAPI(void) decodeFromTypeEncoding(const char *typeCoding, CHTagBufEncodingType &encodingType)
     {
@@ -634,6 +762,12 @@ public:
         if (class_isMetaClass(cls)) {
             NSCAssert(NO, @"The Class is meta-class:%@", NSStringFromClass(cls));
             return;
+        }
+
+        NSArray<CHClassProperty *> *properties = objc_getAssociatedObject(cls, &kTagBufferPropertyKey);
+        if (!properties) {
+            properties = getProperties(cls);
+            objc_setAssociatedObject(cls, &kTagBufferPropertyKey, properties, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         }
 
         uint32_t count = 0;
@@ -1030,7 +1164,6 @@ public:
     }
 };
 
-
 CHTagBufferBuilder::CHTagBufferBuilder() :_d(new struct CHTagBufferBuilderPrivate)
 {}
 
@@ -1051,7 +1184,7 @@ void CHTagBufferBuilder::startBuildingWithObject(id instance)
     CHInternalHelper::writeTagBuffer(instance, _d->buf, tag);
 }
 
-NSData *CHTagBufferBuilder::buildedData()
+NSData *CHTagBufferBuilder::buildedData() const
 {
     return _d->buf;
 }

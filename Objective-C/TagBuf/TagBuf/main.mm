@@ -18,11 +18,21 @@
 @property (nonatomic, copy, readonly) NSString *str2;
 @property (nonatomic, assign) double num;
 @property double num2;
-@property NSArray<NSNumber *> *ttt;
+@property NSArray<NSCopying> *ttt;
+@property (nonatomic) char ch0;
+@property (nonatomic) short s0;
+@property (nonatomic) BOOL t_b;
+@property (nonatomic, setter=setTb:) bool t_b_cpp;
 
+@property (nonatomic, copy) NSArray<NSCopying, NSCoding> *numbers;
 @end
 
 @implementation Test
+
+- (void)setTb:(bool)b
+{
+    self.t_b_cpp = b;
+}
 
 @end
 
@@ -40,7 +50,7 @@ void maker(id instance)
         const char *name = property_getName(property);
         printf("attribute:%s, name:%s\n", attribute, name);
         id value = [instance valueForKey:[NSString stringWithUTF8String:name]];
-        NSLog(@"%@", value);
+//        NSLog(@"%@", value);
     }
 }
 
@@ -49,7 +59,7 @@ void func1();
 
 int main(int argc, const char * argv[]) {
     @autoreleasepool {
-//        maker([Test new]);
+        maker([Test new]);
         uint32_t integer = 0x12345678;
         auto integer_ptr = &integer;
         auto p = (const char *)(integer_ptr);
