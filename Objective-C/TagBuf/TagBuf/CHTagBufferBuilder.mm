@@ -726,8 +726,9 @@ public:
             tag.internalTag = container_container;
             writeTag(_tag, buf);
             [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
-            _tag.itag = 0;
             for (NSArray *a in container) {
+                _tag.itag = 0;
+                tag.writeType = CHTagBufferWriteTypeContainer;
                 writeContainer(a, buf, _tag);
             }
         } else {
@@ -811,6 +812,7 @@ public:
         NSCAssert(_array, @"Param [_array] can't be nil!");
         uint64_t count = 0;
         uint32_t offset = readInteger<uint64_t *, true>(&count, tag, buf);
+        NSCAssert(count, @"Logic error! count must not be 0.");
         NSMutableArray *array = [NSMutableArray arrayWithCapacity:count ?: 10];
         *_array = array;
         switch (tag.internalTag) {
@@ -886,9 +888,9 @@ public:
             case container_container: {
                 NSMutableArray *embeddedArray = nil;
                 __tag_buffer_flag embeddeTag = {0};
-                offset += readTag(embeddeTag, buf + offset);
                 for (uint64_t i=0; i<count; ++i) {
-                    offset += readContainer(&embeddedArray, tag, buf + offset, ivar);
+                    offset += readTag(embeddeTag, buf + offset);
+                    offset += readContainer(&embeddedArray, embeddeTag.tag, buf + offset, ivar);
                     if (embeddedArray) {
                         [array addObject:embeddedArray];
                     }
