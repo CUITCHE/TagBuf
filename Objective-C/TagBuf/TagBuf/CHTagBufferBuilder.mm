@@ -1164,9 +1164,9 @@ public:
                 }
                     break;
                 case container_object: {
-                    Class cls = property.propertyClassType;
+                    Class cls = NSClassFromString(property.protocol);
                     if (!cls) {
-                        NSCAssert(NO, @"No such Class at property:%@", property.propertyName);
+                        NSCAssert(NO, @"No such Class:%@ at property:%@", property.protocol, property.propertyName);
                         break;
                     }
                     id value = nil;
@@ -1366,8 +1366,16 @@ id CHTagBufferBuilder::readTagBuffer(NSData *data, id instance)
         memcpy(cp + byteRange.location, bytes, sizeof(char) * byteRange.length);
     }];
 
-    auto final = cp + CHInternalHelper::readObject(cp, instance);
-    NSCAssert(final = cp + data.length, @"");
+#ifdef DEBUG
+    @try {
+        auto final = cp + CHInternalHelper::readObject(cp, instance);
+        NSCAssert(final = cp + data.length, @"");
+    } @catch (NSException *exception) {
+        NSLog(@"%@", exception);
+    }
+#else
+    CHInternalHelper::readObject(cp, instance);
+#endif
 
     return instance;
 }

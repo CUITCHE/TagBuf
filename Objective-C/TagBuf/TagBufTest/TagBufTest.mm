@@ -40,7 +40,6 @@
 
 - (void)test1
 {
-    //    static NSMutableData *s_data = [NSMutableData dataWithCapacity:4096];
     [self measureBlock:^{
         CHDataModel *model = [CHDataModel new];
         model.obj0 = 0x1234567890ffeeddll;
@@ -57,13 +56,6 @@
         model.array = (NSArray<CHDataModel1> *)(@[[CHDataModel1 new], [CHDataModel1 new], [CHDataModel1 new]]);
         model.strEmbedArray = (NSArray<NSArrayNSArray> *)@[@[@"fefer", @"fert45t4", @"fergert"], @[@"freger", @"dewfre"], @[@"fersvt54 4t34_d34d3"]];
         NSData *data = model.toTagBuf;
-        //    if (s_data.length == 0) {
-        //        [s_data setData:data];
-        //    } else {
-        //        XCTAssertEqualObjects(s_data, data, @"data wrong.");
-        //        [s_data setData:data];
-        //    }
-        //    NSLog(@"%@", data);
 
         CHDataModel *model2 = [CHDataModel tagBufferWithTagBuf:data];
         XCTAssertEqual(model.obj0, model2.obj0);
