@@ -40,20 +40,15 @@
 /**
  * @author hejunqiu, 16-07-27 17:07:07
  *
- * When A NSNumber in array, you should use the protocol to modify the NSArray.
- * That tell builder to choose which one way to build. The protocol NSNumberInt32
- * is default when this situation.
+ * that modify the NSNumber by protocol way represents contains a int32_t type
+ * value. And when a NSNumber in array, it represents that array contains int32_t
+ * type value. 
+ *
+ * @note The protocol NSNumberInt32 is default for NSNumber and NSArray.
  */
 @protocol NSNumberInt32
 @end
 
-/**
- * @author hejunqiu, 16-07-27 17:07:07
- *
- * When A NSNumber in array, you should use the protocol to modify the NSArray.
- * That tell builder to choose which one way to build. The protocol NSNumberInt32
- * is default when this situation.
- */
 @protocol NSNumberInt64
 @end
 
@@ -72,6 +67,15 @@
 @protocol NSNumberDouble
 @end
 
+@protocol NSArrayNSData
+@end
+
+@protocol NSArrayNSString
+@end
+
+@protocol NSArrayNSArray
+@end
+
 typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
     /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes. And about bool value, specially it only takes up 1 bit.
     CHTagBufferWriteTypeVarintFixed = 0,
@@ -84,15 +88,51 @@ typedef NS_ENUM(uint32_t, CHTagBufferWriteType) {
 };
 
 typedef NS_ENUM(uint32_t, CHTagBufEncodingType) {
+    /// For check use.
     CHTagBufEncodingTypeNone   = 0,
+    /// cplusplus bool.
     CHTagBufEncodingTypeBool   = 1,
+    /// 8 bits, such as char.
     CHTagBufEncodingType8Bits  = 2,
+    /// 16 bits, such as short
     CHTagBufEncodingType16Bits = 3,
+    /// 32 bits, such as int.
     CHTagBufEncodingType32Bits = 4,
+    /// 64 bits, such as long long
     CHTagBufEncodingType64Bits = 5,
+    /// float value
     CHTagBufEncodingTypeFloat  = 6,
+    /// double value
     CHTagBufEncodingTypeDouble = 7,
-    CHTagBufEncodingTypeObject = 8
+    /// NSNumber value.
+    CHTagBufEncodingTypeNSNumber,
+    /// NSData object.
+    CHTagBufEncodingTypeNSData,
+    /// NSString object.
+    CHTagBufEncodingTypeNSString,
+    /// NSArray object.
+    CHTagBufEncodingTypeNSArray,
+    /// other object, such as custom class.
+    CHTagBufEncodingTypeOtherObject
 };
+
+#ifndef tag_contact
+#define tag_contact(x) @#x
+#endif
+
+#define printCHTagBufEncodingType(type) [@[tag_contact(CHTagBufEncodingTypeNone),\
+tag_contact(CHTagBufEncodingTypeBool),\
+tag_contact(CHTagBufEncodingType8Bits),\
+tag_contact(CHTagBufEncodingType16Bits),\
+tag_contact(CHTagBufEncodingType32Bits),\
+tag_contact(CHTagBufEncodingType64Bits),\
+tag_contact(CHTagBufEncodingTypeFloat),\
+tag_contact(CHTagBufEncodingTypeDouble),\
+tag_contact(CHTagBufEncodingTypeNSNumber),\
+tag_contact(CHTagBufEncodingTypeNSData),\
+tag_contact(CHTagBufEncodingTypeNSString),\
+tag_contact(CHTagBufEncodingTypeNSArray),\
+tag_contact(CHTagBufEncodingTypeOtherObject),\
+] objectAtIndex:type]
 
 #endif /* tagBuf_h */

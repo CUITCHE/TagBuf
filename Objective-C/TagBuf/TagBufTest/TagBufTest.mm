@@ -55,7 +55,7 @@
         model.obj1.str11 = @"feferwvefsvw frewfrew f";
         model.arrayString = @[@"12432543", @"dewf34ffw"];
         model.array = (NSArray<CHDataModel1> *)(@[[CHDataModel1 new], [CHDataModel1 new], [CHDataModel1 new]]);
-        model.strEmbedArray = @[@[@"fefer", @"fert45t4", @"fergert"], @[@"freger", @"dewfre"], @[@"fersvt54 4t34_d34d3"]];
+        model.strEmbedArray = (NSArray<NSArrayNSArray> *)@[@[@"fefer", @"fert45t4", @"fergert"], @[@"freger", @"dewfre"], @[@"fersvt54 4t34_d34d3"]];
         NSData *data = model.toTagBuf;
         //    if (s_data.length == 0) {
         //        [s_data setData:data];

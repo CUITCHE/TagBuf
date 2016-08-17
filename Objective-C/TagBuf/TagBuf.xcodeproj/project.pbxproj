@@ -11,6 +11,8 @@
 		FB19DCB11D48F3DF00C42DD3 /* CHTagBufferBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */; };
 		FB19DCB21D48F46400C42DD3 /* CHTagBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */; };
 		FB19DCB51D48F47B00C42DD3 /* CHDataModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FB19DCB41D48F47B00C42DD3 /* CHDataModel.m */; };
+		FB1B28E51D634BE100DA0DE4 /* TagBufBitset.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */; };
+		FB1B28E61D634BE100DA0DE4 /* TagBufBitset.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */; };
 		FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = FB221FA41D62E53A00AC3708 /* CHClassProperty.m */; };
 		FB221FA61D62E54400AC3708 /* CHClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = FB221FA41D62E53A00AC3708 /* CHClassProperty.m */; };
 		FB5F75DD1D421013007E4965 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75DC1D421013007E4965 /* main.mm */; };
@@ -36,6 +38,8 @@
 		FB19DCAD1D48F3CB00C42DD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FB19DCB31D48F47B00C42DD3 /* CHDataModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHDataModel.h; sourceTree = "<group>"; };
 		FB19DCB41D48F47B00C42DD3 /* CHDataModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHDataModel.m; sourceTree = "<group>"; };
+		FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TagBufBitset.mm; sourceTree = "<group>"; };
+		FB1B28E41D634BE100DA0DE4 /* TagBufBitset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagBufBitset.h; sourceTree = "<group>"; };
 		FB221FA31D62E53A00AC3708 /* CHClassProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHClassProperty.h; sourceTree = "<group>"; };
 		FB221FA41D62E53A00AC3708 /* CHClassProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CHClassProperty.m; sourceTree = "<group>"; };
 		FB5F75D91D421013007E4965 /* TagBuf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TagBuf; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,6 +109,8 @@
 				FB6B54C91D62C6F000F6D2F2 /* tagBuf.h */,
 				FB221FA31D62E53A00AC3708 /* CHClassProperty.h */,
 				FB221FA41D62E53A00AC3708 /* CHClassProperty.m */,
+				FB1B28E41D634BE100DA0DE4 /* TagBufBitset.h */,
+				FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */,
 			);
 			path = TagBuf;
 			sourceTree = "<group>";
@@ -201,6 +207,7 @@
 				FB19DCB51D48F47B00C42DD3 /* CHDataModel.m in Sources */,
 				FB19DCB11D48F3DF00C42DD3 /* CHTagBufferBuilder.mm in Sources */,
 				FB221FA61D62E54400AC3708 /* CHClassProperty.m in Sources */,
+				FB1B28E61D634BE100DA0DE4 /* TagBufBitset.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,6 +219,7 @@
 				FB5F75E51D42103A007E4965 /* CHTagBuffer.mm in Sources */,
 				FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */,
 				FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */,
+				FB1B28E51D634BE100DA0DE4 /* TagBufBitset.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

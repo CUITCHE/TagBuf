@@ -25,6 +25,7 @@
 @property (nonatomic, setter=setTb:) bool t_b_cpp;
 
 @property (nonatomic, copy) NSArray<NSCopying, NSCoding> *numbers;
+@property (nonatomic, strong) NSArray<NSArray<NSCopying> *> *v1;
 @end
 
 @implementation Test

@@ -24,7 +24,7 @@
 @property float prority;
 @property double level;
 
-@property (nonatomic, strong) NSString<required> *str;
+@property (nonatomic, strong) NSString *str;
 @property (nonatomic) char ch0;
 @property (nonatomic) short sh0;
 
@@ -35,6 +35,6 @@
 
 @property (nonatomic, strong) NSArray<CHDataModel1> *array;
 
-@property (nonatomic, strong) NSArray<NSArray *> *strEmbedArray;
+@property (nonatomic, strong) NSArray<NSArrayNSArray> *strEmbedArray;
 
 @end
