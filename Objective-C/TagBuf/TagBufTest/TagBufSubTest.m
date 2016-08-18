@@ -175,4 +175,66 @@
     CHAssertEqualObjects(_13);
 }
 
+- (void)testNSArrayMultiProtocol
+{
+    TestNSArrayMultiProtocol *model = TestNSArrayMultiProtocol.new;
+    model._14 = @[@[@[@(12),@(12),@(12),],@[@(12),@(12),@(12),],@[@(12),@(12),@(12),],],
+                  @[@(12),@(12),@(12),],@[@(12),@(12),@(12),], @[]].copy;
+    NSData *data = model.toTagBuf;
+
+    TestNSArrayMultiProtocol *target = [TestNSArrayMultiProtocol tagBufferWithTagBuf:data];
+    CHAssertEqualObjects(_14);
+}
+
+- (void)testNSArrayOtherObject
+{
+    TestNSArrayOtherObject *model = TestNSArrayOtherObject.new;
+    TestPodType *_model = TestPodType.new;
+    _model._1 = YES;
+    _model._2 = '3';
+    _model._3 = 35265;
+    _model._4 = 3465474245;
+    _model._5 = 0x1122334455667788ll;
+    _model._6 = 356.4;
+    _model._7 = 2353464897894.6523543;
+    _model._8 = false;
+    model._1 = @[_model,_model,_model,_model,_model,_model,_model,_model,
+                 _model,_model,_model,_model,_model,_model,_model,_model,
+                 _model,_model,_model,_model,_model,_model,_model,_model,].copy;
+
+    NSData *data = model.toTagBuf;
+    TestNSArrayOtherObject *target = [TestNSArrayOtherObject tagBufferWithTagBuf:data];
+    CHAssertEqualObjects(_1);
+}
+
+- (void)testForceTest
+{
+    [self measureBlock:^{
+        [self testNSNumber];
+        [self testPodType];
+        [self testNSString];
+        [self testNSData];
+        [self testNSArrayEmpty];
+        [self testNSArray];
+        [self testNSArrayMultiProtocol];
+        [self testNSArrayOtherObject];
+    }];
+}
+
+- (void)testForceLimitTest
+{
+    [self measureBlock:^{
+        int i = 1e3;
+        while (i-->0) {
+            [self testNSNumber];
+            [self testPodType];
+            [self testNSString];
+            [self testNSData];
+            [self testNSArrayEmpty];
+            [self testNSArray];
+            [self testNSArrayMultiProtocol];
+            [self testNSArrayOtherObject];
+        }
+    }];
+}
 @end

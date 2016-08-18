@@ -607,7 +607,7 @@ public:
                 tag.tag.internalTag = object_is_nil;
                 writeTag(tag, buf);
             } else {
-                @throw [NSException exceptionWithName:@"Object is nil"
+                @throw [NSException exceptionWithName:@"Object which is not optional or ignore is nil"
                                                reason:[NSString stringWithFormat:@"The value of %@'s property[%@]",[instance class], property.propertyName]
                                              userInfo:nil];
             }
@@ -1063,10 +1063,6 @@ public:
             }
                 break;
             case CHTagBufferWriteTypeContainer: {
-                if (tag.placeholder12 != 1 && tag.internalTag == container_none) {
-                    [instance setValue:@[] forKey:property.propertyName];
-                    break;
-                }
                 NSMutableArray *array = nil;
                 offset = readContainer(&array, tag, buf, property);
                 if (array) {
@@ -1177,6 +1173,10 @@ public:
     ReadMemoryAPI(uint32_t) readContainer(NSMutableArray **_array, __tag_detail__ tag, const char *buf, CHClassProperty *property)
     {
         NSCAssert(_array, @"Param [_array] can't be nil!");
+        if (tag.placeholder12 != 1 && tag.internalTag == container_none) {
+            *_array = @[].mutableCopy;
+            return 0;
+        }
         uint64_t count = 0;
         uint32_t offset = readInteger<uint64_t *, true>(&count, tag, buf);
         NSCAssert(count, @"Logic error! count must not be 0.");
