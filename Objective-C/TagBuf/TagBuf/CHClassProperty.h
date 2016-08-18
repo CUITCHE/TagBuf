@@ -10,19 +10,19 @@
 
 typedef NS_ENUM(uint32_t, CHTagBufObjectDetailType) {
     CHTagBufObjectDetailTypeNone,
-    /// NSNumber<NSNumberBoolean> value.
+    /// NSNumber<NSNumberBoolean> value. Or NSArray<NSNumberBoolean> value.
     CHTagBufObjectDetailTypeNSNumberBoolean,
-    /// NSNumber<NSNumberInt8> value.
+    /// NSNumber<NSNumberInt8> value. Or NSArray<NSNumberInt8> value.
     CHTagBufObjectDetailTypeNSNumber8BitsInteger,
-    /// NSNumber<NSNumberInt16> value.
+    /// NSNumber<NSNumberInt16> value. Or NSArray<NSNumberInt16> value.
     CHTagBufObjectDetailTypeNSNumber16BitsInteger,
-    /// NSNumber<NSNumberInt32> value.
+    /// NSNumber<NSNumberInt32> value. Or NSArray<NSNumberInt32> value.
     CHTagBufObjectDetailTypeNSNumber32BitsInteger,
-    /// NSNumber<NSNumberInt64> value.
+    /// NSNumber<NSNumberInt64> value. Or NSArray<NSNumberInt64> value.
     CHTagBufObjectDetailTypeNSNumber64BitsInteger,
-    /// NSNumber<NSNumberFloat> value.
+    /// NSNumber<NSNumberFloat> value. Or NSArray<NSNumberFloat> value.
     CHTagBufObjectDetailTypeNSNumberFloat,
-    /// NSNumber<NSNumberDouble> value.
+    /// NSNumber<NSNumberDouble> value. Or NSArray<NSNumberDouble> value.
     CHTagBufObjectDetailTypeNSNumberDouble,
     CHTagBufObjectDetailTypeNSArrayNSData,
     CHTagBufObjectDetailTypeNSArrayNSString,

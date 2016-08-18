@@ -18,6 +18,8 @@
 		FB5F75DD1D421013007E4965 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75DC1D421013007E4965 /* main.mm */; };
 		FB5F75E51D42103A007E4965 /* CHTagBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */; };
 		FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */; };
+		FB6938F31D65603400F6F0C7 /* TagBufSubTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F21D65603400F6F0C7 /* TagBufSubTest.m */; };
+		FB6938F61D6560BD00F6F0C7 /* CHTestModels.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F51D6560BD00F6F0C7 /* CHTestModels.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -48,6 +50,9 @@
 		FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTagBuffer.mm; sourceTree = "<group>"; };
 		FB5F75E61D4210B7007E4965 /* CHTagBufferBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHTagBufferBuilder.h; sourceTree = "<group>"; };
 		FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTagBufferBuilder.mm; sourceTree = "<group>"; };
+		FB6938F21D65603400F6F0C7 /* TagBufSubTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagBufSubTest.m; sourceTree = "<group>"; };
+		FB6938F41D6560BD00F6F0C7 /* CHTestModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHTestModels.h; sourceTree = "<group>"; };
+		FB6938F51D6560BD00F6F0C7 /* CHTestModels.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTestModels.mm; sourceTree = "<group>"; };
 		FB6B54C91D62C6F000F6D2F2 /* tagBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tagBuf.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,6 +81,9 @@
 				FB19DCB31D48F47B00C42DD3 /* CHDataModel.h */,
 				FB19DCB41D48F47B00C42DD3 /* CHDataModel.m */,
 				FB19DCAD1D48F3CB00C42DD3 /* Info.plist */,
+				FB6938F21D65603400F6F0C7 /* TagBufSubTest.m */,
+				FB6938F41D6560BD00F6F0C7 /* CHTestModels.h */,
+				FB6938F51D6560BD00F6F0C7 /* CHTestModels.mm */,
 			);
 			path = TagBufTest;
 			sourceTree = "<group>";
@@ -202,12 +210,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB6938F61D6560BD00F6F0C7 /* CHTestModels.mm in Sources */,
 				FB19DCB21D48F46400C42DD3 /* CHTagBuffer.mm in Sources */,
 				FB19DCAC1D48F3CB00C42DD3 /* TagBufTest.mm in Sources */,
 				FB19DCB51D48F47B00C42DD3 /* CHDataModel.m in Sources */,
 				FB19DCB11D48F3DF00C42DD3 /* CHTagBufferBuilder.mm in Sources */,
 				FB221FA61D62E54400AC3708 /* CHClassProperty.m in Sources */,
 				FB1B28E61D634BE100DA0DE4 /* TagBufBitset.mm in Sources */,
+				FB6938F31D65603400F6F0C7 /* TagBufSubTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

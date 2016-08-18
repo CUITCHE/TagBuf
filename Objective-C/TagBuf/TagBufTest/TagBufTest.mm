@@ -7,7 +7,6 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "CHTagBufferBuilder.h"
 #import "CHDataModel.h"
 
 @interface TagBufTest : XCTestCase
@@ -71,4 +70,6 @@
         XCTAssertEqualObjects(model.array, model2.array);
     }];
 }
+
+
 @end

@@ -135,4 +135,6 @@ tag_contact(CHTagBufEncodingTypeNSArray),\
 tag_contact(CHTagBufEncodingTypeOtherObject),\
 ] objectAtIndex:type]
 
+#import "CHTagBuffer.h"
+
 #endif /* tagBuf_h */

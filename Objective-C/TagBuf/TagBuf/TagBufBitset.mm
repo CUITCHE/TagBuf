@@ -60,21 +60,21 @@ void TagBufBitset::push_back(bool bit)
     char &bitChar = _d->buf->at(writePosition / 8);
     switch (writePosition % 8) {
         case 0:
-            bitChar &= bit ? bit0 : ~bit0; break;
+            bit ? bitChar |= bit0 : bitChar &= ~bit0; break;
         case 1:
-            bitChar &= bit ? bit1 : ~bit1; break;
+            bit ? bitChar |= bit1 : bitChar &= ~bit1; break;
         case 2:
-            bitChar &= bit ? bit2 : ~bit2; break;
+            bit ? bitChar |= bit2 : bitChar &= ~bit2; break;
         case 3:
-            bitChar &= bit ? bit3 : ~bit3; break;
+            bit ? bitChar |= bit3 : bitChar &= ~bit3; break;
         case 4:
-            bitChar &= bit ? bit4 : ~bit4; break;
+            bit ? bitChar |= bit4 : bitChar &= ~bit4; break;
         case 5:
-            bitChar &= bit ? bit5 : ~bit5; break;
+            bit ? bitChar |= bit5 : bitChar &= ~bit5; break;
         case 6:
-            bitChar &= bit ? bit6 : ~bit6; break;
+            bit ? bitChar |= bit6 : bitChar &= ~bit6; break;
         case 7:
-            bitChar &= bit ? bit7 : ~bit7; break;
+            bit ? bitChar |= bit7 : bitChar &= ~bit7; break;
         default:
             NSCAssert(NO, @"Logic error.");
             break;
@@ -132,21 +132,21 @@ void TagBufBitset::convertArrayToBitset(NSArray *bitArray)
     for (NSNumber *number in bitArray) {
         switch (i) {
             case 0:
-                bitSet &= number.boolValue ? bit0 : ~bit0; break;
+                number.boolValue ? bitSet |= bit0 : bitSet &= ~bit0; break;
             case 1:
-                bitSet &= number.boolValue ? bit1 : ~bit1; break;
+                number.boolValue ? bitSet |= bit1 : bitSet &= ~bit1; break;
             case 2:
-                bitSet &= number.boolValue ? bit2 : ~bit2; break;
+                number.boolValue ? bitSet |= bit2 : bitSet &= ~bit2; break;
             case 3:
-                bitSet &= number.boolValue ? bit3 : ~bit3; break;
+                number.boolValue ? bitSet |= bit3 : bitSet &= ~bit3; break;
             case 4:
-                bitSet &= number.boolValue ? bit4 : ~bit4; break;
+                number.boolValue ? bitSet |= bit4 : bitSet &= ~bit4; break;
             case 5:
-                bitSet &= number.boolValue ? bit5 : ~bit5; break;
+                number.boolValue ? bitSet |= bit5 : bitSet &= ~bit5; break;
             case 6:
-                bitSet &= number.boolValue ? bit6 : ~bit6; break;
+                number.boolValue ? bitSet |= bit6 : bitSet &= ~bit6; break;
             case 7:
-                bitSet &= number.boolValue ? bit7 : ~bit7;
+                number.boolValue ? bitSet |= bit7 : bitSet &= ~bit7;
                 i = -1;
                 bitBuf.push_back(bitSet);
                 bitSet = 0;
@@ -158,7 +158,7 @@ void TagBufBitset::convertArrayToBitset(NSArray *bitArray)
         ++i;
     }
     _d->writePointer = bitBuf.size() * 8 + i;
-    if (bitSet) {
+    if (i) {
         bitBuf.push_back(bitSet);
     }
 }
@@ -182,7 +182,7 @@ void TagBufBitset::convertToBooleanArray(NSMutableArray *bitArray)
             [bitArray addObject:@(!!(bitChar & bit7))];
             i += 8;
         }
-        size_t rest = _d->writePointer - i;
+        size_t rest = _d->writePointer - i - 1;
         for (i=0; i<rest; ++i) {
             switch (i) {
                 case 0:
@@ -219,5 +219,4 @@ void TagBufBitset::convertToBooleanArray(NSMutableArray *bitArray)
     } @finally {
         bitVector.push_back(storage);
     }
-
 }

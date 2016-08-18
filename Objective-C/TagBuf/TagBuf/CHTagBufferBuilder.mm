@@ -44,9 +44,9 @@ using namespace std;
  [11] = 1 represents that the bytes of string or data's length has been compressed by zigzag.
  [12] = 1 represents that the blob stream has been encrypted, otherwise has not.
       = 1 represents that there store a bool [true] value, 0 represents [false] value when
-        write tpye is CHTagBufferWriteTypeVarintFixed and internal-tag is varint_bool.
-      = 1 represents that container contains number value(bool, 8~64bits, values 
-        by CHTagBufferWriteTypeVarintFixed's internal values).
+          write tpye is CHTagBufferWriteTypeVarintFixed and internal-tag is varint_bool.
+      = 1 represents that container contains number value(bool, 8~64bits, values
+          by CHTagBufferWriteTypeVarintFixed's internal values).
 
   ---------
  |07~04 bit| {tagBuf internal-tag}
@@ -65,6 +65,7 @@ using namespace std;
     internal-tag = 4, represents 32bits float.
     internal-tag = 5, represents 64bits double.
     internal-tag = 6, represents bool or BOOL.
+    internal-tag = 7, represents object is nil if this is a NSNumber object.
  - CHTagBufferWriteTypeContainer
     internal-tag = 0, contains 32bits integer.
     internal-tag = 1, contains 64bits integer.
@@ -73,11 +74,13 @@ using namespace std;
     internal-tag = 4, contains string or blob data.
     internal-tag = 5, contains custome object.
     internal-tag = 6, contains container;
+    internal-tag = 7, represents object is nil
  - CHTagBufferWriteTypeblobStream
     internal-tag = 0, represents NSString.
     internal-tag = 1, represents NSData.
+    internal-tag = 7, represents object is nil
  - CHTagBufferWriteTypeTagBuffer
-    internal-tag = 1, represents object is nil.
+    internal-tag = 7, represents object is nil
  *
  * How about to support structure, sounds interesting.
  */
@@ -113,17 +116,21 @@ union __tag_buffer_flag {
 #define varint_bool     6
 
 // if writeType is CHTagBufferWriteTypeContainer
-#define container_stream_nsstring   0
-#define container_stream_nsdata     1
-#define container_object    2
-#define container_container 3
+#define container_none      0
+#define container_stream_nsstring   1
+#define container_stream_nsdata     2
+#define container_object    3
+#define container_container 4
+
 
 // if writeType is CHTagBufferWriteTypeblobStream
 #define stream_nsstring     0
 #define stream_nsdata       1
+
 // if writeType is CHTagBufferWriteTypeTagBuffer
-#define object_is_exists    0
-#define object_is_nil       1
+
+// common defined
+#define object_is_nil       7
         uint32_t internalTag        : 03; // [04~06]
         uint32_t next               : 01; // [07]
         uint32_t lengthOfZigzag     : 03; // [08~10]
@@ -151,13 +158,6 @@ struct CHTagBufferBuilderPrivate
     {
         delete readBuffer;
     }
-
-    void resetTagWithFieldNumber(uint32_t fieldNumber)
-    {
-        NSCAssert(fieldNumber <= 0xFFFFF, @"Too many variable. [%ud]th. The max is %d", fieldNumber, 0xFFFFF);
-        tag.itag = 0;
-        tag.tag.fieldNumber = fieldNumber;
-    }
 };
 
 NSCharacterSet *CHTagBufferBuilderPrivate::protocolCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\"<"];
@@ -177,41 +177,9 @@ using tag_bool = BOOL;
 using tag_bool = bool;
 #endif
 
-#ifdef DEBUG
-#define debug_condition(cond, relate) cond relate
-#else
-#define debug_condition(cond, relate)
-#endif
-
 struct CHInternalHelper
 {
 private:
-    NS_INLINE NSString *getClassNameByIvar(Ivar ivar)
-    {
-        const char *classname = ivar_getTypeEncoding(ivar) + 2;
-        uint32_t length = (uint32_t)strlen(classname) - 1;
-        NSString *str = [[NSString alloc] initWithBytes:classname length:length encoding:NSUTF8StringEncoding];
-        return str;
-    }
-
-    NS_INLINE NSString *getClassNameInContainerByIvar(Ivar ivar)
-    {
-        const char *classname = ivar_getTypeEncoding(ivar);
-        const char *start = nullptr;
-        while (debug_condition(*classname, &&) *++classname != '<') {
-            continue;
-        }
-        NSCAssert(*classname, @"No such class. Info:%s", ivar_getTypeEncoding(ivar));
-        start = ++classname;
-        while (debug_condition(*classname, &&) *++classname != '>') {
-            continue;
-        }
-        NSCAssert(*classname, @"No such class. Info:%s", ivar_getTypeEncoding(ivar));
-
-        NSString *str = [[NSString alloc] initWithBytes:start length:classname - start encoding:NSUTF8StringEncoding];
-        return str;
-    }
-
     NS_INLINE CHTagBufObjectDetailType getNumberProtocolByPropertyAttributeType(NSString *typePart, NSScanner * _Nullable scanner)
     {
         if (typePart.length < 12) { // min length of 'NSNumberInt8'
@@ -337,7 +305,7 @@ private:
                 } else {
                     cp.encodingType = CHTagBufEncodingTypeOtherObject;
                 }
-                
+
                 NSString *protocolName = nil;
                 while ([scanner scanString:@"<" intoString:nil]) {
                     [scanner scanUpToString:@">" intoString:&protocolName];
@@ -390,7 +358,7 @@ private:
             _buf[4] = ((integer & 0x00000000ff000000ll) >> 24);
             _buf[5] = ((integer & 0x0000000000ff0000ll) >> 16);
             _buf[6] = ((integer & 0x000000000000ff00ll) >>  8);
-            _buf[7] = ((integer & 0xff));
+            _buf[7] = ((integer & 0x00000000000000ffll));
         } else {
             NSCAssert(sizeof(T) > 8, @"Larger integer not supported");
         }
@@ -634,6 +602,17 @@ public:
             return;
         }
         id value = [instance valueForKey:property.propertyName];
+        if (!value ) {
+            if (property.isIgnore || property.isOptional) {
+                tag.tag.internalTag = object_is_nil;
+                writeTag(tag, buf);
+            } else {
+                @throw [NSException exceptionWithName:@"Object is nil"
+                                               reason:[NSString stringWithFormat:@"The value of %@'s property[%@]",[instance class], property.propertyName]
+                                             userInfo:nil];
+            }
+            return;
+        }
         switch (property.encodingType) {
             case CHTagBufEncodingTypeBool: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
@@ -676,21 +655,8 @@ public:
             case CHTagBufEncodingTypeNSData:
             case CHTagBufEncodingTypeNSString:
             case CHTagBufEncodingTypeNSArray:
-            case CHTagBufEncodingTypeOtherObject: {
-                if (value) {
-                    writeObjcect(value, buf, tag, property);
-                } else {
-                    if (property.isOptional || property.isIgnore) {
-                        tag.tag.writeType = CHTagBufferWriteTypeTagBuffer;
-                        tag.tag.internalTag = object_is_nil;
-                        writeTag(tag, buf);
-                    } else {
-                        @throw [NSException exceptionWithName:@"Object is nil"
-                                                       reason:[NSString stringWithFormat:@"The value of %@'s property[%@]",[instance class], property.propertyName]
-                                                     userInfo:nil];
-                    }
-                }
-            }
+            case CHTagBufEncodingTypeOtherObject:
+                writeObjcect(value, buf, tag, property);
                 break;
             default:
                 NSCAssert(NO, @"Logic error.");
@@ -796,16 +762,17 @@ public:
 
     WriteMemoryAPI(void) writeContainer(NSArray *container, NSMutableData *buf, __tag_buffer_flag__ &_tag, CHClassProperty *property)
     {
+        auto &tag = _tag.tag;
         uint64_t count = (uint64_t)container.count;
         if (!count) {
+            tag.internalTag = container_none;
+            writeTag(_tag, buf);
             return;
         }
 
         CHTagBufObjectDetailType detailType = getNSArrayContainerTypeOnRuntime(container.firstObject, property);
 
         char _buf[8] = {0};
-        auto &tag = _tag.tag;
-
         switch (detailType) {
             case CHTagBufObjectDetailTypeNSNumberBoolean: {
                 TagBufBitset bitset(count);
@@ -824,7 +791,8 @@ public:
 
                 [buf appendBytes:_buf length:tag.lengthOfZigzag ?: sizeof(size_t)]; // write bit data count.
                 [buf appendBytes:bitData length:dataCount]; // write bit data.
-                [buf appendBytes:&count length:sizeof(count)]; // write size of bit.
+                integerToByte(count, (Byte *)_buf);
+                [buf appendBytes:_buf length:sizeof(count)]; // write size of bit.
             }
                 break;
             case CHTagBufObjectDetailTypeNSNumber8BitsInteger:
@@ -991,7 +959,7 @@ public:
 
     WriteMemoryAPI(void) writeDoubleInList(double v, NSMutableData *buf, __tag_buffer_flag__ &_tag)
     {
-        writeFloat<false>(v, buf, _tag);
+        writeDouble<false>(v, buf, _tag);
     }
 
     template <typename T>
@@ -1002,6 +970,144 @@ public:
     }
 
 #pragma mark - Read APIs
+
+    ReadMemoryAPI(uint32_t) readObject(const char *buf, id instance)
+    {
+        NSCAssert(instance, @"instance param must not be nil.");
+        Class cls = [instance class];
+
+        NSArray<CHClassProperty *> *properties = objc_getAssociatedObject(cls, &kTagBufferPropertyKey);
+        if (!properties) {
+            properties = getProperties(cls);
+            objc_setAssociatedObject(cls, &kTagBufferPropertyKey, properties, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+
+        union __tag_buffer_flag _tag{0};
+        auto &tag = _tag.tag;
+        const char *cp = buf;
+        NSUInteger count = properties.count;
+        for (;;) {
+            if (tag.next) {
+                break;
+            }
+            cp += readTag(_tag, cp);
+            if (tag.fieldNumber >= count) {
+                NSCAssert(NO, @"field number is overflow.");
+                break;
+            }
+            cp += readByWriteType(tag, cp, [properties objectAtIndex:tag.fieldNumber], instance);
+
+        }
+
+        return static_cast<uint32_t>(cp - buf);
+    }
+
+    ReadMemoryAPI(uint32_t) readByWriteType(__tag_detail__ tag, const char *buf, CHClassProperty *property, id instance)
+    {
+        if (tag.internalTag == object_is_nil) {
+            if (property.isOptional || property.isIgnore) {
+                return 0;
+            } else {
+                @throw [NSException exceptionWithName:@"Transmitted failed."
+                                               reason:[NSString stringWithFormat:@"Transmitted data represents nil. But the property[%@] is not [optional] or [ignore].", property.propertyName]
+                                             userInfo:nil];
+            }
+        }
+        uint32_t offset = 0;
+        switch ((CHTagBufferWriteType)tag.writeType) {
+            case CHTagBufferWriteTypeVarintFixed: {
+                switch (tag.internalTag) {
+                    case varint_bool:
+                        [instance setValue:@(tag.placeholder12) forKey:property.propertyName];
+                        break;
+                    case varint_8bits: {
+                        uint8_t value = 0;
+                        offset = byteToPodType(&value, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    case varint_16bits: {
+                        uint16_t value = 0;
+                        offset = byteToPodType(&value, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    case varint_32bits: {
+                        uint32_t value = 0;
+                        offset = readInteger(&value, tag, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    case varint_64bits: {
+                        uint64_t value = 0;
+                        offset = readInteger(&value, tag, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    case varint_float: {
+                        float value = 0;
+                        offset = readFloat(&value, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    case varint_double: {
+                        double value = 0;
+                        offset = readDouble(&value, buf);
+                        [instance setValue:@(value) forKey:property.propertyName];
+                    }
+                        break;
+                    default:
+                        NSCAssert(NO, @"Logic error.");
+                        break;
+                }
+            }
+                break;
+            case CHTagBufferWriteTypeContainer: {
+                if (tag.placeholder12 != 1 && tag.internalTag == container_none) {
+                    [instance setValue:@[] forKey:property.propertyName];
+                    break;
+                }
+                NSMutableArray *array = nil;
+                offset = readContainer(&array, tag, buf, property);
+                if (array) {
+                    [instance setValue:array forKey:property.propertyName];
+                }
+            }
+                break;
+            case CHTagBufferWriteTypeblobStream: {
+                const char *dest = nullptr;
+                uint32_t length = 0;
+                offset = readBlobStream(dest, length, tag, buf);
+                switch (tag.internalTag) {
+                    case stream_nsstring: {
+                        NSString *str = [[NSString alloc] initWithBytes:dest length:length encoding:NSUTF8StringEncoding];
+                        [instance setValue:str forKey:property.propertyName];
+                    }
+                        break;
+                    case stream_nsdata: {
+                        NSData *data = [[NSData alloc] initWithBytes:dest length:length];
+                        [instance setValue:data forKey:property.propertyName];
+                    }
+                    default:
+                        break;
+                }
+            }
+                break;
+            case CHTagBufferWriteTypeTagBuffer: {
+                Class cls = property.propertyClassType;
+                if (!cls) {
+                    @throw [NSException exceptionWithName:@"Class does not exist." reason:[NSString stringWithFormat:@"No such Class at property:%@", property.propertyName] userInfo:nil];
+                }
+                id value = [[cls alloc] init];
+                offset = readObject(buf, value);
+                [instance setValue:value forKey:property.propertyName];
+            }
+                break;
+            default:
+                break;
+        }
+        return offset;
+    }
 
     template<typename T, bool accessToReadLength = false, bool readIntegerInList = false>
     ReadMemoryAPI(uint32_t) readInteger(T dest, __tag_detail__ tag, const char *buf)
@@ -1113,7 +1219,7 @@ public:
                 case varint_float: {
                     float value = 0;
                     for (uint64_t i=0; i<count; ++i) {
-                        offset += readInteger<decltype(value)* ,false, true>(&value, tag, buf + offset);
+                        offset += readFloat(&value, buf + offset);
                         [array addObject:@(value)];
                     }
                 }
@@ -1121,7 +1227,7 @@ public:
                 case varint_double: {
                     double value = 0;
                     for (uint64_t i=0; i<count; ++i) {
-                        offset += readInteger<decltype(value)* ,false, true>(&value, tag, buf + offset);
+                        offset += readDouble(&value, buf + offset);
                         [array addObject:@(value)];
                     }
                 }
@@ -1129,8 +1235,8 @@ public:
                 case varint_bool: {
                     const char *bitData = buf + offset; // bit data blob stream
                     offset += count;
-                    uint64_t bitCount = count; // bit data size. var[count] represents bit size.
-                    offset += byteToPodType(&count, buf + offset);
+                    uint64_t bitCount = 0; // bit data size. var[count] represents bit size.
+                    offset += byteToPodType(&bitCount, buf + offset);
                     TagBufBitset bitset(bitData, count, bitCount);
                     bitset.convertToBooleanArray(array);
                 }
@@ -1197,134 +1303,10 @@ public:
         return offset;
     }
 
-    ReadMemoryAPI(uint32_t) readObject(const char *buf, id instance)
-    {
-        NSCAssert(instance, @"instance param must not be nil.");
-        Class cls = [instance class];
 
-        NSArray<CHClassProperty *> *properties = objc_getAssociatedObject(cls, &kTagBufferPropertyKey);
-        if (!properties) {
-            properties = getProperties(cls);
-            objc_setAssociatedObject(cls, &kTagBufferPropertyKey, properties, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        }
-
-        union __tag_buffer_flag _tag{0};
-        auto &tag = _tag.tag;
-        const char *cp = buf;
-        NSUInteger count = properties.count;
-        for (;;) {
-            if (tag.next) {
-                break;
-            }
-            cp += readTag(_tag, cp);
-            if (tag.fieldNumber >= count) {
-                NSCAssert(NO, @"field number is overflow.");
-                break;
-            }
-            cp += readByWriteType(tag, cp, [properties objectAtIndex:tag.fieldNumber], instance);
-
-        }
-
-        return static_cast<uint32_t>(cp - buf);
-    }
-
-    ReadMemoryAPI(uint32_t) readByWriteType(__tag_detail__ tag, const char *buf, CHClassProperty *property, id instance)
-    {
-        uint32_t offset = 0;
-        switch ((CHTagBufferWriteType)tag.writeType) {
-            case CHTagBufferWriteTypeVarintFixed: {
-                switch (tag.internalTag) {
-                    case varint_bool:
-                        [instance setValue:@(tag.placeholder12) forKey:property.propertyName];
-                        break;
-                    case varint_8bits: {
-                        uint8_t value = 0;
-                        offset = byteToPodType(&value, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    case varint_16bits: {
-                        uint16_t value = 0;
-                        offset = byteToPodType(&value, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    case varint_32bits: {
-                        uint32_t value = 0;
-                        offset = readInteger(&value, tag, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    case varint_64bits: {
-                        uint64_t value = 0;
-                        offset = readInteger(&value, tag, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    case varint_float: {
-                        float value = 0;
-                        offset = readFloat(&value, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    case varint_double: {
-                        double value = 0;
-                        offset = readDouble(&value, buf);
-                        [instance setValue:@(value) forKey:property.propertyName];
-                    }
-                        break;
-                    default:
-                        NSCAssert(NO, @"Logic error.");
-                        break;
-                }
-            }
-                break;
-            case CHTagBufferWriteTypeContainer: {
-                NSMutableArray *array = nil;
-                offset = readContainer(&array, tag, buf, property);
-                if (array) {
-                    [instance setValue:array forKey:property.propertyName];
-                }
-            }
-                break;
-            case CHTagBufferWriteTypeblobStream: {
-                const char *dest = nullptr;
-                uint32_t length = 0;
-                offset = readBlobStream(dest, length, tag, buf);
-                switch (tag.internalTag) {
-                    case stream_nsstring: {
-                        NSString *str = [[NSString alloc] initWithBytes:dest length:length encoding:NSUTF8StringEncoding];
-                        [instance setValue:str forKey:property.propertyName];
-                    }
-                        break;
-                    case stream_nsdata: {
-                        NSData *data = [[NSData alloc] initWithBytes:dest length:length];
-                        [instance setValue:data forKey:property.propertyName];
-                    }
-                    default:
-                        break;
-                }
-            }
-                break;
-            case CHTagBufferWriteTypeTagBuffer: {
-                if (tag.internalTag == object_is_exists) {
-                    Class cls = property.propertyClassType;
-                    if (!cls) {
-                        @throw [NSException exceptionWithName:@"Class does not exist." reason:[NSString stringWithFormat:@"No such Class at property:%@", property.propertyName] userInfo:nil];
-                    }
-                    id value = [[cls alloc] init];
-                    offset = readObject(buf, value);
-                    [instance setValue:value forKey:property.propertyName];
-                }
-            }
-                break;
-            default:
-                break;
-        }
-        return offset;
-    }
 };
 
+#pragma mark - public
 CHTagBufferBuilder::CHTagBufferBuilder() :_d(new struct CHTagBufferBuilderPrivate)
 {}
 
@@ -1367,12 +1349,12 @@ id CHTagBufferBuilder::readTagBuffer(NSData *data, id instance)
     }];
 
 #ifdef DEBUG
-    @try {
+//    @try {
         auto final = cp + CHInternalHelper::readObject(cp, instance);
-        NSCAssert(final = cp + data.length, @"");
-    } @catch (NSException *exception) {
-        NSLog(@"%@", exception);
-    }
+        NSCAssert(final = cp + data.length, @"Logic error.");
+//    } @catch (NSException *exception) {
+//        NSLog(@"%@", exception);
+//    }
 #else
     CHInternalHelper::readObject(cp, instance);
 #endif
