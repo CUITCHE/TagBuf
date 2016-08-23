@@ -15,6 +15,7 @@
 		FB1B28E61D634BE100DA0DE4 /* TagBufBitset.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */; };
 		FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = FB221FA41D62E53A00AC3708 /* CHClassProperty.m */; };
 		FB221FA61D62E54400AC3708 /* CHClassProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = FB221FA41D62E53A00AC3708 /* CHClassProperty.m */; };
+		FB5E07361D6C362C00B0584A /* CHPerformanceTestModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F81D65CCE200F6F0C7 /* CHPerformanceTestModel.m */; };
 		FB5F75DD1D421013007E4965 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75DC1D421013007E4965 /* main.mm */; };
 		FB5F75E51D42103A007E4965 /* CHTagBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */; };
 		FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */; };
@@ -36,8 +37,6 @@
 		FB6939291D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6939141D65D7AB00F6F0C7 /* JSONValueTransformer.m */; };
 		FB69392A1D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6939141D65D7AB00F6F0C7 /* JSONValueTransformer.m */; };
 		FB69392B1D65D7AB00F6F0C7 /* LICENSE_jsonmodel.txt in Resources */ = {isa = PBXBuildFile; fileRef = FB6939151D65D7AB00F6F0C7 /* LICENSE_jsonmodel.txt */; };
-		FB69392C1D65D7AB00F6F0C7 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = FB6939161D65D7AB00F6F0C7 /* README.md */; };
-		FB69392D1D65D7AB00F6F0C7 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = FB6939161D65D7AB00F6F0C7 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -309,7 +308,6 @@
 			files = (
 				FB6938F61D6560BD00F6F0C7 /* CHTestModels.mm in Sources */,
 				FB19DCB21D48F46400C42DD3 /* CHTagBuffer.mm in Sources */,
-				FB69392D1D65D7AB00F6F0C7 /* README.md in Sources */,
 				FB6938F91D65CCE200F6F0C7 /* CHPerformanceTestModel.m in Sources */,
 				FB19DCAC1D48F3CB00C42DD3 /* TagBufTest.m in Sources */,
 				FB19DCB51D48F47B00C42DD3 /* CHDataModel.m in Sources */,
@@ -336,12 +334,12 @@
 				FB5F75E51D42103A007E4965 /* CHTagBuffer.mm in Sources */,
 				FB6939271D65D7AB00F6F0C7 /* JSONKeyMapper.m in Sources */,
 				FB69391D1D65D7AB00F6F0C7 /* JSONModelError.m in Sources */,
-				FB69392C1D65D7AB00F6F0C7 /* README.md in Sources */,
 				FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */,
 				FB6939171D65D7AB00F6F0C7 /* JSONModel.m in Sources */,
 				FB6939291D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */,
 				FB69391F1D65D7AB00F6F0C7 /* NSArray+JSONModel.m in Sources */,
 				FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */,
+				FB5E07361D6C362C00B0584A /* CHPerformanceTestModel.m in Sources */,
 				FB1B28E51D634BE100DA0DE4 /* TagBufBitset.mm in Sources */,
 				FB6939191D65D7AB00F6F0C7 /* JSONModelArray.m in Sources */,
 			);

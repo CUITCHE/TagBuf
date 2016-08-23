@@ -30,9 +30,12 @@ typedef NS_ENUM(uint32_t, CHTagBufObjectDetailType) {
     CHTagBufObjectDetailTypeOtherObject
 };
 
+typedef struct objc_ivar *Ivar;
+
 @interface CHClassProperty : NSObject
 
 @property (nonatomic, strong) NSString *propertyName;
+@property (nonatomic) Ivar ivar;
 
 @property (nonatomic) CHTagBufferWriteType writeType;
 @property (nonatomic) CHTagBufEncodingType encodingType;
@@ -40,8 +43,8 @@ typedef NS_ENUM(uint32_t, CHTagBufObjectDetailType) {
 @property (nonatomic) CHTagBufObjectDetailType detailType;
 
 @property (nonatomic) Class propertyClassType;
+@property (nonatomic) Class protocolClassType;
 
-@property (nonatomic, strong) NSString *protocol;
 @property (nonatomic) BOOL isOptional;
 @property (nonatomic) BOOL isIgnore;
 

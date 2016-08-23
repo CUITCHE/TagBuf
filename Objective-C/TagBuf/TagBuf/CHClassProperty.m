@@ -23,8 +23,16 @@
         [properties addObject:@"ignore"];
     }
     NSString *propertiesString = [NSString stringWithFormat:@"(%@)", [properties componentsJoinedByString:@", "]];
-    NSString *desc = [NSString stringWithFormat:@"<property[%@], protocol[%@], type[%@]\n%@>", self.propertyName, self.protocol, self.propertyClassType, propertiesString];
+    NSString *desc = [NSString stringWithFormat:@"<property[%@], protocol[%@], type[%@]\n%@>", self.propertyName, self.protocolClassType, self.propertyClassType, propertiesString];
     return desc;
 }
 
+- (void)dealloc
+{
+    if (self.fieldNumber == 0) {
+        if (self.ivar) {
+            free(_ivar);
+        }
+    }
+}
 @end

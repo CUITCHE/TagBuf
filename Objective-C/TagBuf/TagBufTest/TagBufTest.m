@@ -131,8 +131,7 @@
         int i = 1e5;
         while (i-->0) {
             @autoreleasepool {
-                id a = [[CHPerformanceTestJSONModel alloc] initWithString:json error:nil];
-#pragma unused(a)
+                (void)[[CHPerformanceTestJSONModel alloc] initWithString:json error:nil];
             }
         }
     }];
