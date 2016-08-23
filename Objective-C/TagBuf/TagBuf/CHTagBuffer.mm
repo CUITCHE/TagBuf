@@ -34,6 +34,7 @@ static CHTagBufferBuilder *___builder = new CHTagBufferBuilder();
 - (NSData *)toTagBuffer
 {
     CHTagBufferBuilder *builder = new CHTagBufferBuilder();
+    builder->startBuildingWithObject(self);
     return builder->buildedData();
 }
 

@@ -1351,7 +1351,7 @@ id CHTagBufferBuilder::readTagBuffer(NSData *data, id instance)
 #ifdef DEBUG
 //    @try {
         auto final = cp + CHInternalHelper::readObject(cp, instance);
-        NSCAssert(final = cp + data.length, @"Logic error.");
+        NSCAssert(final == cp + data.length, @"Logic error.");
 //    } @catch (NSException *exception) {
 //        NSLog(@"%@", exception);
 //    }

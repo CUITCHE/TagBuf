@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "CHDataModel.h"
+#import "CHPerformanceTestModel.h"
 
 @interface TagBufTest : XCTestCase
 
@@ -71,5 +72,69 @@
     }];
 }
 
+- (void)testPerformance1
+{
+    CHPerformanceTestModel *model = [CHPerformanceTestModel new];
+    [model fillTestData]; // genrated 1220 bytes data.
 
+    [self measureBlock:^{
+        int i = 1e5;
+        while (i-->0) {
+            @autoreleasepool {
+                (void) [model toTagBuf];
+            }
+        }
+    }];
+    NSLog(@"END.");
+}
+
+- (void)testPerformance2
+{
+    CHPerformanceTestModel *model = [CHPerformanceTestModel new];
+    [model fillTestData]; // genrated 1220 bytes data.
+    NSData *data = model.toTagBuf;
+
+    [self measureBlock:^{
+        int i = 1e5;
+        while (i-->0) {
+            @autoreleasepool {
+                (void) [CHPerformanceTestModel tagBufferWithTagBuf:data];
+            }
+        }
+    }];
+    NSLog(@"END.");
+}
+
+- (void)testJSONPerformance
+{
+    CHPerformanceTestJSONModel *model = [CHPerformanceTestJSONModel new];
+    [model fillTestData];
+
+    [self measureBlock:^{
+        int i = 1e5;
+        while (i-->0) {
+            @autoreleasepool {
+                (void) [model toJSONString];
+            }
+        }
+    }];
+}
+
+- (void)testJSONPerformance2
+{
+    CHPerformanceTestJSONModel *model = [CHPerformanceTestJSONModel new];
+    [model fillTestData];
+    NSString *json = [model toJSONString];
+    NSLog(@"%@", @(json.length));
+
+    [self measureBlock:^{
+        int i = 1e5;
+        while (i-->0) {
+            @autoreleasepool {
+                id a = [[CHPerformanceTestJSONModel alloc] initWithString:json error:nil];
+#pragma unused(a)
+            }
+        }
+    }];
+}
 @end

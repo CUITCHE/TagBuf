@@ -224,7 +224,7 @@
 - (void)testForceLimitTest
 {
     [self measureBlock:^{
-        int i = 1e3;
+        int i = 1e4;
         while (i-->0) {
             [self testNSNumber];
             [self testPodType];
