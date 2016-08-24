@@ -72,7 +72,7 @@
     }];
 }
 
-- (void)testPerformance1
+- (void)testTagBufPerformanceGenrateObject1Million
 {
     CHPerformanceTestModel *model = [CHPerformanceTestModel new];
     [model fillTestData]; // genrated 1220 bytes data.
@@ -88,7 +88,7 @@
     NSLog(@"END.");
 }
 
-- (void)testPerformance2
+- (void)testTagBufPerformanceToBuffer1Million
 {
     CHPerformanceTestModel *model = [CHPerformanceTestModel new];
     [model fillTestData]; // genrated 1220 bytes data.
@@ -105,7 +105,7 @@
     NSLog(@"END.");
 }
 
-- (void)testJSONPerformance
+- (void)testJSONModelPerformanceGenrateObject1Million
 {
     CHPerformanceTestJSONModel *model = [CHPerformanceTestJSONModel new];
     [model fillTestData];
@@ -120,12 +120,11 @@
     }];
 }
 
-- (void)testJSONPerformance2
+- (void)testJSONModelPerformanceToBuffer1Million
 {
     CHPerformanceTestJSONModel *model = [CHPerformanceTestJSONModel new];
     [model fillTestData];
-    NSString *json = [model toJSONString];
-    NSLog(@"%@", @(json.length));
+    NSString *json = [model toJSONString]; // genrated 1231 bytes data.
 
     [self measureBlock:^{
         int i = 1e5;
@@ -135,5 +134,15 @@
             }
         }
     }];
+}
+
+- (void)testCFStringToTagBuf
+{
+    CHPerformanceTestModel *model = CHPerformanceTestModel.new;
+    [model fillTestData];
+
+    NSData *data = model.toTagBuf;
+    CHPerformanceTestModel *target = [CHPerformanceTestModel tagBufferWithTagBuf:data];
+    XCTAssertEqualObjects(model, target);
 }
 @end

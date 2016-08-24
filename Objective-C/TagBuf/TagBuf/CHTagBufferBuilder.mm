@@ -146,19 +146,22 @@ using __tag_detail__ = __tag_buffer_flag::__tag_buffer_structure;
 struct CHTagBufferBuilderPrivate
 {
     static NSCharacterSet *protocolCharacterSet;
-    NSMutableData *buf;
+    NSMutableData *writeBuf = nullptr;
     vector<char> *readBuffer = nullptr;
-    union __tag_buffer_flag tag{0};
-    BOOL accessToWriteTag = YES;
-    CHTagBufferBuilderPrivate()
-    {
-    }
+    vector<char> *extraBuffer;
 
-    ~CHTagBufferBuilderPrivate()
-    {
-        delete readBuffer;
-    }
+    CHTagBufferBuilderPrivate()
+    :extraBuffer(new vector<char>) {}
+
+    ~CHTagBufferBuilderPrivate(){delete readBuffer;}
 };
+
+typedef struct __storageParametersWrite {
+    NSMutableData *writeBuffer;
+    vector<char> *extraBuffer;
+    __tag_buffer_flag__ tag;
+    CHClassProperty *property;
+} __storageParametersWrite;
 
 NSCharacterSet *CHTagBufferBuilderPrivate::protocolCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\"<"];
 
@@ -170,12 +173,6 @@ using ptr32_t = uint32_t *;
 using ptr64_t = uint64_t *;
 using ptrf_t  = float    *;
 using ptrd_t  = double   *;
-
-#ifdef _OBJC_OBJC_H_
-using tag_bool = BOOL;
-#elif __cplusplus
-using tag_bool = bool;
-#endif
 
 struct CHInternalHelper
 {
@@ -597,7 +594,7 @@ public:
 
 #pragma mark - Write APIs
 
-    WriteMemoryAPI(void) writeTagBuffer(id instance, NSMutableData *buf, __tag_buffer_flag__ &_tag)
+    WriteMemoryAPI(void) writeTagBuffer(id instance, NSMutableData *buf, vector<char> *extraBuffer)
     {
         Class cls = [instance class];
         if (class_isMetaClass(cls)) {
@@ -612,27 +609,32 @@ public:
         }
 
         NSUInteger count = properties.count;
+        __storageParametersWrite pw{buf, extraBuffer};
         for (CHClassProperty *property in properties) {
-            _tag.itag = 0;
-            _tag.tag.fieldNumber = property.fieldNumber;
+            pw.tag.itag = 0;
+            pw.tag.tag.fieldNumber = property.fieldNumber;
             if (--count == 0) {
-                _tag.tag.next = 1;
+                pw.tag.tag.next = 1;
             }
-            writeByEncodingType(instance, property, _tag, buf);
+            pw.property = property;
+            writeByEncodingType(instance, pw);
         }
     }
 
-    WriteMemoryAPI(void) writeByEncodingType(id instance, CHClassProperty *property, __tag_buffer_flag__ &tag, NSMutableData *buf)
+    WriteMemoryAPI(void) writeByEncodingType(id instance, __storageParametersWrite &pw)
     {
-        if (property.encodingType == CHTagBufEncodingTypeNone) {
+        if (pw.property.encodingType == CHTagBufEncodingTypeNone) {
             NSCAssert(NO, @"");
             return;
         }
-        switch (property.encodingType) {
+        auto property = pw.property;
+        auto &tag = pw.tag;
+        auto buf = pw.writeBuffer;
+        switch (pw.property.encodingType) {
             case CHTagBufEncodingTypeBool: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
                 tag.tag.internalTag = varint_bool;
-                tag_bool *p = (tag_bool *)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                bool *p = (bool *)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 tag.tag.placeholder12 = *p;
                 writeTag(tag, buf);
             }
@@ -690,7 +692,7 @@ public:
                     }
                     return;
                 }
-                writeObjcect(value, buf, tag, property);
+                writeObjcect(value, pw);
             }
                 break;
             default:
@@ -700,12 +702,15 @@ public:
 
     }
 
-    WriteMemoryAPI(void) writeObjcect(_Nonnull id obj, NSMutableData *buf, __tag_buffer_flag__ &_tag, CHClassProperty *property)
+    WriteMemoryAPI(void) writeObjcect(_Nonnull id obj, __storageParametersWrite &pw)
     {
+        auto buf = pw.writeBuffer;
+        auto &_tag = pw.tag;
+        auto property = pw.property;
         switch (property.encodingType) {
             case CHTagBufEncodingTypeNSNumber:
                 _tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                writeNSNumber(obj, buf, _tag, property);
+                writeNSNumber(obj, pw);
                 break;
             case CHTagBufEncodingTypeNSData:
                 _tag.tag.writeType = CHTagBufferWriteTypeblobStream;
@@ -713,19 +718,18 @@ public:
                 break;
             case CHTagBufEncodingTypeNSString: {
                 _tag.tag.writeType = CHTagBufferWriteTypeblobStream;
-                const char *_buf = [obj UTF8String];
-                writeCString(_buf, buf, _tag);
+                writeNSString(obj, pw);
             }
                 break;
             case CHTagBufEncodingTypeNSArray:
                 _tag.tag.writeType = CHTagBufferWriteTypeContainer;
-                writeContainer(obj, buf, _tag, property);
+                writeContainer(obj, pw);
                 break;
             case CHTagBufEncodingTypeOtherObject:
                 _tag.tag.writeType = CHTagBufferWriteTypeTagBuffer;
                 writeTag(_tag, buf);
                 _tag.itag = 0;
-                writeTagBuffer(obj, buf, _tag);
+                writeTagBuffer(obj, buf, pw.extraBuffer);
                 break;
             default:
                 NSCAssert(NO, @"");
@@ -733,11 +737,12 @@ public:
         }
     }
 
-    WriteMemoryAPI(void) writeNSNumber(NSNumber *number,
-                                       NSMutableData *buf, __tag_buffer_flag__ &_tag,
-                                       CHClassProperty *property)
+    WriteMemoryAPI(void) writeNSNumber(NSNumber *number, __storageParametersWrite &pw)
     {
-        auto &tag = _tag.tag;
+        auto &tag = pw.tag.tag;
+        auto &_tag = pw.tag;
+        auto buf = pw.writeBuffer;
+        auto property = pw.property;
         switch (property.detailType) {
             case CHTagBufObjectDetailTypeNSNumberBoolean:
                 tag.internalTag = varint_bool;
@@ -779,12 +784,27 @@ public:
      |tag(4)|length(4) may be compressed|string-data(N)|
      -------------------------------------------------
      */
-    WriteMemoryAPI(void) writeCString(const char *str, NSMutableData *buf, __tag_buffer_flag__ &_tag)
+    WriteMemoryAPI(void) writeNSString(NSString *str, __storageParametersWrite &pw)
     {
-        size_t length = str ? strlen(str) : 0;
-        _tag.tag.internalTag = stream_nsstring;
-        writeInteger<size_t, true, true, false, false>(length, buf, _tag);
-        [buf appendBytes:str length:sizeof(char) * length];
+        NSUInteger length = [str lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        const char *buf = CFStringGetCStringPtr((__bridge CFStringRef)str, kCFStringEncodingUTF8);
+        if (!buf) {
+            if (pw.extraBuffer->size() < length) {
+                pw.extraBuffer->resize(length);
+            }
+            Boolean suc = CFStringGetCString((__bridge CFStringRef)str,
+                                             pw.extraBuffer->data(),
+                                             length,
+                                             NSUTF8StringEncoding);
+            if (suc) {
+                buf = pw.extraBuffer->data();
+            } else {
+                buf = [str UTF8String];
+            }
+        }
+        pw.tag.tag.internalTag = stream_nsstring;
+        writeInteger<size_t, true, true, false, false>(length, pw.writeBuffer, pw.tag);
+        [pw.writeBuffer appendBytes:buf length:sizeof(char) * length];
     }
 
     WriteMemoryAPI(void) writeNSData(NSData *data, NSMutableData *buf, __tag_buffer_flag__ &_tag)
@@ -795,15 +815,18 @@ public:
         [buf appendData:data];
     }
 
-    WriteMemoryAPI(void) writeContainer(NSArray *container, NSMutableData *buf, __tag_buffer_flag__ &_tag, CHClassProperty *property)
+    WriteMemoryAPI(void) writeContainer(NSArray *container, __storageParametersWrite &pw)
     {
-        auto &tag = _tag.tag;
+        auto &tag = pw.tag.tag;
+        auto buf = pw.writeBuffer;
         uint64_t count = (uint64_t)container.count;
         if (!count) {
             tag.internalTag = container_none;
-            writeTag(_tag, buf);
+            writeTag(pw.tag, buf);
             return;
         }
+        auto &_tag = pw.tag;
+        auto property = pw.property;
 
         CHTagBufObjectDetailType detailType = getNSArrayContainerTypeOnRuntime(container.firstObject, property);
 
@@ -905,8 +928,7 @@ public:
                 writeTag(_tag, buf);
                 [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                 for (NSString *str in container) {
-                    const char *_buf = [str UTF8String];
-                    writeCStringInList(_buf, buf, _tag);
+                    writeNSStringInList(str, pw);
                 }
                 break;
             case CHTagBufObjectDetailTypeNSArrayNSArray:
@@ -917,7 +939,7 @@ public:
                 for (NSArray *a in container) {
                     _tag.itag = 0;
                     tag.writeType = CHTagBufferWriteTypeContainer;
-                    writeContainer(a, buf, _tag, property);
+                    writeContainer(a, pw);
                 }
                 break;
             case CHTagBufObjectDetailTypeOtherObject:
@@ -927,7 +949,7 @@ public:
                 [buf appendBytes:_buf length:tag.lengthOfZigzag ?: 8];
                 _tag.itag = 0;
                 for (id obj in container) {
-                    writeTagBuffer(obj, buf, _tag);
+                    writeTagBuffer(obj, buf, pw.extraBuffer);
                 }
                 break;
             default:
@@ -952,15 +974,26 @@ public:
         [buf appendData:data];
     }
 
-    WriteMemoryAPI(void) writeCStringInList(const char *str, NSMutableData *buf, __tag_buffer_flag__ &_tag)
+    WriteMemoryAPI(void) writeNSStringInList(NSString *str, __storageParametersWrite &pw)
     {
-        size_t length = str ? strlen(str) : 0;
-        if (length == 0) {
-            NSCAssert(NO, @"The length is 0.");
-            return;
+        NSUInteger length = [str lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        const char *buf = CFStringGetCStringPtr((__bridge CFStringRef)str, kCFStringEncodingUTF8);
+        if (!buf) {
+            if (pw.extraBuffer->size() < length) {
+                pw.extraBuffer->resize(length);
+            }
+            Boolean suc = CFStringGetCString((__bridge CFStringRef)str,
+                                             pw.extraBuffer->data(),
+                                             length,
+                                             NSUTF8StringEncoding);
+            if (suc) {
+                buf = pw.extraBuffer->data();
+            } else {
+                buf = [str UTF8String];
+            }
         }
-        writeInteger<size_t, false, false, false, false>(length, buf, _tag);
-        [buf appendBytes:str length:sizeof(char) * length];
+        writeInteger<size_t, false, false, false, false>(length, pw.writeBuffer, pw.tag);
+        [pw.writeBuffer appendBytes:buf length:sizeof(char) * length];
     }
 
     template<bool shouldWriteTag = true>
@@ -1388,19 +1421,18 @@ CHTagBufferBuilder::~CHTagBufferBuilder()
 
 void CHTagBufferBuilder::startBuildingWithObject(id instance)
 {
-    __tag_buffer_flag__ tag = {0};
-    if (!_d->buf) {
-        _d->buf = [NSMutableData dataWithCapacity:4096];
+    if (!_d->writeBuf) {
+        _d->writeBuf = [NSMutableData dataWithCapacity:4096];
     } else {
-        _d->buf.length = 0;
+        _d->writeBuf.length = 0;
     }
 
-    CHInternalHelper::writeTagBuffer(instance, _d->buf, tag);
+    CHInternalHelper::writeTagBuffer(instance, _d->writeBuf, _d->extraBuffer);
 }
 
 NSData *CHTagBufferBuilder::buildedData() const
 {
-    return _d->buf;
+    return _d->writeBuf;
 }
 
 id CHTagBufferBuilder::readTagBuffer(NSData *data, id instance)

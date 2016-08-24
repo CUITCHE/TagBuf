@@ -26,6 +26,16 @@
     self._10StringContent = @[str,str,str,str,str,str,str,str,str,str];
 }
 
+- (BOOL)isEqual:(CHPerformanceTestModel *)object
+{
+    return self.name == object.name &&
+    self.prority - object.prority == 0 &&
+    self.number == object.number &&
+    self.opened == object.opened &&
+    [self.str100Length isEqualToString:object.str100Length] &&
+    [self._10StringContent isEqualToArray:object._10StringContent];
+}
+
 @end
 
 @implementation CHPerformanceTestJSONModel
