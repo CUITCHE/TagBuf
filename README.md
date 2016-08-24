@@ -47,20 +47,20 @@ Especially, if [07] eaquals to 0 represents there is an object at next tagBuf, 1
 |Internal-Tag value|Meaning|
 |---|---|
 |0|Indicate non-contain, such as a array contain 0 element.|
-|1|contains string|
-|2|contains data(NSData|
-|3|contains an object|
-|4|contains containers|
+|1|Contains string|
+|2|Contains data(NSData)|
+|3|Contains an object|
+|4|Contains containers|
 |7|Indicate object is nil/null/NULL|
 
-You may have a question: where is integer. We think it is a object in container's integer(include C++). We will check type of container's element and store it to builtin structure. Defaultly, contain-type is 32 bits intger if the type is like integer(include float and double).
+You may have a question: where is integer. We think it is an object in container's integer(include C++). We will check type of container's element and store it to builtin structure in runtime. Defaultly, contain-type is 32 bits intger if the type is like integer(include float and double).
 
 - Write type is Blob Stream
 
 |Internal-Tag value|Meaning|
 |---|---|
-|0|represents NSString/String/string|
-|1|represents NSData|
+|0|Represents NSString/String/string|
+|1|Represents NSData|
 |7|Indicate object is nil/null/NULL|
 
 - Write type is Blob Stream
@@ -72,8 +72,8 @@ You may have a question: where is integer. We think it is a object in container'
 ## TagBuf Reserved (08~12)
 |Bits|Meaning|
 |---|---|
-|08~10|represents the length of zigzag|
+|08~10|Represents the length of zigzag|
 |11|1 represents that the bytes of string or data's length has been compressed by zigzag.|
-|12|1 represents that there store a bool [true] value, 0 represents [false] value when write tpye is VarintFixed and internal-tag is varint_bool. And 1 represents that container contains number value(bool, 8~64bits, values by VarintFixed's internal values).|
+|12|1 represents that there store a bool [true] value, 0 represents [false] value when write tpye is VarintFixed and internal-tag is varint_bool(6). And 1 represents that container contains number value(bool, 8~64bits, values by VarintFixed's internal values).|
 
 Above is overall design idea.
