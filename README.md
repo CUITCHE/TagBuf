@@ -19,21 +19,61 @@ Tag takes up 4 bytes. And tag will make the best of each bit.
 |03~00|tagBuf write type|
 
 ## TagBuf Write Type (00~03)
-|No.|Type|Note|
+|No.|Write Type|Note|
 |---|---|---|
-|0|Varint|kinds of [singed\|unsigned]int(8,16,31,64bits)|
-|1|float|May be deprecated in the future|
-|2|double|May be deprecated in the future|
-|3|container|such as array(list)|
-|4|blob stream|such as string, blob data|
+|0|VarintFixed|kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes. And about bool value, specially it only takes up 1 bit.|
+|1|Container|NSArray on iOS platform(Objective-C), List on Android(Java), vector\<T> on C++|
+|2|Blob Stream|such as NSString, NSData/String/string|
+|3|Object|An Object|
 
 ## TagBuf Internal-Tag (04~07)
-- 04: 1 represents integer was compressed by zigzag if write-type is about integer or string's length. And the placeholder is valid only write-type is about integer or string. 0 represents not.
-- 05: 1 represents there is a data of container like array at next. 0 represents not.
-- 06: 1 represents there is a tagBuf cell at next. 0 represents not.
-- 07: 1 represents there is a tagBuf object at next. 0 represents not.
+Especially, if [07] eaquals to 0 represents there is an object at next tagBuf, 1 represents not.
+
+- Write type is VarintFixed.
+
+|Internal-Tag value|Meaning|
+|---|---|
+|0|8 bits integer, such as char|
+|1|16 bits integer, such as short|
+|2|32 bits integer, such as int|
+|3|64 bits integer, such as long/long long|
+|4|32 bits float|
+|5|64 bits double|
+|6|1 bits value: bool|
+|7|Indicate object is nil/null if this is a number(NSNumber/Number) object|
+
+- Write type is Container
+
+|Internal-Tag value|Meaning|
+|---|---|
+|0|Indicate non-contain, such as a array contain 0 element.|
+|1|contains string|
+|2|contains data(NSData|
+|3|contains an object|
+|4|contains containers|
+|7|Indicate object is nil/null/NULL|
+
+You may have a question: where is integer. We think it is a object in container's integer(include C++). We will check type of container's element and store it to builtin structure. Defaultly, contain-type is 32 bits intger if the type is like integer(include float and double).
+
+- Write type is Blob Stream
+
+|Internal-Tag value|Meaning|
+|---|---|
+|0|represents NSString/String/string|
+|1|represents NSData|
+|7|Indicate object is nil/null/NULL|
+
+- Write type is Blob Stream
+
+|Internal-Tag value|Meaning|
+|---|---|
+|7|Indicate object is nil/null/NULL|
 
 ## TagBuf Reserved (08~12)
-May make reserved for shared space.
+|Bits|Meaning|
+|---|---|
+|08~10|represents the length of zigzag|
+|11|1 represents that the bytes of string or data's length has been compressed by zigzag.|
+|12|1 represents that there store a bool [true] value, 0 represents [false] value when write tpye is VarintFixed and internal-tag is varint_bool. And 1 represents that container contains number value(bool, 8~64bits, values by VarintFixed's internal values).|
 
-Continue...
+Above is overall design idea.
