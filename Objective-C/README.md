@@ -9,7 +9,7 @@ There has two ways to create a class which can be Distinguished by TagBuf.
 - Inherits class CHTagBuffer. These class which inherits CHTagBuffer use common CHTagBufferBuilder instance. So it is non-thread-safe. However, because of common use, the performance is better.
 - Inherits NSObject. These class which inherits NSObject has own CHTagBufferBuilder instance.
 
-Whether it is inherited from CHTagBuffer, or inherited from NSObject. You can also invoke `- (NSData *)toTagBuffer;` or `+ (instancetype)objectWithTagBuffer:(NSData *)tagBuffer;`. These methods is non-thread-safe.
+Whether it is inherited from CHTagBuffer, or inherited from NSObject. You can also invoke `- (NSData *)toTagBuffer;` or `+ (instancetype)objectWithTagBuffer:(NSData *)tagBuffer;`. These methods are non-thread-safe.
 
 ### Example
 - For object. Every object is required by default, That is, If object is nil, TagBuf will throw exception.
@@ -29,7 +29,7 @@ Whether it is inherited from CHTagBuffer, or inherited from NSObject. You can al
 
 - For Other object contained. You must declare protocol named the same as the object. And use the protocol to modify the property.
 
-```
+```Objective-C
 #import "tagBuf.h"
 
 @protocol OtherClassName
@@ -53,12 +53,12 @@ Whether it is inherited from CHTagBuffer, or inherited from NSObject. You can al
 ```
 
 ```Objective-C
-@implementation CHPerformanceTestModel
+@implementation CHExampleModel
 @end
 ```
 
 # Performance - Compared To JSONModel
-We make a Class - `CHPerformanceTestModel` and fill some data to its objects.
+We made a class - `CHPerformanceTestModel` and fill some data to its objects.
 
 ```Objective-C
 - (void)fillTestData
