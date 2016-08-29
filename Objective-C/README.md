@@ -1,6 +1,8 @@
 # TagBuf - Implementation In Objective-C
 TagBuf is implemented by C++ and Objective-C. And use inline template to serialize data to improve executed speed.
 
+> Especially, all of string's encode type is UTF8. If not, there will be a error in string generated or synthetic.
+
 ## Usage
 - Copy Directory 'TagBuf' to your project.
 - Import file 'tagBuf.h'.
@@ -47,7 +49,7 @@ Whether it is inherited from CHTagBuffer, or inherited from NSObject. You can al
 
 @property (nonatomic, strong) NSArray<ignore> *ignoreProperty; // This property will be ignore. Even though the property has a value.
 @property (nonatomic, strong) NSString<optional> *optionalProperty; // This property will not be parsed if its value is nil.
-@property (nonatomic, string) NSArray<OtherClassName> *array; // Contains object that its class is 'OtherClassName'.
+@property (nonatomic, strong) NSArray<OtherClassName> *array; // Contains object that its class is 'OtherClassName'.
 @property (nonatomic, strong) NSArray<ignore, NSNumberInt32> *MultiProperty; // Also exists kinds of protocol.
 @end
 ```
