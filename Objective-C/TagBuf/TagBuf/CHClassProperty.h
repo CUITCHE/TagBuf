@@ -50,6 +50,7 @@ typedef struct objc_ivar *Ivar;
 
 @property (nonatomic) uint32_t fieldNumber;
 
+@property (nonatomic) BOOL needFreeIvar;
 @end
 
 #define printCHTagBufObjectDetailType(type) [@[tag_contact(CHTagBufObjectDetailTypeNone),\

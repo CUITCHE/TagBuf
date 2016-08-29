@@ -237,4 +237,26 @@
         }
     }];
 }
+
+- (void)testMutiInhert
+{
+    TestClassInherit *model = TestClassInherit.new;
+    model.doubleValue = 2435;
+    TestPodType *_model = TestPodType.new;
+    _model._1 = YES;
+    _model._2 = '3';
+    _model._3 = 35265;
+    _model._4 = 3465474245;
+    _model._5 = 0x1122334455667788ll;
+    _model._6 = 356.4;
+    _model._7 = 2353464897894.6523543;
+    _model._8 = false;
+    model._1 = @[_model,_model,_model,_model,_model,_model,_model,_model,
+                 _model,_model,_model,_model,_model,_model,_model,_model,
+                 _model,_model,_model,_model,_model,_model,_model,_model,].copy;
+    NSData *data = model.toTagBuf;
+    TestClassInherit *target = [TestClassInherit tagBufferWithTagBuf:data];
+    CHAssertEqualObjects(_1);
+    XCTAssertEqual(model.doubleValue, target.doubleValue);
+}
 @end

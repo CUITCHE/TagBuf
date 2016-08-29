@@ -124,3 +124,9 @@ __testCaseClassEnd()
 __testCaseClassBegin(NSArrayOtherObject)
 __property(NSArray<TestPodType> *_1);
 __testCaseClassEnd()
+
+@interface TestClassInherit : TestNSArrayOtherObject
+
+@property (nonatomic) double doubleValue;
+
+@end

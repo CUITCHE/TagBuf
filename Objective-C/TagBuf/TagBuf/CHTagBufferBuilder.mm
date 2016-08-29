@@ -291,74 +291,87 @@ private:
     {
         NSCAssert(cls, @"Class is nil.");
         NSMutableArray<CHClassProperty *> *properties = [NSMutableArray array];
-        uint32_t count = 0;
-        objc_property_t *pList = class_copyPropertyList(cls, &count);
-        objc_property_t *p = pList;
-
-        uint32_t ivarCount = 0;
-        Ivar *ivarList = class_copyIvarList(cls, &ivarCount); // memory leak.
-        NSCAssert(ivarList, @"Logic error.");
-
-        NSScanner *scanner = nil;
-        for (uint32_t i=0; i<count; ++i) {
-            objc_property_t property = *p++;
-            const char *attrs = property_getAttributes(property);
-            NSString *propertyAttributes = @(attrs);
-            NSArray<NSString *> *attributeItems = [propertyAttributes componentsSeparatedByString:@","];
-            if ([attributeItems containsObject:@"R"]) {
-                continue;
+        uint32_t increment = 0;
+        while (cls) {
+            if (!strcmp(class_getName(cls), "NSObject")) {
+                break;
             }
-            CHClassProperty *cp = [CHClassProperty new];
-            const char *propertyName = property_getName(property);
-            cp.propertyName = @(propertyName);
-            cp.ivar = getIvarWithPropertyName(propertyName, ivarList, ivarCount);
+            if (!strcmp(class_getName(cls), "CHTagBuffer")) {
+                break;
+            }
+            uint32_t count = 0;
+            objc_property_t *pList = class_copyPropertyList(cls, &count);
+            objc_property_t *p = pList;
 
-            scanner = [NSScanner scannerWithString:attributeItems.firstObject];
-            NSString *propertyType = nil;
-            if ([scanner scanString:@"T@\"" intoString:nil]) {
-                [scanner scanUpToCharactersFromSet:CHTagBufferBuilderPrivate::protocolCharacterSet
-                                       intoString:&propertyType];
-                cp.propertyClassType = NSClassFromString(propertyType);
-                /// If if-else structure has been over 10, change to switch-case structure by hash code.
-                if ([propertyType isEqualToString:@"NSString"]) {
-                    cp.encodingType = CHTagBufEncodingTypeNSString;
-                } else if ([propertyType isEqualToString:@"NSArray"]) {
-                    cp.encodingType = CHTagBufEncodingTypeNSArray;
-                } else if ([propertyType isEqualToString:@"NSData"]) {
-                    cp.encodingType = CHTagBufEncodingTypeNSData;
-                } else if ([propertyType isEqualToString:@"NSNumber"]) {
-                    cp.encodingType = CHTagBufEncodingTypeNSNumber;
-                } else {
-                    cp.encodingType = CHTagBufEncodingTypeOtherObject;
+            uint32_t ivarCount = 0;
+            Ivar *ivarList = class_copyIvarList(cls, &ivarCount); // memory leak.
+            NSCAssert(ivarList, @"Logic error.");
+            NSCAssert(count == ivarCount, @"Count of property and count of ivar must be equal.");
+
+            NSScanner *scanner = nil;
+            for (uint32_t i=0; i<count; ++i) {
+                objc_property_t property = *p++;
+                const char *attrs = property_getAttributes(property);
+                NSString *propertyAttributes = @(attrs);
+                NSArray<NSString *> *attributeItems = [propertyAttributes componentsSeparatedByString:@","];
+                if ([attributeItems containsObject:@"R"]) {
+                    continue;
                 }
+                CHClassProperty *cp = [CHClassProperty new];
+                cp.needFreeIvar = !i;
+                cp.fieldNumber = i + increment;
+                const char *propertyName = property_getName(property);
+                cp.propertyName = @(propertyName);
+                cp.ivar = getIvarWithPropertyName(propertyName, ivarList, ivarCount);
 
-                NSString *protocolName = nil;
-                while ([scanner scanString:@"<" intoString:nil]) {
-                    [scanner scanUpToString:@">" intoString:&protocolName];
-                    if ([protocolName isEqualToString:@"optional"]) {
-                        cp.isOptional = YES;
-                    } else if ([protocolName containsString:@"ignore"]) {
-                        cp.isIgnore = YES;
-                    }  else if ([protocolName containsString:@"NSNumber"]) {
-                        cp.detailType = getNumberProtocolByPropertyAttributeType(protocolName, nil);
-                    } else if ([protocolName containsString:@"NSArray"]) {
-                        cp.detailType = getNSArrayProtocolByPropertyAttributeType(protocolName);
+                scanner = [NSScanner scannerWithString:attributeItems.firstObject];
+                NSString *propertyType = nil;
+                if ([scanner scanString:@"T@\"" intoString:nil]) {
+                    [scanner scanUpToCharactersFromSet:CHTagBufferBuilderPrivate::protocolCharacterSet
+                                            intoString:&propertyType];
+                    cp.propertyClassType = NSClassFromString(propertyType);
+                    /// If if-else structure has been over 10, change to switch-case structure by hash code.
+                    if ([propertyType isEqualToString:@"NSString"]) {
+                        cp.encodingType = CHTagBufEncodingTypeNSString;
+                    } else if ([propertyType isEqualToString:@"NSArray"]) {
+                        cp.encodingType = CHTagBufEncodingTypeNSArray;
+                    } else if ([propertyType isEqualToString:@"NSData"]) {
+                        cp.encodingType = CHTagBufEncodingTypeNSData;
+                    } else if ([propertyType isEqualToString:@"NSNumber"]) {
+                        cp.encodingType = CHTagBufEncodingTypeNSNumber;
                     } else {
-                        cp.protocolClassType = NSClassFromString(protocolName);
-                        NSCAssert(cp.protocolClassType, @"No such Class:%@", protocolName);
-                        cp.detailType = CHTagBufObjectDetailTypeOtherObject;
+                        cp.encodingType = CHTagBufEncodingTypeOtherObject;
                     }
-                    [scanner scanString:@">" intoString:nil];
+
+                    NSString *protocolName = nil;
+                    while ([scanner scanString:@"<" intoString:nil]) {
+                        [scanner scanUpToString:@">" intoString:&protocolName];
+                        if ([protocolName isEqualToString:@"optional"]) {
+                            cp.isOptional = YES;
+                        } else if ([protocolName containsString:@"ignore"]) {
+                            cp.isIgnore = YES;
+                        }  else if ([protocolName containsString:@"NSNumber"]) {
+                            cp.detailType = getNumberProtocolByPropertyAttributeType(protocolName, nil);
+                        } else if ([protocolName containsString:@"NSArray"]) {
+                            cp.detailType = getNSArrayProtocolByPropertyAttributeType(protocolName);
+                        } else {
+                            cp.protocolClassType = NSClassFromString(protocolName);
+                            NSCAssert(cp.protocolClassType, @"No such Class:%@", protocolName);
+                            cp.detailType = CHTagBufObjectDetailTypeOtherObject;
+                        }
+                        [scanner scanString:@">" intoString:nil];
+                    }
+                } else {
+                    CHTagBufEncodingType encodingType = CHTagBufEncodingTypeNone;
+                    decodeFromTypeEncoding(attrs + 1, encodingType);
+                    cp.encodingType = encodingType;
                 }
-            } else {
-                CHTagBufEncodingType encodingType = CHTagBufEncodingTypeNone;
-                decodeFromTypeEncoding(attrs + 1, encodingType);
-                cp.encodingType = encodingType;
+                [properties addObject:cp];
             }
-            cp.fieldNumber = i;
-            [properties addObject:cp];
+            free(pList);
+            cls = class_getSuperclass(cls);
+            increment = count;
         }
-        free(pList);
         return properties;
     }
 

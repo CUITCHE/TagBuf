@@ -41,3 +41,7 @@ __implementation(NSArrayMultiProtocol)
 __implementation(NSArrayOtherObject)
 
 __implementation(NSArrayEmpty)
+
+@implementation TestClassInherit
+
+@end

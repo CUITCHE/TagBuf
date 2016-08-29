@@ -8,6 +8,18 @@
 
 #import "CHClassProperty.h"
 
+struct ___internalFlags {
+    uint32_t isOptional : 1;
+    uint32_t isIgnore : 1;
+    uint32_t needFree : 1;
+};
+
+@interface CHClassProperty ()
+{
+    struct ___internalFlags flags;
+}
+@end
+
 @implementation CHClassProperty
 
 - (NSString *)description
@@ -29,10 +41,41 @@
 
 - (void)dealloc
 {
-    if (self.fieldNumber == 0) {
+    if (self.needFreeIvar) {
         if (self.ivar) {
             free(_ivar);
         }
     }
+}
+
+#pragma mark - property
+- (void)setIsOptional:(BOOL)isOptional
+{
+    flags.isOptional = isOptional;
+}
+
+- (BOOL)isOptional
+{
+    return flags.isOptional;
+}
+
+- (void)setIsIgnore:(BOOL)isIgnore
+{
+    flags.isIgnore = isIgnore;
+}
+
+- (BOOL)isIgnore
+{
+    return flags.isIgnore;
+}
+
+- (void)setNeedFreeIvar:(BOOL)needFreeIvar
+{
+    flags.needFree = needFreeIvar;
+}
+
+- (BOOL)needFreeIvar
+{
+    return flags.needFree;
 }
 @end
