@@ -153,7 +153,10 @@ struct CHTagBufferBuilderPrivate
     CHTagBufferBuilderPrivate()
     :extraBuffer(new vector<char>) {}
 
-    ~CHTagBufferBuilderPrivate(){delete readBuffer;}
+    ~CHTagBufferBuilderPrivate() {
+        delete readBuffer;
+        delete extraBuffer;
+    }
 };
 
 typedef struct __storageParametersWrite {
@@ -281,7 +284,7 @@ private:
             }
             ++p;
         }
-        return p ? *p : nullptr;
+        return count ? *p : nullptr;
     }
 
     NS_INLINE NSArray<CHClassProperty *>* getProperties(Class cls)
@@ -634,44 +637,44 @@ public:
             case CHTagBufEncodingTypeBool: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
                 tag.tag.internalTag = varint_bool;
-                bool *p = (bool *)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                bool *p = (bool *)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 tag.tag.placeholder12 = *p;
                 writeTag(tag, buf);
             }
                 break;
             case CHTagBufEncodingType8Bits: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptr8_t p = (ptr8_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptr8_t p = (ptr8_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeInteger(*p, buf, tag);
             }
                 break;
             case CHTagBufEncodingType16Bits: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptr16_t p = (ptr16_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptr16_t p = (ptr16_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeInteger(*p, buf, tag);
             }
                 break;
             case CHTagBufEncodingType32Bits: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptr32_t p = (ptr32_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptr32_t p = (ptr32_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeInteger(*p, buf, tag);
             }
                 break;
             case CHTagBufEncodingType64Bits: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptr64_t p = (ptr64_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptr64_t p = (ptr64_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeInteger(*p, buf, tag);
             }
                 break;
             case CHTagBufEncodingTypeFloat: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptrf_t p = (ptrf_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptrf_t p = (ptrf_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeFloat(*p, buf, tag);
             }
                 break;
             case CHTagBufEncodingTypeDouble: {
                 tag.tag.writeType = CHTagBufferWriteTypeVarintFixed;
-                ptrd_t p = (ptrd_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                ptrd_t p = (ptrd_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                 writeDouble(*p, buf, tag);
             }
                 break;
@@ -1089,7 +1092,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(!!tag.placeholder12));
                         } else {
-                            bool *p = (bool *)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            bool *p = (bool *)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = tag.placeholder12;
                         }
                     }
@@ -1100,7 +1103,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptr8_t p = (ptr8_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptr8_t p = (ptr8_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
@@ -1111,7 +1114,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptr16_t p = (ptr16_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptr16_t p = (ptr16_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
@@ -1122,7 +1125,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptr32_t p = (ptr32_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptr32_t p = (ptr32_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
@@ -1133,7 +1136,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptr64_t p = (ptr64_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptr64_t p = (ptr64_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
@@ -1144,7 +1147,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptrf_t p = (ptrf_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptrf_t p = (ptrf_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
@@ -1155,7 +1158,7 @@ public:
                         if (property.encodingType == CHTagBufEncodingTypeNSNumber) {
                             object_setIvar(instance, property.ivar, @(value));
                         } else {
-                            ptrd_t p = (ptrd_t)(reinterpret_cast<NSInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
+                            ptrd_t p = (ptrd_t)(reinterpret_cast<NSUInteger>((__bridge void *)(instance)) + ivar_getOffset(property.ivar));
                             *p = value;
                         }
                     }
