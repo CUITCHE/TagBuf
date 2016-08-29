@@ -20,6 +20,7 @@
 @property (nonatomic, strong) NSArray *_10StringContent;
 
 - (void)fillTestData;
+- (void)fillTestLongStringData;
 
 @end
 

@@ -139,7 +139,7 @@
 - (void)testCFStringToTagBuf
 {
     CHPerformanceTestModel *model = CHPerformanceTestModel.new;
-    [model fillTestData];
+    [model fillTestLongStringData];
 
     NSData *data = model.toTagBuf;
     CHPerformanceTestModel *target = [CHPerformanceTestModel tagBufferWithTagBuf:data];

@@ -37,6 +37,8 @@
 		FB6939291D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6939141D65D7AB00F6F0C7 /* JSONValueTransformer.m */; };
 		FB69392A1D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6939141D65D7AB00F6F0C7 /* JSONValueTransformer.m */; };
 		FB69392B1D65D7AB00F6F0C7 /* LICENSE_jsonmodel.txt in Resources */ = {isa = PBXBuildFile; fileRef = FB6939151D65D7AB00F6F0C7 /* LICENSE_jsonmodel.txt */; };
+		FB7D636B1D742D7400322252 /* CFStringRefTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB7D63691D742D7400322252 /* CFStringRefTools.cpp */; };
+		FB7D636C1D742D7400322252 /* CFStringRefTools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB7D63691D742D7400322252 /* CFStringRefTools.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,6 +92,8 @@
 		FB6939151D65D7AB00F6F0C7 /* LICENSE_jsonmodel.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE_jsonmodel.txt; sourceTree = "<group>"; };
 		FB6939161D65D7AB00F6F0C7 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		FB6B54C91D62C6F000F6D2F2 /* tagBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tagBuf.h; sourceTree = "<group>"; };
+		FB7D63691D742D7400322252 /* CFStringRefTools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CFStringRefTools.cpp; sourceTree = "<group>"; };
+		FB7D636A1D742D7400322252 /* CFStringRefTools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CFStringRefTools.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +162,8 @@
 				FB221FA41D62E53A00AC3708 /* CHClassProperty.m */,
 				FB1B28E41D634BE100DA0DE4 /* TagBufBitset.h */,
 				FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */,
+				FB7D63691D742D7400322252 /* CFStringRefTools.cpp */,
+				FB7D636A1D742D7400322252 /* CFStringRefTools.h */,
 			);
 			path = TagBuf;
 			sourceTree = "<group>";
@@ -321,6 +327,7 @@
 				FB6938F31D65603400F6F0C7 /* TagBufSubTest.m in Sources */,
 				FB69391E1D65D7AB00F6F0C7 /* JSONModelError.m in Sources */,
 				FB6939181D65D7AB00F6F0C7 /* JSONModel.m in Sources */,
+				FB7D636C1D742D7400322252 /* CFStringRefTools.cpp in Sources */,
 				FB69391A1D65D7AB00F6F0C7 /* JSONModelArray.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -336,6 +343,7 @@
 				FB69391D1D65D7AB00F6F0C7 /* JSONModelError.m in Sources */,
 				FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */,
 				FB6939171D65D7AB00F6F0C7 /* JSONModel.m in Sources */,
+				FB7D636B1D742D7400322252 /* CFStringRefTools.cpp in Sources */,
 				FB6939291D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */,
 				FB69391F1D65D7AB00F6F0C7 /* NSArray+JSONModel.m in Sources */,
 				FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */,

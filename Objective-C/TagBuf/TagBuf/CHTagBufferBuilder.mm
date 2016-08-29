@@ -12,6 +12,8 @@
 #import "tagBuf.h"
 #import "CHClassProperty.h"
 #import "TagBufBitset.h"
+#include "CFStringRefTools.h"
+
 using namespace std;
 
 #define CHTAGBUFFER_CATEGORY 1
@@ -180,6 +182,28 @@ using ptrd_t  = double   *;
 struct CHInternalHelper
 {
 private:
+    NS_INLINE void getBufferAndLength(NSString *str, const char *&dest, CFIndex &length, vector<char> *extraBuffer)
+    {
+        CHCFStringGetBuffer((__bridge CFStringRef)str, dest, length);
+        if (!dest) {
+            if (extraBuffer->size() < length) {
+                extraBuffer->resize(length);
+            }
+            Boolean suc = CFStringGetCString((__bridge CFStringRef)str,
+                                             extraBuffer->data(),
+                                             length,
+                                             NSUTF8StringEncoding);
+            if (suc) {
+                dest = extraBuffer->data();
+            } else {
+                dest = [str UTF8String];
+#if DEBUG
+                NSLog(@"Foot into unexpected branch-code.[str UTF8String]");
+#endif
+            }
+        }
+    }
+
     NS_INLINE CHTagBufObjectDetailType getNumberProtocolByPropertyAttributeType(NSString *typePart, NSScanner * _Nullable scanner)
     {
         if (typePart.length < 12) { // min length of 'NSNumberInt8'
@@ -802,22 +826,9 @@ public:
      */
     WriteMemoryAPI(void) writeNSString(NSString *str, __storageParametersWrite &pw)
     {
-        NSUInteger length = [str lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-        const char *buf = CFStringGetCStringPtr((__bridge CFStringRef)str, kCFStringEncodingUTF8);
-        if (!buf) {
-            if (pw.extraBuffer->size() < length) {
-                pw.extraBuffer->resize(length);
-            }
-            Boolean suc = CFStringGetCString((__bridge CFStringRef)str,
-                                             pw.extraBuffer->data(),
-                                             length,
-                                             NSUTF8StringEncoding);
-            if (suc) {
-                buf = pw.extraBuffer->data();
-            } else {
-                buf = [str UTF8String];
-            }
-        }
+        CFIndex length = 0;
+        const char *buf = nullptr;
+        getBufferAndLength(str, buf, length, pw.extraBuffer);
         pw.tag.tag.internalTag = stream_nsstring;
         writeInteger<size_t, true, true, false, false>(length, pw.writeBuffer, pw.tag);
         [pw.writeBuffer appendBytes:buf length:sizeof(char) * length];
@@ -992,22 +1003,9 @@ public:
 
     WriteMemoryAPI(void) writeNSStringInList(NSString *str, __storageParametersWrite &pw)
     {
-        NSUInteger length = [str lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-        const char *buf = CFStringGetCStringPtr((__bridge CFStringRef)str, kCFStringEncodingUTF8);
-        if (!buf) {
-            if (pw.extraBuffer->size() < length) {
-                pw.extraBuffer->resize(length);
-            }
-            Boolean suc = CFStringGetCString((__bridge CFStringRef)str,
-                                             pw.extraBuffer->data(),
-                                             length,
-                                             NSUTF8StringEncoding);
-            if (suc) {
-                buf = pw.extraBuffer->data();
-            } else {
-                buf = [str UTF8String];
-            }
-        }
+        CFIndex length = 0;
+        const char *buf = nullptr;
+        getBufferAndLength(str, buf, length, pw.extraBuffer);
         writeInteger<size_t, false, false, false, false>(length, pw.writeBuffer, pw.tag);
         [pw.writeBuffer appendBytes:buf length:sizeof(char) * length];
     }

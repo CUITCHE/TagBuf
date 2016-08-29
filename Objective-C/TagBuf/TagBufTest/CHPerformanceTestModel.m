@@ -26,6 +26,26 @@
     self._10StringContent = @[str,str,str,str,str,str,str,str,str,str];
 }
 
+- (void)fillTestLongStringData
+{
+    self.name = 0x23546;
+    self.prority = 5346.65473;
+    self.number = 35;
+    self.opened = true;
+    NSMutableString *str = [NSMutableString stringWithCapacity:100];
+    int i=100;
+    while (i-->0) {
+        [str appendString:@"14524"];
+    }
+    i=1000;
+    while (i-->0) {
+        [str appendString:@"14524fdsav435dc"];
+    }
+    self.str100Length = str;
+
+    self._10StringContent = @[str,str,str,str,str,str,str,str,str,str];
+}
+
 - (BOOL)isEqual:(CHPerformanceTestModel *)object
 {
     return self.name == object.name &&
