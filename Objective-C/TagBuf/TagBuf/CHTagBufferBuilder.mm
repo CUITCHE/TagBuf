@@ -186,6 +186,7 @@ private:
     {
         CHCFStringGetBuffer((__bridge CFStringRef)str, dest, length);
         if (!dest) {
+            NSCAssert(NO, @"Foot into unexpected branch-code."); // In fact, we don't wish go here.
             if (extraBuffer->size() < length) {
                 extraBuffer->resize(length);
             }
@@ -197,9 +198,6 @@ private:
                 dest = extraBuffer->data();
             } else {
                 dest = [str UTF8String];
-#if DEBUG
-                NSLog(@"Foot into unexpected branch-code.[str UTF8String]");
-#endif
             }
         }
     }
