@@ -22,7 +22,7 @@ struct bucket_t
 {
 private:
     cache_key_t _key;
-    IMP _imp;
+    IMP _imp; // is method's address.
 public:
     inline cache_key_t key() const { return _key; }
     inline IMP imp() const { return (IMP)_imp; }

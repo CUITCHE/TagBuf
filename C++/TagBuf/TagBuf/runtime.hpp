@@ -14,9 +14,7 @@
 #endif
 
 #include <stdio.h>
-
-using Class = struct class_t *;
-using id = Class;
+#include "types.h"
 
 #define selector(method) #method
 
@@ -29,40 +27,29 @@ using id = Class;
 enum {
     __Property  = 1,
     __Overload  = 1 << 1, // Not implement
-    __Static    = 1 << 2, // Not implement
+    __Static    = 1 << 2, // Not implement. Only support 'getClass'. Custome method is not supported.
 };
 
-using uint32_t = unsigned int;
-using uint16_t = unsigned short;
-
-#if __LP64__
-using IMP = unsigned long;
-using uintptr_t = unsigned long;
-#else
-using IMP = unsigned int;
-using uintptr_t = unsigned int;
-#endif
-
-using SEL = const char *;
-
-struct property_t
+struct method_t
 {
-    uint32_t varEncodeType;
+    uint32_t flag : 3;
+    uint32_t varEncodeType : 28;
     IMP imp;
     SEL name;
 };
 
-struct property_list
+struct method_list
 {
-    struct property_t method[1];
+    struct method_t method[1];
 };
 
-struct class_t
+struct class_t final
 {
     uint32_t property_count;
+    uint32_t size; // size of class
     Class super_class;
     const char *name;
-    struct property_list *methodList;
+    struct method_list *methodList;
     void *cache;
 };
 
@@ -122,16 +109,23 @@ bool class_registerClass(Class cls);
  *
  * @return Return a pointer to property_list pointer.
  */
-struct property_list *class_getPropertyList(Class cls, uint32_t *outCount);
+struct method_list *class_getPropertyList(Class cls, uint32_t *outCount);
 
 IMP runtime_lookup_property(Class cls, SEL selector);
 
+void *allocateInstance(Class cls);
+
 #include "CHTagBuf.hpp"
-template<typename _T>
-_T& propertyInvoke(CHTagBuf *self, SEL propertyName)
+
+template <typename _T, typename... Args>
+_T methodInvoke(CHTagBuf *self, SEL selector, Class cls, Args&&... args)
 {
-    typedef _T&(*Function)();
-    Function f = (Function)runtime_lookup_property(self->getClass(), propertyName);
+    struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_property(cls ?: self->getClass(), selector));
+    typedef _T(*Function)(Args...);
+    Function f = (Function)method->imp;
+    if (method->flag == __Static) {
+        return f(std::forward<Args...>(args)...);
+    }
     uintptr_t object_addr = (uintptr_t)self;
 #ifdef __GNUC__ // GCC Compiler
 #if __LP64__
@@ -153,29 +147,13 @@ _T& propertyInvoke(CHTagBuf *self, SEL propertyName)
         mov ecx, object_addr
     }
 #endif
-    return f();
+    return f(std::forward<Args...>(args)...);
 }
 
-enum {
-    CHTagBufObjectDetailTypeNone,
-    /// NSNumber<NSNumberBoolean> value. Or NSArray<NSNumberBoolean> value.
-    CHTagBufObjectDetailTypeNSNumberBoolean,
-    /// NSNumber<NSNumberInt8> value. Or NSArray<NSNumberInt8> value.
-    CHTagBufObjectDetailTypeNSNumber8BitsInteger,
-    /// NSNumber<NSNumberInt16> value. Or NSArray<NSNumberInt16> value.
-    CHTagBufObjectDetailTypeNSNumber16BitsInteger,
-    /// NSNumber<NSNumberInt32> value. Or NSArray<NSNumberInt32> value.
-    CHTagBufObjectDetailTypeNSNumber32BitsInteger,
-    /// NSNumber<NSNumberInt64> value. Or NSArray<NSNumberInt64> value.
-    CHTagBufObjectDetailTypeNSNumber64BitsInteger,
-    /// NSNumber<NSNumberFloat> value. Or NSArray<NSNumberFloat> value.
-    CHTagBufObjectDetailTypeNSNumberFloat,
-    /// NSNumber<NSNumberDouble> value. Or NSArray<NSNumberDouble> value.
-    CHTagBufObjectDetailTypeNSNumberDouble,
-    CHTagBufObjectDetailTypeNSArrayNSData,
-    CHTagBufObjectDetailTypeNSArrayNSString,
-    CHTagBufObjectDetailTypeNSArrayNSArray,
-    CHTagBufObjectDetailTypeOtherObject
-};
+template<typename _T>
+_T& propertyInvoke(CHTagBuf *self, SEL propertyName)
+{
+    return std::forward<_T&>(methodInvoke<_T&>(self, propertyName, self->getClass()));
+}
 
 #endif /* runtime_hpp */

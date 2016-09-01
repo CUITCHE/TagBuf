@@ -19,7 +19,8 @@
 #ifndef Interface
 #define Interface(classname) class classname final : public CHTagBuf { \
                                 public:\
-                                Class getClass() override;
+                                Class getClass() override; \
+                                static Class getClass(std::nullptr_t);
 #endif
 
 #ifndef ClassNamed
@@ -27,7 +28,8 @@
 #endif
 
 #ifndef Implement
-#define Implement(classname) Class classname::getClass(){ return class_getClass(ClassNamed(classname)->name); }
+#define Implement(classname) Class classname::getClass() { return class_getClass(ClassNamed(classname)->name); } \
+    Class classname::getClass(std::nullptr_t) { return class_getClass(ClassNamed(classname)->name); }
 #endif
 
 #ifndef tagbuf_class_check
@@ -65,48 +67,9 @@ public: \
         tagbuf_class_check(std::remove_pointer<decltype(this)>::type); \
         tagbuf_class_check2(object_type); \
         static_assert(std::is_class<object_type>::value, "Unexcepted pod_type[not a class]"); \
+    static_assert(!std::is_pointer<object_type>::value, "Unexcepted pod_type[*]"); \
         return variable_declare(name); \
     }
 #endif
-
-enum {
-    /// kinds of Integers, zigzag-int, zigzag-int64. Above also support unsinged type. double value, 8 bytes, float value, 4 bytes. And about bool value, specially it only takes up 1 bit.
-    CHTagBufferWriteTypeVarintFixed = 0,
-    /// container, such as NSArray
-    CHTagBufferWriteTypeContainer   = 1,
-    /// such as NSString, c-style string, NSData
-    CHTagBufferWriteTypeblobStream  = 2,
-    /// data from the object which is kind of CHTagBuffer Class.
-    CHTagBufferWriteTypeTagBuffer   = 3
-};
-
-enum {
-    /// For check use.
-    CHTagBufEncodingTypeNone   = 0,
-    /// cplusplus bool.
-    CHTagBufEncodingTypeBool   = 1,
-    /// 8 bits, such as char.
-    CHTagBufEncodingType8Bits  = 2,
-    /// 16 bits, such as short
-    CHTagBufEncodingType16Bits = 3,
-    /// 32 bits, such as int.
-    CHTagBufEncodingType32Bits = 4,
-    /// 64 bits, such as long long
-    CHTagBufEncodingType64Bits = 5,
-    /// float value
-    CHTagBufEncodingTypeFloat  = 6,
-    /// double value
-    CHTagBufEncodingTypeDouble = 7,
-    /// NSNumber value.
-    CHTagBufEncodingTypeNSNumber,
-    /// NSData object.
-    CHTagBufEncodingTypeNSData,
-    /// NSString object.
-    CHTagBufEncodingTypeNSString,
-    /// NSArray object.
-    CHTagBufEncodingTypeNSArray,
-    /// other object, such as custom class.
-    CHTagBufEncodingTypeOtherObject
-};
 
 #endif /* tagBuf_h */

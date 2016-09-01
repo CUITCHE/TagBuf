@@ -57,7 +57,7 @@ bool class_registerClass(Class cls)
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
-struct property_list *class_getPropertyList(Class cls, uint32_t *outCount)
+struct method_list *class_getPropertyList(Class cls, uint32_t *outCount)
 {
     assert(cls);
     assert(outCount);
@@ -70,10 +70,10 @@ IMP runtime_lookup_property(Class cls, SEL selector)
     IMP imp = cache_lookup_method(cls, selector);
     if (imp == (IMP)0) {
         uint32_t outcount = 0;
-        property_list *list = class_getPropertyList(cls, &outcount);
+        method_list *list = class_getPropertyList(cls, &outcount);
         while (outcount-->0) {
             if (!strcmp(list->method[0].name, selector)) {
-                imp = list->method[0].imp;
+                imp = reinterpret_cast<IMP>(&list->method);
                 break;
             }
             ++list;
@@ -83,4 +83,11 @@ IMP runtime_lookup_property(Class cls, SEL selector)
         }
     }
     return imp;
+}
+
+void *allocateInstance(Class cls)
+{
+    assert(cls);
+    void *s = calloc(cls->size, 1);
+    return s;
 }

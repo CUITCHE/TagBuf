@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		FB1534A61D75E2C600AB8B62 /* CHTagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB1534A41D75E2C600AB8B62 /* CHTagBuf.cpp */; };
+		FB2845B01D770D5600FBA79F /* CHString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB2845AE1D770D5600FBA79F /* CHString.cpp */; };
+		FB2845B41D7718BE00FBA79F /* TagBufferBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB2845B21D7718BE00FBA79F /* TagBufferBuilder.cpp */; };
 		FB6D84931D75595300691F23 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D84921D75595300691F23 /* main.cpp */; };
 		FB6D849B1D7559B800691F23 /* runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D84991D7559B800691F23 /* runtime.cpp */; };
 		FB6D849E1D756F2900691F23 /* cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D849C1D756F2900691F23 /* cache.cpp */; };
@@ -29,6 +31,12 @@
 /* Begin PBXFileReference section */
 		FB1534A41D75E2C600AB8B62 /* CHTagBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHTagBuf.cpp; sourceTree = "<group>"; };
 		FB1534A51D75E2C600AB8B62 /* CHTagBuf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHTagBuf.hpp; sourceTree = "<group>"; };
+		FB2845AC1D770B5700FBA79F /* TagBufDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagBufDefines.h; sourceTree = "<group>"; };
+		FB2845AE1D770D5600FBA79F /* CHString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHString.cpp; sourceTree = "<group>"; };
+		FB2845AF1D770D5600FBA79F /* CHString.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHString.hpp; sourceTree = "<group>"; };
+		FB2845B11D770E1300FBA79F /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		FB2845B21D7718BE00FBA79F /* TagBufferBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagBufferBuilder.cpp; sourceTree = "<group>"; };
+		FB2845B31D7718BE00FBA79F /* TagBufferBuilder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TagBufferBuilder.hpp; sourceTree = "<group>"; };
 		FB6D848F1D75595300691F23 /* TagBuf */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TagBuf; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB6D84921D75595300691F23 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FB6D84991D7559B800691F23 /* runtime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runtime.cpp; sourceTree = "<group>"; };
@@ -51,6 +59,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FB2845AD1D770D3C00FBA79F /* framework */ = {
+			isa = PBXGroup;
+			children = (
+				FB2845AE1D770D5600FBA79F /* CHString.cpp */,
+				FB2845AF1D770D5600FBA79F /* CHString.hpp */,
+			);
+			path = framework;
+			sourceTree = "<group>";
+		};
 		FB6D84861D75595300691F23 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +96,11 @@
 				FB6D84A31D759BD300691F23 /* tagBuf.hpp */,
 				FB1534A41D75E2C600AB8B62 /* CHTagBuf.cpp */,
 				FB1534A51D75E2C600AB8B62 /* CHTagBuf.hpp */,
+				FB2845AC1D770B5700FBA79F /* TagBufDefines.h */,
+				FB2845AD1D770D3C00FBA79F /* framework */,
+				FB2845B11D770E1300FBA79F /* types.h */,
+				FB2845B21D7718BE00FBA79F /* TagBufferBuilder.cpp */,
+				FB2845B31D7718BE00FBA79F /* TagBufferBuilder.hpp */,
 			);
 			path = TagBuf;
 			sourceTree = "<group>";
@@ -149,10 +171,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB6D849B1D7559B800691F23 /* runtime.cpp in Sources */,
+				FB2845B01D770D5600FBA79F /* CHString.cpp in Sources */,
 				FB6D849E1D756F2900691F23 /* cache.cpp in Sources */,
 				FB1534A61D75E2C600AB8B62 /* CHTagBuf.cpp in Sources */,
 				FB6D84931D75595300691F23 /* main.cpp in Sources */,
 				FB6D84A71D75A4FD00691F23 /* CHDemo+TagBuf.cpp in Sources */,
+				FB2845B41D7718BE00FBA79F /* TagBufferBuilder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

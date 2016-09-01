@@ -16,8 +16,6 @@
 
 using namespace std;
 
-#define CHTAGBUFFER_CATEGORY 1
-#define CHTAGBUFFER_VERSION  1
 #define WriteMemoryAPI(returnType) NS_INLINE returnType
 #define ReadMemoryAPI(returnType) NS_INLINE returnType
 
