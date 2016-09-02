@@ -41,6 +41,7 @@ unsigned int RevBit(unsigned int x)
 }
 
 #include <assert.h>
+#include <time.h>
 void test()
 {
     CHDemo *demo = new CHDemo;
@@ -49,6 +50,7 @@ void test()
     demo->_4() = 334;
     demo->tableId() = 35372343;
     int i = 1e6;
+    clock_t start = clock();
     while (i-->0) {
         {
             auto ret =  propertyInvoke<CHDemo2>(demo, selector(_2));
@@ -64,4 +66,5 @@ void test()
             assert(ret == demo->tableId());
         }
     }
+    printf("Finished. Used:%fms\n", (clock() - start) / 1000.0);
 }
