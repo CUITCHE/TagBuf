@@ -11,6 +11,7 @@
 #include "runtime.hpp"
 
 unsigned int RevBit(unsigned int x);
+void test();
 
 int main(int argc, const char * argv[]) {
     CHDemo *demo = new CHDemo;
@@ -18,8 +19,9 @@ int main(int argc, const char * argv[]) {
 
     auto ret =  propertyInvoke<int>(demo, selector(_1));
     printf("0x%x\n", ret);
-    Class cls = methodInvoke<Class>(demo, selector(getClass), nullptr);
+    auto cls = methodInvoke<Class>(demo, selector(getClass), nullptr);
     printf("%s\n", cls->name);
+    test();
     return 0;
 }
 
@@ -36,4 +38,30 @@ unsigned int RevBit(unsigned int x)
     x=((x&0x00ff00ff)<<8)|((x>>8)&0x00ff00ff);
     x=x<<16|x>>16;
     return x;
+}
+
+#include <assert.h>
+void test()
+{
+    CHDemo *demo = new CHDemo;
+    demo->_1() = 0x25453;
+    demo->_3() = 0x243;
+    demo->_4() = 334;
+    demo->tableId() = 35372343;
+    int i = 1e6;
+    while (i-->0) {
+        {
+            auto ret =  propertyInvoke<CHDemo2>(demo, selector(_2));
+        }
+        {
+            auto ret =  propertyInvoke<int>(demo, selector(_1));
+            assert(ret == demo->_1());
+            ret =  propertyInvoke<int>(demo, selector(_3));
+            assert(ret == demo->_3());
+            ret =  propertyInvoke<int>(demo, selector(_4));
+            assert(ret == demo->_4());
+            ret =  propertyInvoke<int>(demo, selector(tableId));
+            assert(ret == demo->tableId());
+        }
+    }
 }

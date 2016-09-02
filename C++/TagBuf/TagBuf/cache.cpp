@@ -16,13 +16,13 @@ static inline mask_t cache_hash(cache_key_t key, mask_t mask)
 
 cache_t *getCache(Class cls)
 {
-    return (cache_t *)&cls->cache;
+    return (cache_t *)(cls->cache);
 }
 
 cache_key_t getKey(SEL sel)
 {
     assert(sel);
-    return (cache_key_t)sel;
+    return (cache_key_t)(sel);
 }
 
 static inline mask_t cache_next(mask_t i, mask_t mask) {
@@ -31,7 +31,16 @@ static inline mask_t cache_next(mask_t i, mask_t mask) {
 
 
 // cache_t
+cache_t::cache_t()
+:_mask(1),_occupied(0)
+{
+    _buckets = (bucket_t *)calloc(1, sizeof(bucket_t));
+}
 
+cache_t::~cache_t()
+{
+    free(_buckets);
+}
 struct bucket_t *cache_t::buckets()
 {
     return _buckets;
@@ -69,7 +78,7 @@ void cache_t::initializeToEmpty()
 
 mask_t cache_t::capacity()
 {
-    return mask() ? _mask + 1 : 0;
+    return _mask;
 }
 
 size_t cache_t::bytesForCapacity(uint32_t cap)
@@ -87,9 +96,9 @@ void cache_t::reallocate(mask_t oldCapacity, mask_t newCapacity)
     bucket_t *newBuckets = allocateBuckets(newCapacity);
 
     assert(newCapacity > 0);
-    assert((uintptr_t)(mask_t)(newCapacity-1) == newCapacity-1);
+    assert((uintptr_t)(mask_t)(newCapacity) == newCapacity);
 
-    setBucketsAndMask(newBuckets, newCapacity - 1);
+    setBucketsAndMask(newBuckets, newCapacity );
 }
 
 struct bucket_t *cache_t::find(cache_key_t key)
@@ -127,6 +136,7 @@ void cache_fill_method(Class cls, SEL sel, IMP imp)
     mask_t newOccupied = cache->occupied() + 1;
     mask_t capacity = cache->capacity();
     if (newOccupied > capacity) {
+        newOccupied = (capacity << 1) + 1;
         cache->reallocate(capacity, newOccupied);
     }
 

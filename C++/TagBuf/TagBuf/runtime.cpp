@@ -38,6 +38,11 @@ struct _hash_
  */
 static unordered_map<const char *, Class/*, struct _hash_*/> runtime_class_hashmap;
 
+extern void *allocateCache()
+{
+    return new struct cache_t();
+}
+
 Class class_getClass(const char *classname)
 {
     do {
@@ -52,8 +57,9 @@ Class class_getClass(const char *classname)
     return nullptr;
 }
 
-bool class_registerClass(Class cls)
+bool class_registerClass(Class cls, Class superClass)
 {
+    cls->super_class = superClass;
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
@@ -61,16 +67,25 @@ struct method_list *class_getPropertyList(Class cls, uint32_t *outCount)
 {
     assert(cls);
     assert(outCount);
-    *outCount = cls->property_count;
+    *outCount = cls->methodOffset;
     return cls->methodList;
 }
 
-IMP runtime_lookup_property(Class cls, SEL selector)
+struct method_list *class_getMethodList(Class cls, uint32_t *outCount)
+{
+    assert(cls);
+    assert(outCount);
+    *outCount = cls->methodCount - cls->methodOffset;
+    return cls->methodList + cls->methodOffset;
+}
+
+IMP runtime_lookup_method(Class cls, SEL selector)
 {
     IMP imp = cache_lookup_method(cls, selector);
     if (imp == (IMP)0) {
         uint32_t outcount = 0;
         method_list *list = class_getPropertyList(cls, &outcount);
+    Retry:
         while (outcount-->0) {
             if (!strcmp(list->method[0].name, selector)) {
                 imp = reinterpret_cast<IMP>(&list->method);
@@ -80,6 +95,9 @@ IMP runtime_lookup_property(Class cls, SEL selector)
         }
         if (imp != (IMP)0) {
             cache_fill_method(cls, selector, imp);
+        } else {
+            list = class_getMethodList(cls, &outcount);
+            goto Retry;
         }
     }
     return imp;

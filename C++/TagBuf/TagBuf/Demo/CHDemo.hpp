@@ -18,6 +18,9 @@ Interface(CHDemo2)
 Interface(CHDemo)
     property_pod(_1, int);
     property_class(_2, CHDemo2);
+    property_pod(_3, int);
+    property_pod(_4, int);
+    property_pod(tableId, int);
 };
 
 #endif /* CHDemo_hpp */

@@ -35,10 +35,12 @@ public:
 struct cache_t
 {
 private:
-    struct bucket_t *_buckets = nullptr;
-    mask_t _mask = 0;
-    mask_t _occupied = 0;
+    struct bucket_t *_buckets;
+    mask_t _mask;
+    mask_t _occupied;
 public:
+    cache_t();
+    ~cache_t();
     struct bucket_t *buckets();
     mask_t mask() const;
     mask_t occupied() const;

@@ -45,13 +45,16 @@ struct method_list
 
 struct class_t final
 {
-    uint32_t property_count;
+    uint32_t methodCount;
+    uint32_t methodOffset;
     uint32_t size; // size of class
     Class super_class;
     const char *name;
     struct method_list *methodList;
     void *cache;
 };
+
+extern void *allocateCache();
 
 #ifndef _func_addr_
 template<typename Func>
@@ -88,16 +91,17 @@ template<typename Function> struct FunctionAddr
 Class class_getClass(const char *classname);
 
 /**
- * @author hejunqiu, 16-08-30 22:08:03
+ * @author hejunqiu, 16-09-02 09:09:54
  *
- * Register a Class to runtime. If there has a Class which its name is equal to 
+ * Register a Class to runtime. If there has a Class which its name is equal to
  * cls's, will return false and register failed.
  *
- * @param cls A class object. Must not be NULL.
+ * @param cls        A class object. Must not be NULL.
+ * @param superClass The super of cls. May be NULL if cls has not a super.
  *
  * @return true if success, otherwise is false.
  */
-bool class_registerClass(Class cls);
+bool class_registerClass(Class cls, Class superClass = nullptr);
 
 /**
  * @author hejunqiu, 16-08-30 23:08:19
@@ -111,7 +115,7 @@ bool class_registerClass(Class cls);
  */
 struct method_list *class_getPropertyList(Class cls, uint32_t *outCount);
 
-IMP runtime_lookup_property(Class cls, SEL selector);
+IMP runtime_lookup_method(Class cls, SEL selector);
 
 void *allocateInstance(Class cls);
 
@@ -120,7 +124,7 @@ void *allocateInstance(Class cls);
 template <typename _T, typename... Args>
 _T methodInvoke(CHTagBuf *self, SEL selector, Class cls, Args&&... args)
 {
-    struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_property(cls ?: self->getClass(), selector));
+    struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls ?: self->getClass(), selector));
     typedef _T(*Function)(Args...);
     Function f = (Function)method->imp;
     if (method->flag == __Static) {
@@ -156,4 +160,5 @@ _T& propertyInvoke(CHTagBuf *self, SEL propertyName)
     return std::forward<_T&>(methodInvoke<_T&>(self, propertyName, self->getClass()));
 }
 
+extern size_t bkdr_hash(const char *str);
 #endif /* runtime_hpp */
