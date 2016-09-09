@@ -13,9 +13,10 @@
 
 using uint32_t = unsigned int;
 using uint16_t = unsigned short;
+using uint64_t = unsigned long long;
 
 #if __LP64__
-using IMP = unsigned long;
+using IMP = unsigned long long;
 using uintptr_t = unsigned long;
 #else
 using IMP = unsigned int;

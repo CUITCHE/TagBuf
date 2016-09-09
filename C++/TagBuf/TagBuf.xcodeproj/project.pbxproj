@@ -14,6 +14,7 @@
 		FB6D849B1D7559B800691F23 /* runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D84991D7559B800691F23 /* runtime.cpp */; };
 		FB6D849E1D756F2900691F23 /* cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D849C1D756F2900691F23 /* cache.cpp */; };
 		FB6D84A71D75A4FD00691F23 /* CHDemo+TagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D84A61D75A4FD00691F23 /* CHDemo+TagBuf.cpp */; };
+		FB6F68141D798E230004BB1A /* CHData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6F68121D798E230004BB1A /* CHData.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -46,6 +47,8 @@
 		FB6D84A11D759BAC00691F23 /* CHDemo.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHDemo.hpp; sourceTree = "<group>"; };
 		FB6D84A31D759BD300691F23 /* tagBuf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tagBuf.hpp; sourceTree = "<group>"; };
 		FB6D84A61D75A4FD00691F23 /* CHDemo+TagBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "CHDemo+TagBuf.cpp"; sourceTree = "<group>"; };
+		FB6F68121D798E230004BB1A /* CHData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHData.cpp; sourceTree = "<group>"; };
+		FB6F68131D798E230004BB1A /* CHData.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHData.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +67,8 @@
 			children = (
 				FB2845AE1D770D5600FBA79F /* CHString.cpp */,
 				FB2845AF1D770D5600FBA79F /* CHString.hpp */,
+				FB6F68121D798E230004BB1A /* CHData.cpp */,
+				FB6F68131D798E230004BB1A /* CHData.hpp */,
 			);
 			path = framework;
 			sourceTree = "<group>";
@@ -172,6 +177,7 @@
 			files = (
 				FB6D849B1D7559B800691F23 /* runtime.cpp in Sources */,
 				FB2845B01D770D5600FBA79F /* CHString.cpp in Sources */,
+				FB6F68141D798E230004BB1A /* CHData.cpp in Sources */,
 				FB6D849E1D756F2900691F23 /* cache.cpp in Sources */,
 				FB1534A61D75E2C600AB8B62 /* CHTagBuf.cpp in Sources */,
 				FB6D84931D75595300691F23 /* main.cpp in Sources */,
