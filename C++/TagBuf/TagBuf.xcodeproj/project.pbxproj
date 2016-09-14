@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FB1534A61D75E2C600AB8B62 /* CHTagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB1534A41D75E2C600AB8B62 /* CHTagBuf.cpp */; };
+		FB1FF2121D892DB200AED073 /* CHBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB1FF2101D892DB200AED073 /* CHBase.cpp */; };
 		FB2845B01D770D5600FBA79F /* CHString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB2845AE1D770D5600FBA79F /* CHString.cpp */; };
 		FB2845B41D7718BE00FBA79F /* TagBufferBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB2845B21D7718BE00FBA79F /* TagBufferBuilder.cpp */; };
 		FB6D84931D75595300691F23 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6D84921D75595300691F23 /* main.cpp */; };
@@ -32,6 +33,8 @@
 /* Begin PBXFileReference section */
 		FB1534A41D75E2C600AB8B62 /* CHTagBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHTagBuf.cpp; sourceTree = "<group>"; };
 		FB1534A51D75E2C600AB8B62 /* CHTagBuf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHTagBuf.hpp; sourceTree = "<group>"; };
+		FB1FF2101D892DB200AED073 /* CHBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHBase.cpp; sourceTree = "<group>"; };
+		FB1FF2111D892DB200AED073 /* CHBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHBase.hpp; sourceTree = "<group>"; };
 		FB2845AC1D770B5700FBA79F /* TagBufDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TagBufDefines.h; sourceTree = "<group>"; };
 		FB2845AE1D770D5600FBA79F /* CHString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHString.cpp; sourceTree = "<group>"; };
 		FB2845AF1D770D5600FBA79F /* CHString.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHString.hpp; sourceTree = "<group>"; };
@@ -65,6 +68,8 @@
 		FB2845AD1D770D3C00FBA79F /* framework */ = {
 			isa = PBXGroup;
 			children = (
+				FB1FF2101D892DB200AED073 /* CHBase.cpp */,
+				FB1FF2111D892DB200AED073 /* CHBase.hpp */,
 				FB2845AE1D770D5600FBA79F /* CHString.cpp */,
 				FB2845AF1D770D5600FBA79F /* CHString.hpp */,
 				FB6F68121D798E230004BB1A /* CHData.cpp */,
@@ -183,6 +188,7 @@
 				FB6D84931D75595300691F23 /* main.cpp in Sources */,
 				FB6D84A71D75A4FD00691F23 /* CHDemo+TagBuf.cpp in Sources */,
 				FB2845B41D7718BE00FBA79F /* TagBufferBuilder.cpp in Sources */,
+				FB1FF2121D892DB200AED073 /* CHBase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
