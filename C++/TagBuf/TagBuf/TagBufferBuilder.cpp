@@ -8,7 +8,7 @@
 
 #include "TagBufferBuilder.hpp"
 #include "runtime.hpp"
-#include "CHBase.hpp"
+#include <CHBase.hpp>
 #include <assert.h>
 
 using namespace std;

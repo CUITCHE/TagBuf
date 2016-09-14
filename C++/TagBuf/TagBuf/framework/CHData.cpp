@@ -54,7 +54,7 @@ struct CHDataPrivate
 
     ~CHDataPrivate()
     {
-        destruct();
+        destructor();
     }
 
     uint32_t sizeOfChunks() const { return __CHUNKS_SIZE__(capacity); }
@@ -111,9 +111,10 @@ private:
             uint32_t old_chunk_size = this->sizeOfChunks();
 
             char **new_chunks = (char **)malloc(sizeof(char *) * new_chunk_size);
-            memcpy(new_chunks, chunks, sizeof(char *) * old_chunk_size);
-
-            free(chunks);
+            if (chunks) {
+                memcpy(new_chunks, chunks, sizeof(char *) * old_chunk_size);
+                free(chunks);
+            }
             chunks = new_chunks;
 
             new_chunks += old_chunk_size;
@@ -124,7 +125,7 @@ private:
         }
     }
 
-    void destruct()
+    void destructor()
     {
         if (!chunks) {
             return;

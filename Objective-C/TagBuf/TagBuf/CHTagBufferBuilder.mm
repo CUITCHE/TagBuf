@@ -12,7 +12,7 @@
 #import "CHClassProperty.h"
 #import "TagBufBitset.h"
 #include "CFStringRefTools.h"
-#include "CHBase.hpp"
+#include <CHBase.hpp>
 
 using namespace std;
 

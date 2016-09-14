@@ -86,6 +86,8 @@ template<typename Function> struct FunctionAddr
  *
  * @param classname Class name.
  *
+ * @note Must be local variable.
+ *
  * @return NULL if classname is NULL or the class is not exites.
  */
 Class class_getClass(const char *classname);
@@ -161,4 +163,6 @@ _T& propertyInvoke(CHTagBuf *self, SEL propertyName)
 }
 
 extern size_t bkdr_hash(const char *str);
+
+
 #endif /* runtime_hpp */

@@ -19,8 +19,6 @@
 		FB5F75DD1D421013007E4965 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75DC1D421013007E4965 /* main.mm */; };
 		FB5F75E51D42103A007E4965 /* CHTagBuffer.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */; };
 		FB5F75E81D4210B7007E4965 /* CHTagBufferBuilder.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */; };
-		FB6653F81D82AB9B00E38661 /* CHBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6653F61D82AB9B00E38661 /* CHBase.cpp */; };
-		FB6653F91D82AB9B00E38661 /* CHBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6653F61D82AB9B00E38661 /* CHBase.cpp */; };
 		FB6938F31D65603400F6F0C7 /* TagBufSubTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F21D65603400F6F0C7 /* TagBufSubTest.m */; };
 		FB6938F61D6560BD00F6F0C7 /* CHTestModels.mm in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F51D6560BD00F6F0C7 /* CHTestModels.mm */; };
 		FB6938F91D65CCE200F6F0C7 /* CHPerformanceTestModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FB6938F81D65CCE200F6F0C7 /* CHPerformanceTestModel.m */; };
@@ -71,8 +69,6 @@
 		FB5F75E41D42103A007E4965 /* CHTagBuffer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTagBuffer.mm; sourceTree = "<group>"; };
 		FB5F75E61D4210B7007E4965 /* CHTagBufferBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHTagBufferBuilder.h; sourceTree = "<group>"; };
 		FB5F75E71D4210B7007E4965 /* CHTagBufferBuilder.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTagBufferBuilder.mm; sourceTree = "<group>"; };
-		FB6653F61D82AB9B00E38661 /* CHBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHBase.cpp; sourceTree = "<group>"; };
-		FB6653F71D82AB9B00E38661 /* CHBase.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHBase.hpp; sourceTree = "<group>"; };
 		FB6938F21D65603400F6F0C7 /* TagBufSubTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TagBufSubTest.m; sourceTree = "<group>"; };
 		FB6938F41D6560BD00F6F0C7 /* CHTestModels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CHTestModels.h; sourceTree = "<group>"; };
 		FB6938F51D6560BD00F6F0C7 /* CHTestModels.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CHTestModels.mm; sourceTree = "<group>"; };
@@ -135,12 +131,20 @@
 			path = TagBufTest;
 			sourceTree = "<group>";
 		};
+		FB1FF21D1D893ECD00AED073 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		FB5F75D01D421013007E4965 = {
 			isa = PBXGroup;
 			children = (
 				FB5F75DB1D421013007E4965 /* TagBuf */,
 				FB19DCAA1D48F3CB00C42DD3 /* TagBufTest */,
 				FB5F75DA1D421013007E4965 /* Products */,
+				FB1FF21D1D893ECD00AED073 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -168,8 +172,6 @@
 				FB1B28E31D634BE100DA0DE4 /* TagBufBitset.mm */,
 				FB7D63691D742D7400322252 /* CFStringRefTools.cpp */,
 				FB7D636A1D742D7400322252 /* CFStringRefTools.h */,
-				FB6653F61D82AB9B00E38661 /* CHBase.cpp */,
-				FB6653F71D82AB9B00E38661 /* CHBase.hpp */,
 			);
 			path = TagBuf;
 			sourceTree = "<group>";
@@ -325,7 +327,6 @@
 				FB19DCB51D48F47B00C42DD3 /* CHDataModel.m in Sources */,
 				FB69391C1D65D7AB00F6F0C7 /* JSONModelClassProperty.m in Sources */,
 				FB69392A1D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */,
-				FB6653F91D82AB9B00E38661 /* CHBase.cpp in Sources */,
 				FB19DCB11D48F3DF00C42DD3 /* CHTagBufferBuilder.mm in Sources */,
 				FB221FA61D62E54400AC3708 /* CHClassProperty.m in Sources */,
 				FB6939201D65D7AB00F6F0C7 /* NSArray+JSONModel.m in Sources */,
@@ -353,7 +354,6 @@
 				FB7D636B1D742D7400322252 /* CFStringRefTools.cpp in Sources */,
 				FB6939291D65D7AB00F6F0C7 /* JSONValueTransformer.m in Sources */,
 				FB69391F1D65D7AB00F6F0C7 /* NSArray+JSONModel.m in Sources */,
-				FB6653F81D82AB9B00E38661 /* CHBase.cpp in Sources */,
 				FB221FA51D62E53A00AC3708 /* CHClassProperty.m in Sources */,
 				FB5E07361D6C362C00B0584A /* CHPerformanceTestModel.m in Sources */,
 				FB1B28E51D634BE100DA0DE4 /* TagBufBitset.mm in Sources */,
@@ -423,6 +423,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../Common;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -461,6 +462,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../../Common;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -470,14 +472,26 @@
 		FB5F75E11D421013007E4965 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				HEADER_SEARCH_PATHS = ../../Common;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Debug;
 		};
 		FB5F75E21D421013007E4965 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				HEADER_SEARCH_PATHS = ../../Common;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "";
 			};
 			name = Release;
 		};
