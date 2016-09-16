@@ -63,46 +63,6 @@ bool class_registerClass(Class cls, Class superClass)
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
-struct method_list *class_getPropertyList(Class cls, uint32_t *outCount)
-{
-    assert(cls);
-    assert(outCount);
-    *outCount = cls->methodOffset;
-    return cls->methodList;
-}
-
-struct method_list *class_getMethodList(Class cls, uint32_t *outCount)
-{
-    assert(cls);
-    assert(outCount);
-    *outCount = cls->methodCount - cls->methodOffset;
-    return cls->methodList + cls->methodOffset;
-}
-
-IMP runtime_lookup_method(Class cls, SEL selector)
-{
-    IMP imp = cache_lookup_method(cls, selector);
-    if (imp == (IMP)0) {
-        uint32_t outcount = 0;
-        method_list *list = class_getPropertyList(cls, &outcount);
-    Retry:
-        while (outcount-->0) {
-            if (!strcmp(list->method[0].name, selector)) {
-                imp = reinterpret_cast<IMP>(&list->method);
-                break;
-            }
-            ++list;
-        }
-        if (imp != (IMP)0) {
-            cache_fill_method(cls, selector, imp);
-        } else {
-            list = class_getMethodList(cls, &outcount);
-            goto Retry;
-        }
-    }
-    return imp;
-}
-
 void *allocateInstance(Class cls)
 {
     assert(cls);

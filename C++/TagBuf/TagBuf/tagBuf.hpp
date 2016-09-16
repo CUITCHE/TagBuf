@@ -12,10 +12,11 @@
 #include <type_traits>
 
 #ifndef variable_declare
-#define variable_declare(name) _##name;
+#define variable_declare(name) name;
 #endif
 
 #include "CHTagBuf.hpp"
+
 #ifndef Interface
 #define Interface(classname) class classname final : public CHTagBuf { \
                                 public:\
@@ -27,9 +28,13 @@
 #define ClassNamed(classname) class_##classname
 #endif
 
+#ifndef IvarListNamed
+#define IvarListNamed(classname) ivar_list_##classname
+#endif
+
 #ifndef Implement
-#define Implement(classname) Class classname::getClass() { return class_getClass(ClassNamed(classname)->name); } \
-    Class classname::getClass(std::nullptr_t) { return class_getClass(ClassNamed(classname)->name); }
+#define Implement(classname) Class classname::getClass() { return &ClassNamed(classname); } \
+    Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); }
 #endif
 
 #ifndef tagbuf_class_check
@@ -42,10 +47,10 @@
 
 #ifndef property_pod
 #define property_pod(name, pod_type) \
-private: \
-    pod_type variable_declare(name); \
 public: \
-    pod_type& name() { \
+    pod_type variable_declare(name); \
+private: \
+    pod_type& private_##name() { \
         tagbuf_class_check(std::remove_pointer<decltype(this)>::type); \
         static_assert(std::is_pod<pod_type>::value, "Unexcepted pod_type"); \
         static_assert(!std::is_pointer<pod_type>::value, "Unexcepted pod_type[*]"); \
@@ -60,10 +65,10 @@ public: \
 
 #ifndef property_class
 #define property_class(name, object_type) \
-private: \
-    object_type variable_declare(name); \
 public: \
-    object_type& name() { \
+    object_type variable_declare(name); \
+private: \
+    object_type& private##_name() { \
         tagbuf_class_check(std::remove_pointer<decltype(this)>::type); \
         tagbuf_class_check2(object_type); \
         static_assert(std::is_class<object_type>::value, "Unexcepted pod_type[not a class]"); \

@@ -26,6 +26,8 @@ using uintptr_t = unsigned int;
 using SEL = const char *;
 
 using Class = struct class_t *;
-using id = Class;
+
+using Ivar   = struct ivar_t *;
+using Method = struct method_t *;
 
 #endif /* types_h */

@@ -9,19 +9,37 @@
 #include <stdio.h>
 #include "CHDemo.hpp"
 #include "runtime.hpp"
+#include "cast.hpp"
+#include <map>
+#include "id.hpp"
 
 unsigned int RevBit(unsigned int x);
 void test();
 
-int main(int argc, const char * argv[]) {
-    CHDemo *demo = new CHDemo;
-    demo->_1() = 0x25453;
+class TEST {
+    virtual void qq(){};
+public:
+    int a;
+    int b;
+};
 
-    auto ret =  propertyInvoke<int>(demo, selector(_1));
-    printf("0x%x\n", ret);
-    auto cls = methodInvoke<Class>(demo, selector(getClass), nullptr);
-    printf("%s\n", cls->name);
-    test();
+class TEST2 :  TEST {
+    virtual void qqq(){}
+public:
+    int c;
+};
+
+int main(int argc, const char * argv[]) {
+    printf("%s\n", encode("s"));
+    printf("%s\n", encode<const char>());
+    printf("%s\n", encode<TEST>());
+    printf("%s\n", encode<CHDemo>());
+    printf("%s\n", encode<std::__1::map<double, int>>());
+    id obj = objectWithValue('A');
+    printf("%d\n", (int)*obj);
+    obj = objectWithValue(34.56f);
+    printf("%f\n", (float)*obj);
+    release_id(obj);
     return 0;
 }
 
@@ -38,33 +56,4 @@ unsigned int RevBit(unsigned int x)
     x=((x&0x00ff00ff)<<8)|((x>>8)&0x00ff00ff);
     x=x<<16|x>>16;
     return x;
-}
-
-#include <assert.h>
-#include <time.h>
-void test()
-{
-    CHDemo *demo = new CHDemo;
-    demo->_1() = 0x25453;
-    demo->_3() = 0x243;
-    demo->_4() = 334;
-    demo->tableId() = 35372343;
-    int i = 1e6;
-    clock_t start = clock();
-    while (i-->0) {
-        {
-            auto ret =  propertyInvoke<CHDemo2>(demo, selector(_2));
-        }
-        {
-            auto ret =  propertyInvoke<int>(demo, selector(_1));
-            assert(ret == demo->_1());
-            ret =  propertyInvoke<int>(demo, selector(_3));
-            assert(ret == demo->_3());
-            ret =  propertyInvoke<int>(demo, selector(_4));
-            assert(ret == demo->_4());
-            ret =  propertyInvoke<int>(demo, selector(tableId));
-            assert(ret == demo->tableId());
-        }
-    }
-    printf("Finished. Used:%fms\n", (clock() - start) / 1000.0);
 }

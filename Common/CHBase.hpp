@@ -91,6 +91,7 @@ struct CHBufferIOType {
     #include <assert.h>
     #define CHCAssert(cond, ...) assert(cond)
     #define CH_INLINE static inline
+class CHData;
 #else
 #error This code only supports C++ or Objective-C.
 #endif
@@ -177,8 +178,8 @@ NSCharacterSet *CHTagBufferBuilderPrivate::protocolCharacterSet = [NSCharacterSe
 #elif defined(__cplusplus)
 struct TagBufferBuilderPrivate
 {
-    vector<char> *writeBuffer = 0;
-    vector<char> *readBuffer = 0;
+    CHData *writeBuffer = 0;
+    CHData *readBuffer = 0;
 
     ~TagBufferBuilderPrivate()
     {
@@ -321,7 +322,7 @@ WriteMemoryAPI(void) writeTag(__tag_buffer_flag__ tag, IOType buf)
 #if defined(__OBJC__)
     [buf appendBytes:_buf length:sizeof(_buf)];
 #elif defined(__cplusplus)
-    // TODO: 完成C++的write
+    buf->appendBytes(_buf, sizeof(_buf));
 #endif
 }
 

@@ -32,10 +32,27 @@ enum {
 
 struct method_t
 {
-    uint32_t flag : 3;
-    uint32_t varEncodeType : 28;
+    size_t *hash; // [return type hash, parma0 type hash, ...]
     IMP imp;
     SEL name;
+    uint32_t flag : 3;
+    uint32_t isProperty : 1;
+    uint32_t count : 28; // params count(contains return type. And it is first place).
+#ifdef __LP64__
+    int space;
+#endif
+};
+
+#define OFFSET(structure, member) ((int)(reinterpret_cast<size_t>(&((structure *)0)->member)))
+
+struct ivar_t
+{
+    const char *ivar_name;
+    const char *ivar_type;
+    int ivar_offset;
+#ifdef __LP64__
+    int space;
+#endif
 };
 
 struct method_list
@@ -43,15 +60,20 @@ struct method_list
     struct method_t method[1];
 };
 
+struct ivar_list
+{
+    struct ivar_t ivar[1];
+};
+
 struct class_t final
 {
-    uint32_t methodCount;
-    uint32_t methodOffset;
-    uint32_t size; // size of class
     Class super_class;
     const char *name;
-    struct method_list *methodList;
+    struct method_list *methodList; // In this version, Not Implement.
+    struct ivar_list *ivarList;
     void *cache;
+    uint32_t size; // size of class
+    uint32_t ivarCount;
 };
 
 extern void *allocateCache();
@@ -105,18 +127,6 @@ Class class_getClass(const char *classname);
  */
 bool class_registerClass(Class cls, Class superClass = nullptr);
 
-/**
- * @author hejunqiu, 16-08-30 23:08:19
- *
- * Obtain property list of the cls and count of property.
- *
- * @param cls      Class structure.
- * @param outCount Return property count.
- *
- * @return Return a pointer to property_list pointer.
- */
-struct method_list *class_getPropertyList(Class cls, uint32_t *outCount);
-
 IMP runtime_lookup_method(Class cls, SEL selector);
 
 void *allocateInstance(Class cls);
@@ -164,5 +174,5 @@ _T& propertyInvoke(CHTagBuf *self, SEL propertyName)
 
 extern size_t bkdr_hash(const char *str);
 
-
+Ivar object_getIvar();
 #endif /* runtime_hpp */

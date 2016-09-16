@@ -10,13 +10,13 @@
 #define TagBufferBuilder_hpp
 
 #include "types.h"
-#include <vector>
 
 class CHTagBuf;
+class CHData;
 
-void objectToTagBuffer(CHTagBuf *object, std::vector<char> &outdata);
+void objectToTagBuffer(CHTagBuf *object, CHData &outdata);
 
-void *objectWithTagBuffer(const std::vector<char> &data, id cls);
+void *objectWithTagBuffer(const CHData &data, Class cls);
 
 
 class TagBufferBuilder {
@@ -26,9 +26,9 @@ public:
     ~TagBufferBuilder();
 
     void startBuildingWithObject(CHTagBuf *object);
-    void *readTagBuffer(std::vector<char> &data, id cls);
+    void *readTagBuffer(CHData &data, Class cls);
 
-    std::vector<char> &buildedData() const;
+    CHData &buildedData() const;
 };
 
 #endif /* TagBufferBuilder_hpp */

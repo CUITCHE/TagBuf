@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "types.h"
 
-typedef void(*CHDataChunkCallback)(const void *bytes, unsigned long byteLength, bool *stop);
+typedef void(*CHDataChunkCallback)(const char *bytes, unsigned long byteLength, bool *stop);
 
 class CHData {
     struct CHDataPrivate *d;

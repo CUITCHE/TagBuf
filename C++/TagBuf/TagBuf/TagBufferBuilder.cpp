@@ -8,10 +8,13 @@
 
 #include "TagBufferBuilder.hpp"
 #include "runtime.hpp"
+#include "CHData.hpp"
 #include <CHBase.hpp>
 #include <assert.h>
 
 using namespace std;
+
+
 
 
 #pragma mark TagBufferBuilder
@@ -28,18 +31,18 @@ TagBufferBuilder::~TagBufferBuilder()
 void TagBufferBuilder::startBuildingWithObject(CHTagBuf *object)
 {
     if (!d->writeBuffer) {
-        d->writeBuffer = new vector<char>(1024 * 4);
+        d->writeBuffer = new CHData(1);
     }
 }
 
-void *TagBufferBuilder::readTagBuffer(std::vector<char> &data, id cls)
+void *TagBufferBuilder::readTagBuffer(CHData &data, Class cls)
 {
     do {
-        if (data.empty()) {
+        if (!data.length()) {
             break;
         }
         if (!d->readBuffer) {
-            d->readBuffer = new vector<char>;
+            d->readBuffer = new CHData(1);
         }
         *d->readBuffer = std::move(data);
     } while (0);
@@ -49,14 +52,14 @@ void *TagBufferBuilder::readTagBuffer(std::vector<char> &data, id cls)
 
 #pragma public interface
 
-void objectToTagBuffer(CHTagBuf *object, vector<char> &outdata)
+void objectToTagBuffer(CHTagBuf *object, CHData &outdata)
 {
     ;
 }
 
-void *objectWithTagBuffer(const vector<char> &data, id cls)
+void *objectWithTagBuffer(const CHData &data, Class cls)
 {
-    if (data.empty()) {
+    if (!data.length()) {
         return 0;
     }
     return 0;
