@@ -12,39 +12,45 @@
 struct CHNumberPrivate
 {
     volatile uint32_t valueType = 0;
-    volatile union _1 {
+    volatile union {
         char charValue;
         short shortValue;
         int intValue;
         float floatValue;
         long longValue;
-        long long longLongValue;
         double doubleValue;
-        void *object;
+        long long longLongValue;
     } internal = {0};
 };
 
 CHNumber::CHNumber()
-:CHObject(), d(new CHNumberPrivate)
+:CHObject()
 {
 }
 
 CHNumber::~CHNumber()
 {
-    delete d;
+    CHNumberPrivate *d = (CHNumberPrivate *)reserved();
+    if (d) {
+        delete d;
+    }
 }
 
 CHNumber *CHNumber::standardNumber()
 {
-    return new CHNumber;
+    CHNumber *o = new CHNumber;
+    o->setReserved(new CHNumberPrivate);
+    return o;
 }
+
+#define d_d(obj, field) ((CHNumberPrivate *)obj->reserved())->internal.field
 
 CHNumber::operator unsigned char() const
 {
     if (is_tagged_pointer()) {
         return (unsigned char)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
     }
-    return d->internal.charValue;
+    return d_d(this, charValue);
 }
 
 CHNumber::operator char() const
@@ -57,7 +63,7 @@ CHNumber::operator unsigned short() const
     if (is_tagged_pointer()) {
         return (unsigned short)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
     }
-    return d->internal.shortValue;
+    return d_d(this, shortValue);
 }
 
 CHNumber::operator short() const
@@ -70,7 +76,7 @@ CHNumber::operator unsigned int() const
     if (is_tagged_pointer()) {
         return (unsigned int)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
     }
-    return d->internal.intValue;
+    return d_d(this, intValue);
 }
 
 CHNumber::operator int() const
@@ -84,12 +90,12 @@ CHNumber::operator unsigned long() const
     if (is_tagged_pointer()) {
         return this->operator unsigned long long();
     }
-    return d->internal.longValue;
+    return d_d(this, longValue);
 #else
     if (is_tagged_pointer()) {
         return (unsigned long)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
     }
-    return d->internal.longValue;
+    return d_d(this, longValue);
 #endif
 }
 
@@ -103,7 +109,7 @@ CHNumber::operator unsigned long long() const
     if (is_tagged_pointer()) {
         return (unsigned long long)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
     }
-    return d->internal.longLongValue;
+    return d_d(this, longLongValue);
 }
 
 CHNumber::operator long long() const
@@ -124,12 +130,12 @@ CHNumber::operator float() const
         target[3] = p[0];
         return v;
     }
-    return d->internal.floatValue;
+    return d_d(this, floatValue);
 }
 
 CHNumber::operator double() const
 {
-    return d->internal.doubleValue;
+    return d_d(this, doubleValue);
 }
 
 CHNumber *objectWithValue(char v)
@@ -187,7 +193,7 @@ struct CHNumberHelper
 {
     static void assign(CHNumber *obj ,unsigned long long v)
     {
-        obj->d->internal.longLongValue = v;
+        d_d(obj, longLongValue) = v;
     }
 };
 

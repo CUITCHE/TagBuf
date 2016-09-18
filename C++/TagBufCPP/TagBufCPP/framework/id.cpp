@@ -50,7 +50,7 @@ void CHObject::setReserved(void *obj)
     d->obj = obj;
 }
 
-void *CHObject::reserved()
+void *CHObject::reserved() const
 {
     return d->obj;
 }

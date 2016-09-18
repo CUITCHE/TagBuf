@@ -27,7 +27,7 @@ protected:
 
     struct idPrivate *d;
     void setReserved(void *obj);
-    void *reserved();
+    void *reserved() const;
 };
 
 using id = CHObject *;

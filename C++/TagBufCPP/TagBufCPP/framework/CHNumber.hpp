@@ -14,7 +14,6 @@
 class CHNumber : public CHObject
 {
     friend struct CHNumberHelper;
-    struct CHNumberPrivate *d;
 public:
     operator char() const;
     operator unsigned char() const;
