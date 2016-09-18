@@ -176,6 +176,8 @@ struct CHTagBufferBuilderPrivate
 };
 NSCharacterSet *CHTagBufferBuilderPrivate::protocolCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\"<"];
 #elif defined(__cplusplus)
+extern void release(CHData *);
+
 struct TagBufferBuilderPrivate
 {
     CHData *writeBuffer = 0;
@@ -183,8 +185,8 @@ struct TagBufferBuilderPrivate
 
     ~TagBufferBuilderPrivate()
     {
-        delete writeBuffer;
-        delete readBuffer;
+        release(writeBuffer);
+        release(readBuffer);
     }
 };
 #endif
