@@ -74,12 +74,16 @@ template <> struct __encode__<char *>
 
 #include "CHData.hpp"
 #include "CHString.hpp"
+#include "CHNumber.hpp"
 
 template <> struct __encode__<CHData>
 { static const char *type() { return "#\"CHData\""; } }; __ENCODE_CV__(CHData,);
 
 template <> struct __encode__<CHString>
 { static const char *type() { return "#\"CHString\""; } }; __ENCODE_CV__(CHString,);
+
+template <> struct __encode__<CHNumber>
+{ static const char *type() { return "#\"CHNumber\""; } }; __ENCODE_CV__(CHNumber,);
 
 #include <vector>
 using std::vector;

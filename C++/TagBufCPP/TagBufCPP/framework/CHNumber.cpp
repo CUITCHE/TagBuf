@@ -36,13 +36,6 @@ CHNumber::~CHNumber()
     }
 }
 
-CHNumber *CHNumber::standardNumber()
-{
-    CHNumber *o = new CHNumber;
-    o->setReserved(new CHNumberPrivate);
-    return o;
-}
-
 #define d_d(obj, field) ((CHNumberPrivate *)obj->reserved())->internal.field
 
 CHNumber::operator unsigned char() const
@@ -187,13 +180,14 @@ CHNumber *objectWithValue(float v)
     return o;
 }
 
-#define PRIVATE_OFFSET 16
-
 struct CHNumberHelper
 {
-    static void assign(CHNumber *obj ,unsigned long long v)
+    inline static CHNumber *standardNumber(unsigned long long v)
     {
-        d_d(obj, longLongValue) = v;
+        CHNumber *o = new CHNumber;
+        o->setReserved(new CHNumberPrivate);
+        d_d(o, longLongValue) = v;
+        return o;
     }
 };
 
@@ -207,8 +201,7 @@ CHNumber *objectWithValue(long v)
 {
 #ifdef __LP64__
     if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumber::standardNumber();
-        CHNumberHelper::assign(o, v);
+        CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
     CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
@@ -223,8 +216,7 @@ CHNumber *objectWithValue(unsigned long v)
 {
 #ifdef __LP64__
     if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumber::standardNumber();
-        CHNumberHelper::assign(o, v);
+        CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
     CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
@@ -238,8 +230,7 @@ CHNumber *objectWithValue(unsigned long v)
 CHNumber *objectWithValue(long long v)
 {
     if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumber::standardNumber();
-        CHNumberHelper::assign(o, v);
+        CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
     CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
@@ -249,8 +240,7 @@ CHNumber *objectWithValue(long long v)
 CHNumber *objectWithValue(unsigned long long v)
 {
     if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumber::standardNumber();
-        CHNumberHelper::assign(o, v);
+        CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
     CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);

@@ -27,8 +27,6 @@ public:
     operator long long() const;
     operator unsigned long long() const;
     operator double() const;
-
-    static CHNumber *standardNumber();
 protected:
     CHNumber();
     ~CHNumber() override;
