@@ -19,8 +19,11 @@
 
 #ifndef Interface
 #define Interface(classname) class classname final : public CHTagBuf { \
+                                friend struct CHTagBufFactor; \
+                                protected:\
+                                classname() :CHTagBuf(){};\
                                 public:\
-                                Class getClass() override; \
+                                Class getClass() const override; \
                                 static Class getClass(std::nullptr_t);
 #endif
 
@@ -33,7 +36,7 @@
 #endif
 
 #ifndef Implement
-#define Implement(classname) Class classname::getClass() { return &ClassNamed(classname); } \
+#define Implement(classname) Class classname::getClass() const { return &ClassNamed(classname); } \
     Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); }
 #endif
 
@@ -42,7 +45,7 @@
 #endif
 
 #ifndef tagbuf_class_check2
-#define tagbuf_class_check2(type) static_assert(std::is_final<type>::value, "This property'type is not final class. Please use macro TagBufClass(classname) to declare TagBuf class.")
+#define tagbuf_class_check2(type) static_assert(std::is_final<type>::value, "This property'type is not final TagBuf class. Please use macro TagBufClass(classname) to declare TagBuf class.")
 #endif
 
 #ifndef property_pod
@@ -69,10 +72,11 @@ public: \
     object_type variable_declare(name); \
 private: \
     object_type& private##_name() { \
-        tagbuf_class_check(std::remove_pointer<decltype(this)>::type); \
-        tagbuf_class_check2(object_type); \
-        static_assert(std::is_class<object_type>::value, "Unexcepted pod_type[not a class]"); \
-    static_assert(!std::is_pointer<object_type>::value, "Unexcepted pod_type[*]"); \
+        using r_p_type = std::remove_pointer_t<object_type>;\
+        tagbuf_class_check(std::remove_pointer_t<decltype(this)>); \
+        tagbuf_class_check2(r_p_type); \
+        static_assert(std::is_class<r_p_type>::value, "Unexcepted pod_type[not a class]"); \
+        static_assert(std::is_pointer<object_type>::value && std::is_base_of<CHObject, r_p_type>::value, "Unexcepted pod_type[*]. Use kind of id type"); \
         return variable_declare(name); \
     }
 #endif

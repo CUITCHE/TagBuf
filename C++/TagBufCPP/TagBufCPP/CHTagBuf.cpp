@@ -10,8 +10,7 @@
 #include "runtime.hpp"
 #include "TagBufDefines.h"
 #include "tagBuf.hpp"
-#include <stdlib.h>
-#include <typeinfo>
+#include <memory.h>
 
 //------------------
 // class CHTagBuf
@@ -23,7 +22,13 @@ static class_t ClassNamed(CHTagBuf) = {
     nullptr,
     allocateCache(),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHTagBuf), CHTagBuf::getClass(nullptr)), sizeof(CHTagBuf))),
-    0
+    0,
+    selector(^#CHTagBuf)
 };
 
 Implement(CHTagBuf);
+
+const char *CHTagBuf::objectType() const
+{
+    return getClass()->typeName;
+}

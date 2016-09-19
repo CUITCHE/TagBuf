@@ -69,3 +69,28 @@ void *allocateInstance(Class cls)
     void *s = calloc(cls->size, 1);
     return s;
 }
+
+Ivar object_getIvar(CHTagBuf *self, const char *name)
+{
+    auto ivarList = self->getClass()->ivarList - 1;
+    uint32_t count = self->getClass()->ivarCount;
+    while (count --> 0) {
+        if (!strcmp((++ivarList)->ivar[0].ivar_name, name)) {
+            return ivarList->ivar;
+        }
+    }
+    return nullptr;
+}
+
+#include "CHNumber.hpp"
+
+void object_setIvar(CHTagBuf *self, const Ivar ivar, id value)
+{
+    if (!strcmp(ivar->ivar_type, "i")) {
+        int *dst = (int *)((char *)self + ivar->ivar_offset);
+        *dst = *(CHNumber *)value;
+    } else if (strstr(ivar->ivar_type, "^#") == ivar->ivar_type) {
+        id *dst = (id *)((char *)self + ivar->ivar_offset);
+        *dst = value;
+    }
+}

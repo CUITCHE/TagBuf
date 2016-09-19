@@ -49,8 +49,15 @@ int main(int argc, const char * argv[]) {
     printf("%f\n", (double)*number);
     release(number);
 
-    CHDemo *demo = new CHDemo;
-    printf("%s\n", encode(demo));
+    CHDemo *demo = CHTagBufFactor::tagBuf<CHDemo>();
+    Ivar ivar = object_getIvar(demo, "_3");
+    object_setIvar(demo, ivar, number(7525));
+
+    CHDemo2 *demo2 = CHTagBufFactor::tagBuf<CHDemo2>();
+    demo2->_1 = 23.5464;
+    ivar = object_getIvar(demo, "_2");
+    object_setIvar(demo, ivar, demo2);
+    release(demo);
     return 0;
 }
 

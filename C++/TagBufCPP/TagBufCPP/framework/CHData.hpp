@@ -18,12 +18,11 @@ using CHDataChunkCallback = std::function<void(const char *bytes, uint32_t byteL
 CLASS_TAGGEDPOINTER_AVAILABLE class CHData : public CHObject
 {
 protected:
-    ~CHData() override;
     explicit CHData(uint32_t capacity);
     CHData *duplicate() const;
 public:
     CHData() = delete ;
-
+    ~CHData() override;
 //    explicit CHData(CHData &&other);
 //    void operator=(CHData &&right);
 

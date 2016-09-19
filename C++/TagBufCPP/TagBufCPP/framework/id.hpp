@@ -21,11 +21,11 @@ public:
     operator CHTagBuf*() const;
 
     friend void release(CHObject *obj);
-protected:
     virtual ~CHObject();
+protected:
     CHObject();
 
-    struct idPrivate *d;
+    struct idPrivate *d = 0;
 
     void setReserved(void *obj);
     void *reserved() const;
@@ -33,7 +33,5 @@ protected:
     void setObjectType(const char *type);
     virtual const char *objectType() const;
 };
-
-using id = CHObject *;
 
 #endif /* id_hpp */

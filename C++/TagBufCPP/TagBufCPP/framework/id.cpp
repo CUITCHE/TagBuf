@@ -16,44 +16,64 @@ struct idPrivate
     const char *CType;
 };
 
-CHObject::CHObject()
-:d(new idPrivate)
-{
-    ;
-}
+CHObject::CHObject() {}
 
 CHObject::~CHObject()
 {
-    delete d;
+    if (!is_tagged_pointer()) {
+        delete d;
+    }
 }
 
 CHObject::operator void *() const
 {
+    if (is_tagged_pointer()) {
+        return nullptr;
+    }
     return d;
 }
 
 CHObject::operator CHTagBuf *() const
 {
+    if (is_tagged_pointer()) {
+        return nullptr;
+    }
     return (CHTagBuf *)d;
 }
 
 void CHObject::setReserved(void *obj)
 {
-    d->obj = obj;
+    if (!is_tagged_pointer()) {
+        if (!d) {
+            d = new idPrivate;
+        }
+        d->obj = obj;
+    }
 }
 
 void *CHObject::reserved() const
 {
+    if (is_tagged_pointer()) {
+        return nullptr;
+    }
     return d->obj;
 }
 
 void CHObject::setObjectType(const char *type)
 {
-    d->CType = type;
+    if (!is_tagged_pointer()) {
+        if (!d) {
+            d = new idPrivate;
+        }
+        d->CType = type;
+    }
 }
 
 const char *CHObject::objectType() const
 {
+    if (is_tagged_pointer()) {
+        return nullptr;
+    }
     return d->CType;
 }
 

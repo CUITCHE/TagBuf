@@ -35,4 +35,7 @@ using Method = struct method_t *;
 #define CLASS_TAGGEDPOINTER_AVAILABLE
 #endif
 
+class CHObject;
+using id = CHObject *;
+
 #endif /* types_h */

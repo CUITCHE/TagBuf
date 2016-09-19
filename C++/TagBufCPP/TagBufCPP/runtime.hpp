@@ -36,7 +36,7 @@ enum {
 
 struct method_t
 {
-    size_t *hash; // [return type hash, parma0 type hash, ...]
+    size_t *const hash; // [return type hash, parma0 type hash, ...]
     IMP imp;
     SEL name;
     uint32_t flag : 3;
@@ -51,12 +51,10 @@ struct method_t
 
 struct ivar_t
 {
-    const char *ivar_name;
-    const char *ivar_type;
+    const char *const ivar_name;
+    const char *const ivar_type;
     int ivar_offset;
-#ifdef __LP64__
-    int space;
-#endif
+    int type_code;
 };
 
 struct method_list
@@ -72,12 +70,13 @@ struct ivar_list
 struct class_t final
 {
     Class super_class;
-    const char *name;
-    struct method_list *methodList; // In this version, Not Implement.
-    struct ivar_list *ivarList;
+    const char *const name;
+    struct method_list *const methodList; // In this version, Not Implement.
+    struct ivar_list *const ivarList;
     void *cache;
     uint32_t size; // size of class
     uint32_t ivarCount;
+    const char *typeName;
 };
 
 extern void *allocateCache();

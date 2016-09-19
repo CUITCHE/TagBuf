@@ -29,9 +29,9 @@ public:
     operator double() const;
 
     const char *objectType() const override;
+    ~CHNumber() override;
 protected:
     CHNumber();
-    ~CHNumber() override;
 };
 
 CHNumber *numberWithValue(char v);

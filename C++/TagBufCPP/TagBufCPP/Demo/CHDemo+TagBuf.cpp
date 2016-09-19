@@ -10,13 +10,14 @@
 #include "runtime.hpp"
 #include <stdlib.h>
 #include "TagBufDefines.h"
+#include "cast.hpp"
 
 //------------------
 // class CHDemo2
 //------------------
 
 static ivar_list IvarListNamed(CHDemo2)[] = {
-    {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = "double", .ivar_offset = OFFSET(CHDemo2, _1)}}
+    {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = encode<double>(), .ivar_offset = OFFSET(CHDemo2, _1)}}
 };
 
 static class_t ClassNamed(CHDemo2) = {
@@ -26,7 +27,8 @@ static class_t ClassNamed(CHDemo2) = {
     &ivar_list_CHDemo2[0],
     allocateCache(),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHDemo2), CHTagBuf::getClass(nullptr)), sizeof(CHDemo2))),
-    1
+    1,
+    selector(^#CHDemo2)
 };
 
 Implement(CHDemo2);
@@ -36,11 +38,11 @@ Implement(CHDemo2);
 //------------------
 
 static ivar_list IvarListNamed(CHDemo)[] = {
-    {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = "int", .ivar_offset = OFFSET(CHDemo, _1)}},
-    {.ivar[0] = {.ivar_name = selector(_2), .ivar_type = "@\"CHDemo2\"", .ivar_offset = OFFSET(CHDemo, _2)}},
-    {.ivar[0] = {.ivar_name = selector(_3), .ivar_type = "int", .ivar_offset = OFFSET(CHDemo, _3)}},
-    {.ivar[0] = {.ivar_name = selector(_4), .ivar_type = "int", .ivar_offset = OFFSET(CHDemo, _4)}},
-    {.ivar[0] = {.ivar_name = selector(tableId), .ivar_type = "int", .ivar_offset = OFFSET(CHDemo, tableId)}}
+    {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, _1)}},
+    {.ivar[0] = {.ivar_name = selector(_2), .ivar_type = "^#CHDemo2", .ivar_offset = OFFSET(CHDemo, _2)}},
+    {.ivar[0] = {.ivar_name = selector(_3), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, _3)}},
+    {.ivar[0] = {.ivar_name = selector(_4), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, _4)}},
+    {.ivar[0] = {.ivar_name = selector(tableId), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, tableId)}}
 };
 
 static class_t ClassNamed(CHDemo) = {
@@ -50,7 +52,8 @@ static class_t ClassNamed(CHDemo) = {
     &ivar_list_CHDemo[0],
     allocateCache(),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHDemo), CHTagBuf::getClass(nullptr)), sizeof(CHDemo))),
-    5
+    5,
+    selector(^#CHDemo)
 };
 
 Implement(CHDemo);
