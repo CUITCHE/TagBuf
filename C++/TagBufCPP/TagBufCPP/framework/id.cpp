@@ -9,11 +9,12 @@
 #include "id.hpp"
 #include "types.h"
 #include "CHTagBuf.hpp"
+#include "TaggedPointer.h"
 
 struct idPrivate
 {
     void *obj;
-    uint32_t valueType;
+    const char *CType;
 };
 
 CHObject::CHObject()
@@ -24,15 +25,7 @@ CHObject::CHObject()
 
 CHObject::~CHObject()
 {
-//    if (!((uintptr_t)this & TAGGED_POINTER_FLAG)) {
-//        switch (d->valueType) {
-//            case 0:
-//                delete (CHTagBuf *)d->obj;
-//                break;
-//            default:
-//                break;
-//        }
-//    }
+    delete d;
 }
 
 CHObject::operator void *() const
@@ -53,6 +46,16 @@ void CHObject::setReserved(void *obj)
 void *CHObject::reserved() const
 {
     return d->obj;
+}
+
+void CHObject::setObjectType(const char *type)
+{
+    d->CType = type;
+}
+
+const char *CHObject::objectType() const
+{
+    return d->CType;
 }
 
 // constructor

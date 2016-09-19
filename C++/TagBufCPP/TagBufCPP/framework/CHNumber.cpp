@@ -8,11 +8,12 @@
 
 #include "CHNumber.hpp"
 #include "types.h"
+#include "TaggedPointer.h"
+#include "cast.hpp"
 
 struct CHNumberPrivate
 {
-    volatile uint32_t valueType = 0;
-    volatile union {
+    union {
         char charValue;
         short shortValue;
         int intValue;
@@ -41,7 +42,7 @@ CHNumber::~CHNumber()
 CHNumber::operator unsigned char() const
 {
     if (is_tagged_pointer()) {
-        return (unsigned char)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
+        return (unsigned char)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, charValue);
 }
@@ -54,7 +55,7 @@ CHNumber::operator char() const
 CHNumber::operator unsigned short() const
 {
     if (is_tagged_pointer()) {
-        return (unsigned short)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
+        return (unsigned short)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, shortValue);
 }
@@ -67,7 +68,7 @@ CHNumber::operator short() const
 CHNumber::operator unsigned int() const
 {
     if (is_tagged_pointer()) {
-        return (unsigned int)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
+        return (unsigned int)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, intValue);
 }
@@ -79,17 +80,10 @@ CHNumber::operator int() const
 
 CHNumber::operator unsigned long() const
 {
-#ifdef __LP64__
     if (is_tagged_pointer()) {
         return this->operator unsigned long long();
     }
     return d_d(this, longValue);
-#else
-    if (is_tagged_pointer()) {
-        return (unsigned long)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
-    }
-    return d_d(this, longValue);
-#endif
 }
 
 CHNumber::operator long() const
@@ -100,7 +94,7 @@ CHNumber::operator long() const
 CHNumber::operator unsigned long long() const
 {
     if (is_tagged_pointer()) {
-        return (unsigned long long)(((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1);
+        return (unsigned long long)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, longLongValue);
 }
@@ -113,70 +107,64 @@ CHNumber::operator long long() const
 CHNumber::operator float() const
 {
     if (is_tagged_pointer()) {
-        uintptr_t ret = ((uintptr_t)this ^ TAGGED_POINTER_FLAG) >> 1;
-        char *p = (char *)&ret;
-        float v = 0;
-        char *target = (char *)&v;
-        target[0] = p[3];
-        target[1] = p[2];
-        target[2] = p[1];
-        target[3] = p[0];
-        return v;
+        uintptr_t ret = (uintptr_t)this;
+        if (ret & 0xFFFFFFFF00000000ULL) { // may be a double value
+            _double d{.dd = static_cast<uint64_t>(ret ^ TAGGED_POINTER_NUMBER_FLAG)};
+            return (float)d.d;
+        }
+        ret = ((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1;
+        _float f{.ff = static_cast<uint32_t>(ret)};
+        return f.f;
     }
     return d_d(this, floatValue);
 }
 
 CHNumber::operator double() const
 {
+    if (is_tagged_pointer()) {
+        uintptr_t ret = ((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG);
+        _double d{.dd = static_cast<uint64_t>(ret)};
+        return d.d;
+    }
     return d_d(this, doubleValue);
 }
 
-CHNumber *objectWithValue(char v)
+CHNumber *numberWithValue(char v)
 {
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
+    return numberWithValue((unsigned int)v);
+}
+
+CHNumber *numberWithValue(unsigned char v)
+{
+    return numberWithValue((unsigned int)v);
+}
+
+CHNumber *numberWithValue(short v)
+{
+    return numberWithValue((unsigned int)v);
+}
+
+CHNumber *numberWithValue(unsigned short v)
+{
+    return numberWithValue((unsigned int)v);
+}
+
+CHNumber *numberWithValue(int v)
+{
+    return numberWithValue((unsigned int)v);
+}
+
+CHNumber *numberWithValue(unsigned int v)
+{
+    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v) << 1 | TAGGED_POINTER_NUMBER_FLAG);
     return o;
 }
 
-CHNumber *objectWithValue(unsigned char v)
+CHNumber *numberWithValue(float v)
 {
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(short v)
-{
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(unsigned short v)
-{
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(int v)
-{
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(unsigned int v)
-{
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(float v)
-{
-    char *p = (char *)(&v);
-    uintptr_t ret = 0;
-    char *target = (char *)&ret;
-    target[0] = p[3];
-    target[1] = p[2];
-    target[2] = p[1];
-    target[3] = p[0];
-    CHNumber * o = reinterpret_cast<CHNumber *>((ret)<<1 | TAGGED_POINTER_FLAG);
+    _float f{v};
+    uintptr_t ret = f.ff;
+    CHNumber * o = reinterpret_cast<CHNumber *>((ret) << 1 | TAGGED_POINTER_NUMBER_FLAG);
     return o;
 }
 
@@ -187,62 +175,49 @@ struct CHNumberHelper
         CHNumber *o = new CHNumber;
         o->setReserved(new CHNumberPrivate);
         d_d(o, longLongValue) = v;
+        o->setObjectType(encode(o));
         return o;
     }
 };
 
-CHNumber *objectWithValue(double v)
+CHNumber *numberWithValue(double v)
 {
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-}
-
-CHNumber *objectWithValue(long v)
-{
-#ifdef __LP64__
-    if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumberHelper::standardNumber(v);
-        return o;
+    CHNumber *o = nullptr;
+    _double d{v};
+    if (v < 0) {
+        o = CHNumberHelper::standardNumber(d.dd);
+    } else {
+        o = reinterpret_cast<CHNumber *>(d.dd | TAGGED_POINTER_NUMBER_FLAG);
     }
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
     return o;
-#else // bug, same blow.
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-#endif
 }
 
-CHNumber *objectWithValue(unsigned long v)
+CHNumber *numberWithValue(long v)
 {
-#ifdef __LP64__
-    if (v & MAX_INDICATE_FLAG) {
-        CHNumber *o = CHNumberHelper::standardNumber(v);
-        return o;
-    }
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-#else
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
-    return o;
-#endif
+    return numberWithValue((unsigned long)v);
 }
 
-CHNumber *objectWithValue(long long v)
+CHNumber *numberWithValue(unsigned long v)
 {
     if (v & MAX_INDICATE_FLAG) {
         CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
+    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v) << 1 | TAGGED_POINTER_NUMBER_FLAG);
     return o;
 }
 
-CHNumber *objectWithValue(unsigned long long v)
+CHNumber *numberWithValue(long long v)
+{
+    return numberWithValue((unsigned long long)v);
+}
+
+CHNumber *numberWithValue(unsigned long long v)
 {
     if (v & MAX_INDICATE_FLAG) {
         CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
-    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v)<<1 | TAGGED_POINTER_FLAG);
+    CHNumber * o = reinterpret_cast<CHNumber *>(((uintptr_t)v) << 1 | TAGGED_POINTER_NUMBER_FLAG);
     return o;
 }

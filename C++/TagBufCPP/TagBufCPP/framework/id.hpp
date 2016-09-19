@@ -19,15 +19,18 @@ public:
     operator void*() const;
     operator CHTagBuf*() const;
 
-    
     friend void release(CHObject *obj);
 protected:
     virtual ~CHObject();
     CHObject();
 
     struct idPrivate *d;
+
     void setReserved(void *obj);
     void *reserved() const;
+
+    void setObjectType(const char *type);
+    const char *objectType() const;
 };
 
 using id = CHObject *;

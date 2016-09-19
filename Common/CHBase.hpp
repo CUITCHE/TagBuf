@@ -176,7 +176,8 @@ struct CHTagBufferBuilderPrivate
 };
 NSCharacterSet *CHTagBufferBuilderPrivate::protocolCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@"\"<"];
 #elif defined(__cplusplus)
-extern void release(CHData *);
+class CHObject;
+extern void release(CHObject *);
 
 struct TagBufferBuilderPrivate
 {

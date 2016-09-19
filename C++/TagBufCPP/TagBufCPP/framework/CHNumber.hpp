@@ -32,17 +32,18 @@ protected:
     ~CHNumber() override;
 };
 
-CHNumber *objectWithValue(char v);
-CHNumber *objectWithValue(unsigned char v);
-CHNumber *objectWithValue(short v);
-CHNumber *objectWithValue(unsigned short v);
-CHNumber *objectWithValue(int v);
-CHNumber *objectWithValue(unsigned int v);
-CHNumber *objectWithValue(float v);
-CHNumber *objectWithValue(double v);
-CHNumber *objectWithValue(long v);
-CHNumber *objectWithValue(unsigned long v);
-CHNumber *objectWithValue(long long v);
-CHNumber *objectWithValue(unsigned long long v);
+CHNumber *numberWithValue(char v);
+CHNumber *numberWithValue(unsigned char v);
+CHNumber *numberWithValue(short v);
+CHNumber *numberWithValue(unsigned short v);
+CHNumber *numberWithValue(int v);
+CHNumber *numberWithValue(unsigned int v);
+CHNumber *numberWithValue(float v);
+CHNumber *numberWithValue(double v);
+CHNumber *numberWithValue(long v);
+CHNumber *numberWithValue(unsigned long v);
+CHNumber *numberWithValue(long long v);
+CHNumber *numberWithValue(unsigned long long v);
 
+#define number(v) numberWithValue(v)
 #endif /* CHNumber_hpp */

@@ -11,14 +11,14 @@
 
 #include <stdio.h>
 #include "types.h"
+#include "id.hpp"
 
 typedef void(*CHDataChunkCallback)(const char *bytes, unsigned long byteLength, bool *stop);
 
-class CHData
+class CHData : public CHObject
 {
-    struct CHDataPrivate *d;
 protected:
-    ~CHData();
+    ~CHData() override;
 public:
     CHData() = delete ;
     explicit CHData(uint32_t capacity);
@@ -34,8 +34,6 @@ public:
     uint32_t capacity() const;
 
     static CHData *dataWithData(const char *bytes, uint32_t length);
-
-    friend void release(CHData *obj);
 };
 
 #endif /* CHBuffer_hpp */

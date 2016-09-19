@@ -30,8 +30,4 @@ using Class = struct class_t *;
 using Ivar   = struct ivar_t *;
 using Method = struct method_t *;
 
-#define TAGGED_POINTER_FLAG 0x8000000000000001
-#define is_tagged_pointer() ((uintptr_t)this & TAGGED_POINTER_FLAG)
-#define MAX_INDICATE_FLAG 0xE000000000000000ULL
-
 #endif /* types_h */

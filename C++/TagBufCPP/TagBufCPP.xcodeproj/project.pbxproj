@@ -33,6 +33,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaggedPointer.h; sourceTree = "<group>"; };
 		FBBBB6061D8EAE64008DF84F /* TagBufCPP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TagBufCPP; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBBBB6101D8EAE98008DF84F /* cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cache.cpp; sourceTree = "<group>"; };
 		FBBBB6111D8EAE98008DF84F /* cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cache.hpp; sourceTree = "<group>"; };
@@ -130,6 +131,7 @@
 				FBBBB61F1D8EAE98008DF84F /* CHString.hpp */,
 				FBBBB6201D8EAE98008DF84F /* id.cpp */,
 				FBBBB6211D8EAE98008DF84F /* id.hpp */,
+				FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */,
 			);
 			path = framework;
 			sourceTree = "<group>";
@@ -332,6 +334,7 @@
 				FBBBB60F1D8EAE64008DF84F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

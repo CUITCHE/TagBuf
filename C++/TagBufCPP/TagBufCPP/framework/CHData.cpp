@@ -206,34 +206,46 @@ private:
     }
 };
 
-// CHData
-CHData::CHData(uint32_t capacity) :d(new CHDataPrivate(capacity)) {}
+#define d_d(obj, field) ((CHDataPrivate *)obj->reserved())->field
 
-CHData::~CHData() { delete d; }
+// CHData
+CHData::CHData(uint32_t capacity) : CHObject()
+{
+    setReserved(new CHDataPrivate(capacity));
+}
+
+CHData::~CHData()
+{
+    CHDataPrivate *d = (CHDataPrivate *)reserved();
+    if (d) {
+        delete d;
+    }
+}
 
 CHData::CHData(CHData &&other)
 :CHData(0)
 {
-    d->swap(std::move(*other.d));
+    d_d(this, swap)(std::move(*(CHDataPrivate *)other.reserved()));
 }
 
 void CHData::operator=(CHData &&right)
 {
-    d->swap(std::move(*right.d));
+    d_d(this, swap)(std::move(*(CHDataPrivate *)right.reserved()));
 }
 
 void CHData::appendBytes(const char *bytes, uint32_t length)
 {
-    d->write(bytes, length);
+    d_d(this, write)(bytes, length);
 }
 
 void CHData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone /*= false*/)
 {
-    d->writeNoCopy((char *)bytes, length, freeWhenDone);
+    d_d(this, writeNoCopy)((char *)bytes, length, freeWhenDone);
 }
 
 void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
 {
+    CHDataPrivate *d = (CHDataPrivate *)reserved();
     uint32_t count = d->chunk_pos;
     bool stop = false;
     char **p = d->chunks;
@@ -259,15 +271,10 @@ CHData *CHData::dataWithData(const char *bytes, uint32_t length)
 
 uint32_t CHData::length() const
 {
-    return d->size();
+    return d_d(this, size)();
 }
 
 uint32_t CHData::capacity() const
 {
-    return d->capacity();
-}
-
-void release(CHData *obj)
-{
-    ;
+    return d_d(this, capacity)();
 }

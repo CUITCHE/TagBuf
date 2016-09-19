@@ -12,6 +12,7 @@
 #include "cast.hpp"
 #include <map>
 #include "CHNumber.hpp"
+#include "TaggedPointer.h"
 
 unsigned int RevBit(unsigned int x);
 void test();
@@ -35,17 +36,21 @@ int main(int argc, const char * argv[]) {
     printf("%s\n", encode<TEST>());
     printf("%s\n", encode<CHDemo>());
     printf("%s\n", encode<std::__1::map<double, int>>());
-    CHNumber *number = objectWithValue('A');
+    CHNumber *number = number('A');
     printf("%d\n", (int)*number);
     release(number);
 
-    number = objectWithValue(34.56f);
+    number = number(34.56);
     printf("%f\n", (float)*number);
     release(number);
 
-    number = objectWithValue(0x8FFFFFFFFFFFFFFFULL);
+    number = number(0x8FFFFFFFFFFFFFFFULL);
     printf("0x%llx\n", (long long)*number);
+    printf("%f\n", (double)*number);
     release(number);
+
+    CHDemo *demo = new CHDemo;
+    printf("%s\n", encode(demo));
     return 0;
 }
 

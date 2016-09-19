@@ -10,7 +10,11 @@
 #define runtime_hpp
 
 #if defined(__OBJC__)
-#error This code just support cplusplus
+#error This code onlu support cplusplus
+#endif
+
+#if !defined(__LP64__)
+#error This code onlu support 64 bit machine.
 #endif
 
 #include <stdio.h>
@@ -174,5 +178,8 @@ _T& propertyInvoke(CHTagBuf *self, SEL propertyName)
 
 extern size_t bkdr_hash(const char *str);
 
-Ivar object_getIvar();
+#include "id.hpp"
+
+Ivar object_getIvar(CHTagBuf *self, const char *name);
+void object_setIvar(CHTagBuf *self, const Ivar ivar, id value);
 #endif /* runtime_hpp */

@@ -86,22 +86,26 @@ template <> struct __encode__<CHNumber>
 { static const char *type() { return "#\"CHNumber\""; } }; __ENCODE_CV__(CHNumber,);
 
 #include <vector>
-using std::vector;
 
-template <typename T> struct __encode__<vector<T>>
-{ static const char *type() { return "#\"vector<T>\""; } }; __ENCODE_CV__(vector<T>, typename T);
+template <typename T> struct __encode__<std::vector<T>>
+{ static const char *type() { return "#\"vector<T>\""; } }; __ENCODE_CV__(std::vector<T>, typename T);
 
-#include "CHTagBuf.hpp"
 
 template <typename T>
 const char *encode()
 {
-    return std::is_base_of<CHTagBuf, typename std::remove_cv<T>::type>::value ? "#\"CHTagBuf\"" :  __encode__<T>::type();
+    return std::is_base_of<CHTagBuf, typename std::remove_pointer<typename std::remove_cv<T>::type>::type>::value ? "#\"CHTagBuf\"" :  __encode__<T>::type();
 }
 
 template<typename T>
 const char *encode(__unused T unused)
 {
-    return std::is_base_of<CHTagBuf, typename std::remove_cv<T>::type>::value ? "#\"CHTagBuf\"" :  __encode__<T>::type();
+//    if (std::is_pointer<T>::value) {
+//        typedef typename std::remove_pointer<typename std::remove_cv<T>::type>::type _T;
+//        if (std::is_base_of<CHTagBuf, _T>::value) {
+//            return runtimeClassName(unused);
+//        }
+//    }
+    return std::is_base_of<CHTagBuf, typename std::remove_pointer<typename std::remove_cv<T>::type>::type>::value ? "#\"CHTagBuf\"" :  __encode__<T>::type();
 }
 #endif /* cast_hpp */
