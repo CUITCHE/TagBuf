@@ -11,10 +11,11 @@
 
 #include <stdio.h>
 #include "id.hpp"
+#include <functional>
 
-typedef void(*CHDataChunkCallback)(const char *bytes, unsigned long byteLength, bool *stop);
+using CHDataChunkCallback = std::function<void(const char *bytes, uint32_t byteLength, bool *stop)>;
 
-TAGGED_AVAILABLE class CHData : public CHObject
+CLASS_TAGGEDPOINTER_AVAILABLE class CHData : public CHObject
 {
 protected:
     ~CHData() override;
@@ -28,6 +29,8 @@ public:
 
     void appendBytes(const char *bytes, uint32_t length);
     void appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone = false);
+    void appendData(const CHData *other);
+
     void enumerateByteUsingBlock(CHDataChunkCallback block) const;
 
     uint32_t length() const;

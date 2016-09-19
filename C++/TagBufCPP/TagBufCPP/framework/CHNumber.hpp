@@ -11,7 +11,7 @@
 
 #include "id.hpp"
 
-TAGGED_AVAILABLE class CHNumber : public CHObject
+CLASS_TAGGEDPOINTER_AVAILABLE class CHNumber : public CHObject
 {
     friend struct CHNumberHelper;
 public:

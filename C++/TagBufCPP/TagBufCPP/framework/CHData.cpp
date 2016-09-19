@@ -84,13 +84,14 @@ struct CHDataPrivate
         char **src = chunks + chunk_pos - 1;
         uint32_t writeSize = 0;
     continueWrite:
-        dest = *++src + chunk_pointer;
         if (chunk_pointer == 0) {
-            *src = allocate();
+            *++src = allocate();
             dest = *src;
+            *dest++ = Normal;
+            ++chunk_pointer;
+        } else {
+            dest = *++src + chunk_pointer;
         }
-        *++dest = Normal;
-        ++chunk_pointer;
         if (length + chunk_pointer > CHUNK_SIZE) {
             writeSize = CHUNK_SIZE - chunk_pointer;
             memcpy(dest, bytes, writeSize);
@@ -294,6 +295,13 @@ void CHData::appendBytes(const char *bytes, uint32_t length)
 void CHData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone /*= false*/)
 {
     d_d(this, writeNoCopy)((char *)bytes, length, freeWhenDone);
+}
+
+void CHData::appendData(const CHData *other)
+{
+    other->enumerateByteUsingBlock([this](const char *bytes, uint32_t byteLength, bool *stop) {
+        this->appendBytes(bytes, byteLength);
+    });
 }
 
 void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const

@@ -14,7 +14,7 @@
 
 class CHTagBuf;
 
-TAGGED_AVAILABLE class CHObject
+CLASS_TAGGEDPOINTER_AVAILABLE class CHObject
 {
 public:
     operator void*() const;

@@ -11,7 +11,7 @@
 
 #include "CHData.hpp"
 
-TAGGED_AVAILABLE class CHString : protected CHData
+CLASS_TAGGEDPOINTER_AVAILABLE class CHString : protected CHData
 {
     CHString();
     CHString(const CHString&) = delete;

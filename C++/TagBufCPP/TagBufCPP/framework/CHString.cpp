@@ -52,7 +52,7 @@ CHString *CHString::stringWithString(const CHString *other)
 /// CHMutableString
 CHString& CHMutableString::appendString(const CHString *other)
 {
-
+    appendData(other);
     return *this;
 }
 
