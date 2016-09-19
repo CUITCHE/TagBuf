@@ -10,10 +10,11 @@
 #define id_hpp
 
 #include <stdio.h>
+#include "types.h"
 
 class CHTagBuf;
 
-class CHObject
+TAGGED_AVAILABLE class CHObject
 {
 public:
     operator void*() const;
@@ -30,7 +31,7 @@ protected:
     void *reserved() const;
 
     void setObjectType(const char *type);
-    const char *objectType() const;
+    virtual const char *objectType() const;
 };
 
 using id = CHObject *;

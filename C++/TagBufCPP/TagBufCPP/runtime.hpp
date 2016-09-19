@@ -10,11 +10,11 @@
 #define runtime_hpp
 
 #if defined(__OBJC__)
-#error This code onlu support cplusplus
+#error This code only support cplusplus
 #endif
 
 #if !defined(__LP64__)
-#error This code onlu support 64 bit machine.
+#error This code only support 64 bit machine.
 #endif
 
 #include <stdio.h>

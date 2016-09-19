@@ -19,5 +19,6 @@ class CHTagBuf
 public:
     virtual Class getClass();
     static Class getClass(std::nullptr_t);
+    virtual ~CHTagBuf(){};
 };
 #endif /* CHTagBuf_hpp */

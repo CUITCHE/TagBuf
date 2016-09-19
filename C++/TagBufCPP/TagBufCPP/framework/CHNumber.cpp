@@ -7,7 +7,6 @@
 //
 
 #include "CHNumber.hpp"
-#include "types.h"
 #include "TaggedPointer.h"
 #include "cast.hpp"
 
@@ -127,6 +126,11 @@ CHNumber::operator double() const
         return d.d;
     }
     return d_d(this, doubleValue);
+}
+
+const char *CHNumber::objectType() const
+{
+    return encode(this);
 }
 
 CHNumber *numberWithValue(char v)

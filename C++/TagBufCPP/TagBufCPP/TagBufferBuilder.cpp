@@ -15,8 +15,6 @@
 using namespace std;
 
 
-
-
 #pragma mark TagBufferBuilder
 TagBufferBuilder::TagBufferBuilder()
 :d(new TagBufferBuilderPrivate)
@@ -31,7 +29,7 @@ TagBufferBuilder::~TagBufferBuilder()
 void TagBufferBuilder::startBuildingWithObject(CHTagBuf *object)
 {
     if (!d->writeBuffer) {
-        d->writeBuffer = new CHData(1);
+        d->writeBuffer = CHData::dataWithCapacity(0);
     }
 }
 
@@ -42,7 +40,7 @@ void *TagBufferBuilder::readTagBuffer(CHData &data, Class cls)
             break;
         }
         if (!d->readBuffer) {
-            d->readBuffer = new CHData(1);
+            d->readBuffer = CHData::dataWithCapacity(0);
         }
         *d->readBuffer = std::move(data);
     } while (0);

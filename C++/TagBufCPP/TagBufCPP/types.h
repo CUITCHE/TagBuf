@@ -30,4 +30,9 @@ using Class = struct class_t *;
 using Ivar   = struct ivar_t *;
 using Method = struct method_t *;
 
+/// Tag the class to indicate the class support tagged-pointer.
+#ifndef TAGGED_AVAILABLE
+#define TAGGED_AVAILABLE
+#endif
+
 #endif /* types_h */

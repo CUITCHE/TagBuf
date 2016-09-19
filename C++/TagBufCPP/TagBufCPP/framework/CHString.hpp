@@ -9,9 +9,9 @@
 #ifndef CHString_hpp
 #define CHString_hpp
 
-#include "types.h"
+#include "CHData.hpp"
 
-class CHString
+TAGGED_AVAILABLE class CHString : protected CHData
 {
     CHString();
     CHString(const CHString&) = delete;
@@ -21,21 +21,23 @@ public:
     uint32_t capacity() const;
     void print() const;
 
-    static CHString&& stringWithCString(const char *str);
-    static CHString&& stringWithString(const CHString &other);
-    static CHString&& stringWithBytes(const void *bytes, uint32_t length);
+    static CHString* stringWithCString(const char *str);
+    static CHString* stringWithString(const CHString *other);
+    static CHString* stringWithBytes(const void *bytes, uint32_t length);
 
-    friend void release(CHString *obj);
+    const char *objectType() const override;
 };
 
 class CHMutableString : public CHString
 {
 public:
-    CHString& appendString(const CHString &other);
+    CHString& appendString(const CHString *other);
     CHString& appendString(const char *str);
     CHString& appendString(const void *bytes, uint32_t length);
 
     void clear();
+
+    const char *objectType() const override;
 };
 
 #endif /* CHString_hpp */

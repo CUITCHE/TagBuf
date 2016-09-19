@@ -7,7 +7,6 @@
 //
 
 #include "id.hpp"
-#include "types.h"
 #include "CHTagBuf.hpp"
 #include "TaggedPointer.h"
 

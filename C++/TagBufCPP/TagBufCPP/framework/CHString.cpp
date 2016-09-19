@@ -7,12 +7,74 @@
 //
 
 #include "CHString.hpp"
-#include "CHData.hpp"
-#include <string.h>
+#include "cast.hpp"
+#include "TaggedPointer.h"
 
-CHString::CHString() {}
+CHString::CHString() : CHData(0)
+{}
 
 uint32_t CHString::length() const
 {
-    return ((CHData *)this)->length();
+    return this->CHData::length();
 }
+
+uint32_t CHString::capacity() const
+{
+    return this->CHData::capacity();
+}
+
+const char *CHString::objectType() const
+{
+    return encode(this);
+}
+
+CHString *CHString::stringWithCString(const char *str)
+{
+    const char *p = str;
+    while (*++p) {
+        continue;
+    }
+    return stringWithBytes(str, (uint32_t)(p - str));
+}
+
+CHString *CHString::stringWithBytes(const void *bytes, uint32_t length)
+{
+    CHData *data = dataWithBytes((const char *)bytes, length);
+    return (CHString *)data;
+}
+
+CHString *CHString::stringWithString(const CHString *other)
+{
+    return (CHString *)other->duplicate();
+}
+
+
+/// CHMutableString
+CHString& CHMutableString::appendString(const CHString *other)
+{
+
+    return *this;
+}
+
+CHString& CHMutableString::appendString(const char *str)
+{
+    const char *p = str;
+    while (*++p) {
+        continue;
+    }
+    appendBytes(str, (uint32_t)(p - str));
+    return *this;
+}
+
+CHString& CHMutableString::appendString(const void *bytes, uint32_t length)
+{
+    appendBytes((char *)bytes, length);
+    return *this;
+}
+
+
+const char *CHMutableString::objectType() const
+{
+    return encode(this);
+}
+

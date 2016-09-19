@@ -11,7 +11,7 @@
 
 #include "id.hpp"
 
-class CHNumber : public CHObject
+TAGGED_AVAILABLE class CHNumber : public CHObject
 {
     friend struct CHNumberHelper;
 public:
@@ -27,6 +27,8 @@ public:
     operator long long() const;
     operator unsigned long long() const;
     operator double() const;
+
+    const char *objectType() const override;
 protected:
     CHNumber();
     ~CHNumber() override;

@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <memory>
+#include <CHBase.hpp>
 
 /// Size of memory chunk
 constexpr const uint32_t CHUNK_SIZE = 512;
@@ -153,6 +154,7 @@ struct CHDataPrivate
         // 2.Associate to non-copy buffer.
         *++p = bytes;
         chunk_pos += 2;
+        chunk_pointer = 0;
     }
 private:
     void resize(uint32_t new_chunk_size)
@@ -214,6 +216,57 @@ CHData::CHData(uint32_t capacity) : CHObject()
     setReserved(new CHDataPrivate(capacity));
 }
 
+CHData *CHData::duplicate() const
+{
+    CHData *obj = new CHData(0);
+    CHDataPrivate *d = (CHDataPrivate *)reserved();
+    d_d(obj, chunk_pos) = d->chunk_pos;
+    d_d(obj, chunk_pointer) = d->chunk_pointer;
+    d_d(obj, lengthOfChunks) = d->lengthOfChunks;
+    uint32_t count = d->lengthOfChunks;
+    char **p = d->chunks - 1;
+    char *sv = nullptr;
+
+    d = (CHDataPrivate *)obj->reserved();
+    d->chunks = (char **)malloc(sizeof(char *) * count);
+    char **dest = d->chunks - 1;
+    char *dv = nullptr;
+    while (count --> 0) {
+        sv = *++p;
+        if (sv[0] == Normal) {
+            dv =(char *)malloc(sizeof(char) * CHUNK_SIZE);
+            memcpy(dv, sv, sizeof(char) * CHUNK_SIZE);
+        } else {
+            if (sv[0] == ChunkLengthNeedsCalculated) {
+                short length = (sv[1] | sv[2] << 8) + 1 + 2;
+                dv = (char *)malloc(sizeof(char) * length);
+                memcpy(dv, sv, sizeof(char) * length);
+            } else if (sv[0] & (NextIsNonCopyBuffer | NoCopy)) {
+                uint64_t *bufferLength = (uint64_t *)malloc(sizeof(uint64_t));
+                memcpy(bufferLength, sv, sizeof(uint64_t));
+
+                bool needCopy = !!(sv[0] & FreeWhenDone);
+                uint32_t *length = (uint32_t *)(sv + 1);
+
+                *++dest = (char *)bufferLength;
+                sv = *++p;
+                --count;
+
+                if (needCopy) {
+                    dv = (char *)malloc(sizeof(char) * *length);
+                    memcpy(dv, sv, sizeof(char) * *length);
+                } else {
+                    dv = sv;
+                }
+            } else {
+                CHCAssert(false, "Logic error. It's impossible to go here.");
+            }
+        }
+        *++dest = dv;
+    }
+    return obj;
+}
+
 CHData::~CHData()
 {
     CHDataPrivate *d = (CHDataPrivate *)reserved();
@@ -222,16 +275,16 @@ CHData::~CHData()
     }
 }
 
-CHData::CHData(CHData &&other)
-:CHData(0)
-{
-    d_d(this, swap)(std::move(*(CHDataPrivate *)other.reserved()));
-}
-
-void CHData::operator=(CHData &&right)
-{
-    d_d(this, swap)(std::move(*(CHDataPrivate *)right.reserved()));
-}
+//CHData::CHData(CHData &&other)
+//:CHData(0)
+//{
+//    d_d(this, swap)(std::move(*(CHDataPrivate *)other.reserved()));
+//}
+//
+//void CHData::operator=(CHData &&right)
+//{
+//    d_d(this, swap)(std::move(*(CHDataPrivate *)right.reserved()));
+//}
 
 void CHData::appendBytes(const char *bytes, uint32_t length)
 {
@@ -246,27 +299,51 @@ void CHData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhen
 void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
 {
     CHDataPrivate *d = (CHDataPrivate *)reserved();
-    uint32_t count = d->chunk_pos;
+    uint32_t count = d->lengthOfChunks;
     bool stop = false;
-    char **p = d->chunks;
+    char **p = d->chunks - 1;
+    char *v = nullptr;
     while (count --> 0) {
-        block(*p++, CHUNK_SIZE, &stop);
+        v = *++p;
+        if (v[0] == Normal) {
+            block(++v, CHUNK_SIZE - 1, &stop);
+        } else {
+            if (v[0] == ChunkLengthNeedsCalculated) {
+                short length = v[1] | v[2] << 8;
+                block(v + 3, length, &stop);
+            } else if (v[0] & (NextIsNonCopyBuffer | NoCopy)) {
+                uint32_t *length = (uint32_t *)(v + 1);
+                --count;
+                block(*++p, *length, &stop);
+            } else {
+                CHCAssert(false, "Logic error. It's impossible to go here.");
+            }
+        }
+
         if (stop) {
             break;
         }
     }
-    if (!stop && d->chunk_pointer) {
-        block(*p, d->chunk_pointer, &stop);
-    }
 }
 
-CHData *CHData::dataWithData(const char *bytes, uint32_t length)
+CHData *CHData::dataWithBytes(const char *bytes, uint32_t length)
 {
     CHData *obj = nullptr;
     if (length < 8) {
         ;
     }
     return obj;
+}
+
+CHData *CHData::dataWithCapacity(uint32_t capacity)
+{
+    CHData *obj = new CHData(capacity);
+    return obj;
+}
+
+CHData *CHData::dataWithData(const CHData *other)
+{
+    return other->duplicate();
 }
 
 uint32_t CHData::length() const
