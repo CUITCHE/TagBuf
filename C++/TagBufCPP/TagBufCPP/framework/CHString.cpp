@@ -19,9 +19,10 @@ static class_t ClassNamed(CHString) = {
     nullptr,
     nullptr,
     allocateCache(),
+    selector(^#CHString),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHString), CHString::getClass(nullptr)), sizeof(CHString))),
     0,
-    selector(^#CHString)
+    0
 };
 
 Implement(CHString);
@@ -32,9 +33,10 @@ static class_t ClassNamed(CHMutableString) = {
     nullptr,
     nullptr,
     allocateCache(),
+    selector(^#CHMutableString),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableString), CHMutableString::getClass(nullptr)), sizeof(CHMutableString))),
     0,
-    selector(^#CHMutableString)
+    0
 };
 
 Implement(CHMutableString);

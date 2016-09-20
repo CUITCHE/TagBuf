@@ -13,15 +13,32 @@
 #include "tagBuf.hpp"
 #include "runtime.hpp"
 
+struct runtimeclass(CHObject)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[] = {
+            {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member, 0, 1, 0} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static|__Overload, 0, 1, 0} },
+            {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload, 0, 1, 0} },
+            {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member, 0, 2, 0} },
+            {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member, 0, 1, 0} },
+            {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member, 0, 2, 0} },
+        };
+        return method;
+    }
+};
+
 static class_t ClassNamed(CHObject) = {
     nullptr,
     selector(CHObject),
-    nullptr,
+    runtimeclass(CHObject)::methods(),
     nullptr,
     allocateCache(),
+    selector(^#CHObject),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject), CHObject::getClass(nullptr)), sizeof(CHObject))),
     0,
-    selector(^#CHTagBuf)
+    6
 };
 
 Implement(CHObject);

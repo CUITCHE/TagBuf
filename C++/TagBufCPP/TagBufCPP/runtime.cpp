@@ -75,6 +75,16 @@ int ivar_getOffset(Ivar ivar)
     return ivar->ivar_offset;
 }
 
+const char *ivar_getName(Ivar ivar)
+{
+    return ivar->ivar_name;
+}
+
+const char *ivar_getTypeEncoding(Ivar ivar)
+{
+    return ivar->ivar_type;
+}
+
 id object_getIvar(id obj, Ivar ivar)
 {
     if (obj && ivar && !obj->isTaggedPointer()) {
@@ -119,6 +129,42 @@ Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
         ivar_list_t *p = ivars - 1;
         while (count --> 0) {
             *++dst = (++p)->ivar;
+        }
+    }
+    return result;
+}
+
+IMP method_getImplementation(Method m)
+{
+    return m ? m->imp : (IMP)nullptr;
+}
+
+SEL method_getName(Method m)
+{
+    return m ? m->name : nullptr;
+}
+
+Method *class_copyMethodList(Class cls, unsigned int *outCount)
+{
+    if (!cls) {
+        if (outCount) {
+            *outCount = 0;
+        }
+        return nullptr;
+    }
+    Method *result = nullptr;
+    method_list_t *methods = cls->methodList;
+    uint32_t count = cls->methodCount;
+    if (outCount) {
+        *outCount = count;
+    }
+    if (methods && count) {
+        result = (Method *)malloc(sizeof(Method) * (count + 1));
+        result[count] = nullptr;
+        Method *dst = result - 1;
+        method_list_t *p = methods - 1;
+        while (count --> 0) {
+            *++dst = (++p)->method;
         }
     }
     return result;

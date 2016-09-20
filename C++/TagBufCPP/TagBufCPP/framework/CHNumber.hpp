@@ -13,6 +13,7 @@
 
 CLASS_TAGGEDPOINTER_AVAILABLE class CHNumber : public CHObject
 {
+    __SUPPORTRUNTIME__(CHNumber);
     friend struct CHNumberHelper;
 public:
     operator char() const;

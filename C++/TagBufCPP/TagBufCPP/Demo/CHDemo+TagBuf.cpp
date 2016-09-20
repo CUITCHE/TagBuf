@@ -26,9 +26,10 @@ static class_t ClassNamed(CHDemo2) = {
     nullptr,
     &ivar_list_CHDemo2[0],
     allocateCache(),
+    selector(^#CHDemo2),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHDemo2), CHTagBuf::getClass(nullptr)), sizeof(CHDemo2))),
     1,
-    selector(^#CHDemo2)
+    0
 };
 
 Implement(CHDemo2);
@@ -51,9 +52,10 @@ static class_t ClassNamed(CHDemo) = {
     nullptr,
     &ivar_list_CHDemo[0],
     allocateCache(),
+    selector(^#CHDemo),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHDemo), CHTagBuf::getClass(nullptr)), sizeof(CHDemo))),
     5,
-    selector(^#CHDemo)
+    0
 };
 
 Implement(CHDemo);

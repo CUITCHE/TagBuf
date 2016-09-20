@@ -17,6 +17,7 @@ using CHDataChunkCallback = std::function<void(const char *bytes, uint32_t byteL
 
 CLASS_TAGGEDPOINTER_AVAILABLE class CHData : public CHObject
 {
+    __SUPPORTRUNTIME__(CHData);
 protected:
     explicit CHData(uint32_t capacity);
     CHData *duplicate() const;

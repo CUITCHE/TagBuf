@@ -21,9 +21,10 @@ static class_t ClassNamed(CHTagBuf) = {
     nullptr,
     nullptr,
     allocateCache(),
+    selector(^#CHTagBuf),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHTagBuf), CHTagBuf::getClass(nullptr)), sizeof(CHTagBuf))),
     0,
-    selector(^#CHTagBuf)
+    0
 };
 
 Implement(CHTagBuf);

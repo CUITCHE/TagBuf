@@ -14,8 +14,17 @@
 
 class CHTagBuf;
 
+#ifndef runtimeclass
+#define runtimeclass(classname) __##classname##RuntimeClass__
+#endif
+
+#ifndef __SUPPORTRUNTIME__
+#define __SUPPORTRUNTIME__(classname) friend struct runtimeclass(classname)
+#endif
+
 CLASS_TAGGEDPOINTER_AVAILABLE class CHObject
 {
+    __SUPPORTRUNTIME__(CHObject);
 public:
     operator void*() const;
     operator CHTagBuf*() const;

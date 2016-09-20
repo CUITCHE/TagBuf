@@ -12,15 +12,28 @@
 #include "tagBuf.hpp"
 #include "runtime.hpp"
 
+struct runtimeclass(CHNumber)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[] = {
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static|__Overload, 0, 1, 0} },
+            {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload, 0, 1, 0} },
+        };
+        return method;
+    }
+};
+
 static class_t ClassNamed(CHNumber) = {
     CHObject::getClass(nullptr),
     selector(CHNumber),
-    nullptr,
+    runtimeclass(CHNumber)::methods(),
     nullptr,
     allocateCache(),
+    selector(^#CHNumber),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber), CHNumber::getClass(nullptr)), sizeof(CHNumber))),
     0,
-    selector(^#CHNumber)
+    2
 };
 
 Implement(CHNumber);

@@ -18,7 +18,7 @@
 #endif
 
 #include <stdio.h>
-#include "types.h"
+#include "id.hpp"
 #include <stdlib.h>
 
 #define selector(method) #method
@@ -30,7 +30,7 @@
  */
 
 enum {
-    __Property  = 1,
+    __Member    = 1,
     __Overload  = 1 << 1, // Not implement
     __Static    = 1 << 2, // Not implement. Only support 'getClass'. Custome method is not supported.
 };
@@ -75,9 +75,11 @@ struct class_t final
     struct method_list_t *const methodList; // In this version, Not Implement.
     struct ivar_list_t *const ivarList;
     void *cache;
-    uint32_t size; // size of class
-    uint32_t ivarCount;
     const char *typeName;
+    uint32_t size; // size of class
+    uint32_t ivarCount   : 16;
+    uint32_t methodCount : 16;
+
 };
 
 extern void *allocateCache();
@@ -104,6 +106,9 @@ template<typename Function> struct FunctionAddr
         return addr.func;
     }
 };
+
+#define funcAddr(func) FunctionAddr<decltype(func)>::addrValue(func)
+#define overloadFunc(type, func) FunctionAddr<type>::addrValue(func)
 
 /**
  * @author hejunqiu, 16-08-30 21:08:00
@@ -135,10 +140,8 @@ IMP runtime_lookup_method(Class cls, SEL selector);
 
 void *allocateInstance(Class cls);
 
-#include "CHTagBuf.hpp"
-
 template <typename _T, typename... Args>
-_T methodInvoke(CHTagBuf *self, SEL selector, Class cls, Args&&... args)
+_T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
 {
     struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls ?: self->getClass(), selector));
     typedef _T(*Function)(Args...);
@@ -171,20 +174,31 @@ _T methodInvoke(CHTagBuf *self, SEL selector, Class cls, Args&&... args)
 }
 
 template<typename _T>
-_T& propertyInvoke(CHTagBuf *self, SEL propertyName)
+_T& propertyInvoke(id self, SEL propertyName)
 {
     return std::forward<_T&>(methodInvoke<_T&>(self, propertyName, self->getClass()));
 }
 
 extern size_t bkdr_hash(const char *str);
 
-#include "id.hpp"
-
 int ivar_getOffset(Ivar ivar);
-
+const char *ivar_getName(Ivar ivar);
+const char *ivar_getTypeEncoding(Ivar ivar);
 id object_getIvar(id obj, Ivar ivar);
-
 void object_setIvar(id obj, const Ivar ivar, id value);
 
 Ivar *class_copyIvarList(Class cls, uint32_t *outCount);
+
+
+IMP method_getImplementation(Method m);
+SEL method_getName(Method m);
+//const char *method_getTypeEncoding(Method m);
+//void method_getReturnType(Method m, char *dst, size_t dst_len);
+//Method class_getInstanceMethod(Class cls, SEL sel);
+Method *class_copyMethodList(Class cls, unsigned int *outCount);
+
+const char *object_getClassName();
+Class object_getClass();
+
+
 #endif /* runtime_hpp */
