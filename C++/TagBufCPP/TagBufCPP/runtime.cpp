@@ -75,7 +75,7 @@ int ivar_getOffset(Ivar ivar)
     return ivar->ivar_offset;
 }
 
-id object_getIvar(CHTagBuf *obj, Ivar ivar)
+id object_getIvar(id obj, Ivar ivar)
 {
     if (obj && ivar && !obj->isTaggedPointer()) {
         int offset = ivar_getOffset(ivar);
@@ -87,13 +87,13 @@ id object_getIvar(CHTagBuf *obj, Ivar ivar)
 
 #include "CHNumber.hpp"
 
-void object_setIvar(CHTagBuf *self, const Ivar ivar, id value)
+void object_setIvar(id obj, const Ivar ivar, id value)
 {
     if (!strcmp(ivar->ivar_type, "i")) {
-        int *dst = (int *)((char *)self + ivar->ivar_offset);
+        int *dst = (int *)((char *)obj + ivar->ivar_offset);
         *dst = *(CHNumber *)value;
     } else if (strstr(ivar->ivar_type, "^#") == ivar->ivar_type) {
-        id *dst = (id *)((char *)self + ivar->ivar_offset);
+        id *dst = (id *)((char *)obj + ivar->ivar_offset);
         *dst = value;
     }
 }

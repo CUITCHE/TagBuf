@@ -182,9 +182,9 @@ extern size_t bkdr_hash(const char *str);
 
 int ivar_getOffset(Ivar ivar);
 
-id object_getIvar(CHTagBuf *self, Ivar ivar);
+id object_getIvar(id obj, Ivar ivar);
 
-void object_setIvar(CHTagBuf *self, const Ivar ivar, id value);
+void object_setIvar(id obj, const Ivar ivar, id value);
 
 Ivar *class_copyIvarList(Class cls, uint32_t *outCount);
 #endif /* runtime_hpp */

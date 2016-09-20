@@ -21,7 +21,7 @@ static ivar_list_t IvarListNamed(CHDemo2)[] = {
 };
 
 static class_t ClassNamed(CHDemo2) = {
-    nullptr,
+    CHTagBuf::getClass(nullptr),
     selector(CHDemo2),
     nullptr,
     &ivar_list_CHDemo2[0],
@@ -46,7 +46,7 @@ static ivar_list_t IvarListNamed(CHDemo)[] = {
 };
 
 static class_t ClassNamed(CHDemo) = {
-    nullptr,
+    CHTagBuf::getClass(nullptr),
     selector(CHDemo),
     nullptr,
     &ivar_list_CHDemo[0],

@@ -25,7 +25,9 @@ public:
     static CHString* stringWithString(const CHString *other);
     static CHString* stringWithBytes(const void *bytes, uint32_t length);
 
-    const char *objectType() const override;
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
 };
 
 class CHMutableString : public CHString
@@ -37,7 +39,9 @@ public:
 
     void clear();
 
-    const char *objectType() const override;
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
 };
 
 #endif /* CHString_hpp */

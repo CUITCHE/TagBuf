@@ -28,8 +28,11 @@ public:
     operator unsigned long long() const;
     operator double() const;
 
-    const char *objectType() const override;
     ~CHNumber() override;
+
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
 protected:
     CHNumber();
 };

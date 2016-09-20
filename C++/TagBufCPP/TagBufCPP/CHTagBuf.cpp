@@ -16,7 +16,7 @@
 // class CHTagBuf
 //------------------
 static class_t ClassNamed(CHTagBuf) = {
-    nullptr,
+    CHObject::getClass(nullptr),
     selector(CHTagBuf),
     nullptr,
     nullptr,
@@ -27,8 +27,3 @@ static class_t ClassNamed(CHTagBuf) = {
 };
 
 Implement(CHTagBuf);
-
-const char *CHTagBuf::objectType() const
-{
-    return getClass()->typeName;
-}

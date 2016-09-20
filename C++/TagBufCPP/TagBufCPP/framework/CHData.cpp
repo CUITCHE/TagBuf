@@ -11,6 +11,22 @@
 #include <memory.h>
 #include <memory>
 #include <CHBase.hpp>
+#include "TagBufDefines.h"
+#include "tagBuf.hpp"
+#include "runtime.hpp"
+
+static class_t ClassNamed(CHData) = {
+    CHObject::getClass(nullptr),
+    selector(CHData),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHData), CHData::getClass(nullptr)), sizeof(CHData))),
+    0,
+    selector(^#CHData)
+};
+
+Implement(CHData);
 
 /// Size of memory chunk
 constexpr const uint32_t CHUNK_SIZE = 512;

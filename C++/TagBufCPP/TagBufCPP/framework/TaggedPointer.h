@@ -15,6 +15,8 @@
 
 #define TAGGED_POINTER_NUMBER_FLAG TAG_MASK
 
+#define is_number(obj) (((uintptr_t)obj) & TAGGED_POINTER_NUMBER_FLAG)
+
 union _float {
     float f;
     struct {

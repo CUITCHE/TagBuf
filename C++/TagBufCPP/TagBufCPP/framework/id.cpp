@@ -9,6 +9,22 @@
 #include "id.hpp"
 #include "CHTagBuf.hpp"
 #include "TaggedPointer.h"
+#include "TagBufDefines.h"
+#include "tagBuf.hpp"
+#include "runtime.hpp"
+
+static class_t ClassNamed(CHObject) = {
+    nullptr,
+    selector(CHObject),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject), CHObject::getClass(nullptr)), sizeof(CHObject))),
+    0,
+    selector(^#CHTagBuf)
+};
+
+Implement(CHObject);
 
 struct idPrivate
 {
@@ -33,7 +49,7 @@ bool CHObject::isTaggedPointer() const
 CHObject::operator void *() const
 {
     if (isTaggedPointer()) {
-        return nullptr;
+        return (void *)this;
     }
     return d;
 }
@@ -41,7 +57,7 @@ CHObject::operator void *() const
 CHObject::operator CHTagBuf *() const
 {
     if (isTaggedPointer()) {
-        return nullptr;
+        return (CHTagBuf *)this;
     }
     return (CHTagBuf *)d;
 }
@@ -74,15 +90,19 @@ void CHObject::setObjectType(const char *type)
     }
 }
 
+#include "CHNumber.hpp"
 const char *CHObject::objectType() const
 {
     if (isTaggedPointer()) {
+        if (is_number(this)) {
+            return CHNumber::getClass(nullptr)->typeName;
+        }
         return nullptr;
     }
     return d->CType;
 }
 
-// constructor
+// destructor
 void release(id obj)
 {
 #if __LP64__

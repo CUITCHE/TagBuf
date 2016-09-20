@@ -24,6 +24,12 @@ public:
     virtual ~CHObject();
 
     bool isTaggedPointer() const;
+
+    // runtime
+    virtual Class getClass() const;
+    static Class getClass(std::nullptr_t);
+
+    const char *objectType() const;
 protected:
     CHObject();
 
@@ -33,7 +39,6 @@ protected:
     void *reserved() const;
 
     void setObjectType(const char *type);
-    virtual const char *objectType() const;
 };
 
 #endif /* id_hpp */

@@ -12,17 +12,14 @@
 #include <stdio.h>
 #include "id.hpp"
 
-using Class = struct class_t *;
-
 class CHTagBuf : public CHObject
 {
     friend struct CHTagBufFactor;
 protected:
     CHTagBuf() :CHObject(){};
 public:
-    virtual Class getClass() const;
+    Class getClass() const override;
     static Class getClass(std::nullptr_t);
-    const char *objectType() const override;
 };
 
 struct CHTagBufFactor

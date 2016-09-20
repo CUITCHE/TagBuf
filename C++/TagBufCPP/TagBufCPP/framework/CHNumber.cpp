@@ -8,7 +8,22 @@
 
 #include "CHNumber.hpp"
 #include "TaggedPointer.h"
-#include "cast.hpp"
+#include "TagBufDefines.h"
+#include "tagBuf.hpp"
+#include "runtime.hpp"
+
+static class_t ClassNamed(CHNumber) = {
+    CHObject::getClass(nullptr),
+    selector(CHNumber),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber), CHNumber::getClass(nullptr)), sizeof(CHNumber))),
+    0,
+    selector(^#CHNumber)
+};
+
+Implement(CHNumber);
 
 struct CHNumberPrivate
 {
@@ -128,11 +143,6 @@ CHNumber::operator double() const
     return d_d(this, doubleValue);
 }
 
-const char *CHNumber::objectType() const
-{
-    return encode(this);
-}
-
 CHNumber *numberWithValue(char v)
 {
     return numberWithValue((unsigned int)v);
@@ -179,7 +189,6 @@ struct CHNumberHelper
         CHNumber *o = new CHNumber;
         o->setReserved(new CHNumberPrivate);
         d_d(o, longLongValue) = v;
-        o->setObjectType(encode(o));
         return o;
     }
 };

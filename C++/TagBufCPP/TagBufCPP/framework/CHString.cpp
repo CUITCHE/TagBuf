@@ -7,8 +7,37 @@
 //
 
 #include "CHString.hpp"
-#include "cast.hpp"
 #include "TaggedPointer.h"
+
+#include "TagBufDefines.h"
+#include "tagBuf.hpp"
+#include "runtime.hpp"
+
+static class_t ClassNamed(CHString) = {
+    CHData::getClass(nullptr),
+    selector(CHString),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHString), CHString::getClass(nullptr)), sizeof(CHString))),
+    0,
+    selector(^#CHString)
+};
+
+Implement(CHString);
+
+static class_t ClassNamed(CHMutableString) = {
+    CHString::getClass(nullptr),
+    selector(CHMutableString),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableString), CHMutableString::getClass(nullptr)), sizeof(CHMutableString))),
+    0,
+    selector(^#CHMutableString)
+};
+
+Implement(CHMutableString);
 
 CHString::CHString() : CHData(0)
 {}
@@ -21,11 +50,6 @@ uint32_t CHString::length() const
 uint32_t CHString::capacity() const
 {
     return this->CHData::capacity();
-}
-
-const char *CHString::objectType() const
-{
-    return encode(this);
 }
 
 CHString *CHString::stringWithCString(const char *str)
@@ -71,10 +95,3 @@ CHString& CHMutableString::appendString(const void *bytes, uint32_t length)
     appendBytes((char *)bytes, length);
     return *this;
 }
-
-
-const char *CHMutableString::objectType() const
-{
-    return encode(this);
-}
-

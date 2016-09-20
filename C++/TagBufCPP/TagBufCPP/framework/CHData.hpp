@@ -38,6 +38,10 @@ public:
     static CHData *dataWithBytes(const char *bytes, uint32_t length);
     static CHData *dataWithCapacity(uint32_t capacity);
     static CHData *dataWithData(const CHData *other);
+
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
 };
 
 #endif /* CHBuffer_hpp */
