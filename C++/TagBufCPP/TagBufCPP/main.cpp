@@ -50,13 +50,15 @@ int main(int argc, const char * argv[]) {
     release(number);
 
     CHDemo *demo = CHTagBufFactor::tagBuf<CHDemo>();
-    Ivar ivar = object_getIvar(demo, "_3");
-    object_setIvar(demo, ivar, number(7525));
-
-    CHDemo2 *demo2 = CHTagBufFactor::tagBuf<CHDemo2>();
-    demo2->_1 = 23.5464;
-    ivar = object_getIvar(demo, "_2");
-    object_setIvar(demo, ivar, demo2);
+    Ivar *ivars = class_copyIvarList(demo->getClass(), 0);
+    Ivar *p = ivars;
+    while (*p) {
+        id value = object_getIvar(demo, *p);
+        printf("%p\n", value);
+        object_setIvar(demo, *p, number(35264));
+        ++p;
+    }
+    free(ivars);
     release(demo);
     return 0;
 }

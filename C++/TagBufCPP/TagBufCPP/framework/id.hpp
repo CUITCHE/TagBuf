@@ -22,6 +22,8 @@ public:
 
     friend void release(CHObject *obj);
     virtual ~CHObject();
+
+    bool isTaggedPointer() const;
 protected:
     CHObject();
 

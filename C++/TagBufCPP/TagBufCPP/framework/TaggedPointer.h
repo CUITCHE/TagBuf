@@ -10,11 +10,10 @@
 #define TaggedPointer_h
 
 
-#define TAGGED_POINTER_FLAG 0x8000000000000001
-#define is_tagged_pointer() ((uintptr_t)this & TAGGED_POINTER_FLAG)
+#define TAG_MASK 0x8000000000000001
 #define MAX_INDICATE_FLAG 0xE000000000000000ULL
 
-#define TAGGED_POINTER_NUMBER_FLAG TAGGED_POINTER_FLAG
+#define TAGGED_POINTER_NUMBER_FLAG TAG_MASK
 
 union _float {
     float f;

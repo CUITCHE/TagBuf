@@ -20,14 +20,19 @@ CHObject::CHObject() {}
 
 CHObject::~CHObject()
 {
-    if (!is_tagged_pointer()) {
+    if (!isTaggedPointer()) {
         delete d;
     }
 }
 
+bool CHObject::isTaggedPointer() const
+{
+    return ((uintptr_t)this & TAG_MASK);
+}
+
 CHObject::operator void *() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return nullptr;
     }
     return d;
@@ -35,7 +40,7 @@ CHObject::operator void *() const
 
 CHObject::operator CHTagBuf *() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return nullptr;
     }
     return (CHTagBuf *)d;
@@ -43,7 +48,7 @@ CHObject::operator CHTagBuf *() const
 
 void CHObject::setReserved(void *obj)
 {
-    if (!is_tagged_pointer()) {
+    if (!isTaggedPointer()) {
         if (!d) {
             d = new idPrivate;
         }
@@ -53,7 +58,7 @@ void CHObject::setReserved(void *obj)
 
 void *CHObject::reserved() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return nullptr;
     }
     return d->obj;
@@ -61,7 +66,7 @@ void *CHObject::reserved() const
 
 void CHObject::setObjectType(const char *type)
 {
-    if (!is_tagged_pointer()) {
+    if (!isTaggedPointer()) {
         if (!d) {
             d = new idPrivate;
         }
@@ -71,7 +76,7 @@ void CHObject::setObjectType(const char *type)
 
 const char *CHObject::objectType() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return nullptr;
     }
     return d->CType;
@@ -81,7 +86,7 @@ const char *CHObject::objectType() const
 void release(id obj)
 {
 #if __LP64__
-    if (!((uintptr_t)obj & TAGGED_POINTER_FLAG)) {
+    if (!obj->isTaggedPointer()) {
         delete obj;
     }
 #else

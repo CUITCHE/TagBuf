@@ -70,14 +70,17 @@ void *allocateInstance(Class cls)
     return s;
 }
 
-Ivar object_getIvar(CHTagBuf *self, const char *name)
+int ivar_getOffset(Ivar ivar)
 {
-    auto ivarList = self->getClass()->ivarList - 1;
-    uint32_t count = self->getClass()->ivarCount;
-    while (count --> 0) {
-        if (!strcmp((++ivarList)->ivar[0].ivar_name, name)) {
-            return ivarList->ivar;
-        }
+    return ivar->ivar_offset;
+}
+
+id object_getIvar(CHTagBuf *obj, Ivar ivar)
+{
+    if (obj && ivar && !obj->isTaggedPointer()) {
+        int offset = ivar_getOffset(ivar);
+        id *idx = (id *)((char *)obj + offset);
+        return *idx;
     }
     return nullptr;
 }
@@ -93,4 +96,30 @@ void object_setIvar(CHTagBuf *self, const Ivar ivar, id value)
         id *dst = (id *)((char *)self + ivar->ivar_offset);
         *dst = value;
     }
+}
+
+Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
+{
+    if (!cls) {
+        if (outCount) {
+            *outCount = 0;
+        }
+        return nullptr;
+    }
+    Ivar *result = nullptr;
+    ivar_list_t *ivars = cls->ivarList;
+    uint32_t count = cls->ivarCount;
+    if (outCount) {
+        *outCount = count;
+    }
+    if (ivars && count) {
+        result = (Ivar *)malloc(sizeof(Ivar) * (count + 1));
+        result[count] = nullptr;
+        Ivar *dst = result - 1;
+        ivar_list_t *p = ivars - 1;
+        while (count --> 0) {
+            *++dst = (++p)->ivar;
+        }
+    }
+    return result;
 }

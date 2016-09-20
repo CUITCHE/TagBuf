@@ -16,7 +16,7 @@
 // class CHDemo2
 //------------------
 
-static ivar_list IvarListNamed(CHDemo2)[] = {
+static ivar_list_t IvarListNamed(CHDemo2)[] = {
     {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = encode<double>(), .ivar_offset = OFFSET(CHDemo2, _1)}}
 };
 
@@ -37,7 +37,7 @@ Implement(CHDemo2);
 // class CHDemo
 //------------------
 
-static ivar_list IvarListNamed(CHDemo)[] = {
+static ivar_list_t IvarListNamed(CHDemo)[] = {
     {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, _1)}},
     {.ivar[0] = {.ivar_name = selector(_2), .ivar_type = "^#CHDemo2", .ivar_offset = OFFSET(CHDemo, _2)}},
     {.ivar[0] = {.ivar_name = selector(_3), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, _3)}},

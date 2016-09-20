@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include "types.h"
+#include <stdlib.h>
 
 #define selector(method) #method
 
@@ -57,12 +58,12 @@ struct ivar_t
     int type_code;
 };
 
-struct method_list
+struct method_list_t
 {
     struct method_t method[1];
 };
 
-struct ivar_list
+struct ivar_list_t
 {
     struct ivar_t ivar[1];
 };
@@ -71,8 +72,8 @@ struct class_t final
 {
     Class super_class;
     const char *const name;
-    struct method_list *const methodList; // In this version, Not Implement.
-    struct ivar_list *const ivarList;
+    struct method_list_t *const methodList; // In this version, Not Implement.
+    struct ivar_list_t *const ivarList;
     void *cache;
     uint32_t size; // size of class
     uint32_t ivarCount;
@@ -179,6 +180,11 @@ extern size_t bkdr_hash(const char *str);
 
 #include "id.hpp"
 
-Ivar object_getIvar(CHTagBuf *self, const char *name);
+int ivar_getOffset(Ivar ivar);
+
+id object_getIvar(CHTagBuf *self, Ivar ivar);
+
 void object_setIvar(CHTagBuf *self, const Ivar ivar, id value);
+
+Ivar *class_copyIvarList(Class cls, uint32_t *outCount);
 #endif /* runtime_hpp */

@@ -40,7 +40,7 @@ CHNumber::~CHNumber()
 
 CHNumber::operator unsigned char() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return (unsigned char)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, charValue);
@@ -53,7 +53,7 @@ CHNumber::operator char() const
 
 CHNumber::operator unsigned short() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return (unsigned short)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, shortValue);
@@ -66,7 +66,7 @@ CHNumber::operator short() const
 
 CHNumber::operator unsigned int() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return (unsigned int)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, intValue);
@@ -79,7 +79,7 @@ CHNumber::operator int() const
 
 CHNumber::operator unsigned long() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return this->operator unsigned long long();
     }
     return d_d(this, longValue);
@@ -92,7 +92,7 @@ CHNumber::operator long() const
 
 CHNumber::operator unsigned long long() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         return (unsigned long long)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
     }
     return d_d(this, longLongValue);
@@ -105,7 +105,7 @@ CHNumber::operator long long() const
 
 CHNumber::operator float() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         uintptr_t ret = (uintptr_t)this;
         if (ret & 0xFFFFFFFF00000000ULL) { // may be a double value
             _double d{.dd = static_cast<uint64_t>(ret ^ TAGGED_POINTER_NUMBER_FLAG)};
@@ -120,7 +120,7 @@ CHNumber::operator float() const
 
 CHNumber::operator double() const
 {
-    if (is_tagged_pointer()) {
+    if (isTaggedPointer()) {
         uintptr_t ret = ((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG);
         _double d{.dd = static_cast<uint64_t>(ret)};
         return d.d;
