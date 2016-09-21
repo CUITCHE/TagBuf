@@ -135,17 +135,17 @@ id object_getIvar(id obj, Ivar ivar)
         switch (encodeType[0]) {
             case 'C':
             case 'c': {
-                auto *v = (char *)obj + offset;
+                auto v = (char *)obj + offset;
                 return number(*v);
             }
             case 'i':
             case 'I': {
-                auto *v = (int *)((char *)obj + offset);
+                auto v = (int *)((char *)obj + offset);
                 return number(*v);
             }
             case 'l':
             case 'L': {
-                auto *v = (long *)((char *)obj + offset);
+                auto v = (long *)((char *)obj + offset);
                 return number(*v);
             }
             case 'q':
@@ -154,15 +154,15 @@ id object_getIvar(id obj, Ivar ivar)
                 return number(*v);
             }
             case 'f': {
-                auto *v = (float *)((char *)obj + offset);
+                auto v = (float *)((char *)obj + offset);
                 return number(*v);
             }
             case 'd': {
-                auto *v = (double *)((char *)obj + offset);
+                auto v = (double *)((char *)obj + offset);
                 return number(*v);
             }
             case 'B': {
-                auto *v = (bool *)((char *)obj + offset);
+                auto v = (bool *)((char *)obj + offset);
                 return number(*v);
             }
             case '^': {
@@ -170,7 +170,7 @@ id object_getIvar(id obj, Ivar ivar)
                 return *idx;
             }
             case ':': {
-                auto *v = (SEL *)((char *)obj + offset);
+                auto v = (SEL *)((char *)obj + offset);
                 CHString *str = CHString::stringWithCString(*v);
                 return (id)str;
             }
