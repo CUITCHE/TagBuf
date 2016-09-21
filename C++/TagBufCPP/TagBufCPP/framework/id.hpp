@@ -48,6 +48,8 @@ protected:
     void *reserved() const;
 
     void setObjectType(const char *type);
+private:
+    static id allocateInstance();
 };
 
 #endif /* id_hpp */

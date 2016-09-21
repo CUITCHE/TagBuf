@@ -36,6 +36,8 @@ public:
     static Class getClass(std::nullptr_t);
 protected:
     CHNumber();
+private:
+    static id allocateInstance();
 };
 
 CHNumber *numberWithValue(char v);

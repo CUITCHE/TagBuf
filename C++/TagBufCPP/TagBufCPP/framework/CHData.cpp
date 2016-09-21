@@ -22,6 +22,7 @@ struct runtimeclass(CHData)
         static method_list_t method[] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static|__Overload} },
             {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHData::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, funcAddr(&CHData::duplicate), selector(duplicate), __Member} },
             {.method = {0, funcAddr(&CHData::appendBytes), selector(appendBytes), __Member} },
             {.method = {0, funcAddr(&CHData::appendBytesNoCopy), selector(appendBytesNoCopy), __Member} },
@@ -45,9 +46,9 @@ static class_t ClassNamed(CHData) = {
     nullptr,
     allocateCache(),
     selector(^#CHData),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHData), CHData::getClass(nullptr)), sizeof(CHData))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHData), CHObject::getClass(nullptr)), sizeof(CHData))),
     0,
-    12
+    13
 };
 
 Implement(CHData);

@@ -31,8 +31,8 @@
 
 enum {
     __Member    = 1,
-    __Overload  = 1 << 1, // Not implement
-    __Static    = 1 << 2, // Not implement. Only support 'getClass'. Custome method is not supported.
+    __Overload  = 1 << 1,
+    __Static    = 1 << 2,
 };
 
 struct method_t
@@ -136,7 +136,7 @@ bool class_registerClass(Class cls, Class superClass = nullptr);
 
 IMP runtime_lookup_method(Class cls, SEL selector);
 
-void *allocateInstance(Class cls);
+id allocateInstance(Class cls);
 
 template <typename _T, typename... Args>
 _T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
@@ -144,8 +144,8 @@ _T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
     struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls ?: self->getClass(), selector));
     typedef _T(*Function)(Args...);
     Function f = (Function)method->imp;
-    if (method->flag == __Static) {
-        return f(std::forward<Args...>(args)...);
+    if ((method->flag & __Static)) {
+        return f(std::forward<Args&&...>(args)...);
     }
     uintptr_t object_addr = (uintptr_t)self;
 #ifdef __GNUC__ // GCC Compiler
@@ -153,6 +153,8 @@ _T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
     __asm__ __volatile__ (
                           "movq %0, %%rdi"
                           : "=r"(object_addr)
+                          :
+                          :"%rdi"
                           );
 #else
     __asm__ __volatile__ (
@@ -168,7 +170,7 @@ _T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
         mov ecx, object_addr
     }
 #endif
-    return f(std::forward<Args...>(args)...);
+    return f(std::forward<Args&&...>(args)...);
 }
 
 template<typename _T>
@@ -186,6 +188,7 @@ id object_getIvar(id obj, Ivar ivar);
 void object_setIvar(id obj, const Ivar ivar, id value);
 
 Ivar *class_copyIvarList(Class cls, uint32_t *outCount);
+Ivar class_getIvar(Class cls, SEL ivarName);
 
 
 IMP method_getImplementation(Method m);

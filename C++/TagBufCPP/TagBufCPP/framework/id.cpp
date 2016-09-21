@@ -12,6 +12,7 @@
 #include "TagBufDefines.h"
 #include "tagBuf.hpp"
 #include "runtime.hpp"
+#include "cast.hpp"
 
 struct runtimeclass(CHObject)
 {
@@ -20,6 +21,7 @@ struct runtimeclass(CHObject)
         static method_list_t method[] = {
             {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, funcAddr(&CHObject::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload} },
             {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
             {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member} },
@@ -27,21 +29,38 @@ struct runtimeclass(CHObject)
         };
         return method;
     }
+    static struct ivar_list_t *ivars()
+    {
+        static ivar_list_t ivar[] = {
+            {.ivar[0] = {.ivar_name = selector(d), .ivar_type = encode<char *>(), .ivar_offset = OFFSET(CHObject, d)}}
+        };
+        return ivar;
+    }
 };
 
 static class_t ClassNamed(CHObject) = {
     nullptr,
     selector(CHObject),
     runtimeclass(CHObject)::methods(),
-    nullptr,
+    runtimeclass(CHObject)::ivars(),
     allocateCache(),
     selector(^#CHObject),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject), CHObject::getClass(nullptr)), sizeof(CHObject))),
-    0,
-    6
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject), nullptr), sizeof(CHObject))),
+    1,
+    7
 };
 
-Implement(CHObject);
+//Implement(CHObject);
+
+Class CHObject::getClass() const
+{
+    return &class_CHObject;
+}
+
+Class CHObject::getClass(std::nullptr_t)
+{
+    return &class_CHObject;
+}
 
 struct idPrivate
 {
@@ -49,7 +68,7 @@ struct idPrivate
     const char *CType;
 };
 
-CHObject::CHObject() {}
+CHObject::CHObject() :d(new idPrivate){}
 
 CHObject::~CHObject()
 {
@@ -82,9 +101,6 @@ CHObject::operator CHTagBuf *() const
 void CHObject::setReserved(void *obj)
 {
     if (!isTaggedPointer()) {
-        if (!d) {
-            d = new idPrivate;
-        }
         d->obj = obj;
     }
 }
@@ -100,9 +116,6 @@ void *CHObject::reserved() const
 void CHObject::setObjectType(const char *type)
 {
     if (!isTaggedPointer()) {
-        if (!d) {
-            d = new idPrivate;
-        }
         d->CType = type;
     }
 }
@@ -117,6 +130,11 @@ const char *CHObject::objectType() const
         return nullptr;
     }
     return d->CType;
+}
+
+id CHObject::allocateInstance()
+{
+    return new CHObject();
 }
 
 // destructor

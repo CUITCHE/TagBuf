@@ -33,7 +33,9 @@
                                 classname() :CHTagBuf(){};\
                                 public:\
                                 Class getClass() const override; \
-                                static Class getClass(std::nullptr_t);
+                                static Class getClass(std::nullptr_t);\
+                                private:\
+                                static id allocateInstance();
 #endif
 
 #ifndef ClassNamed
@@ -46,13 +48,15 @@
 
 #ifndef Implement
 #define Implement(classname) Class classname::getClass() const { return &ClassNamed(classname); } \
-    Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); }
+    Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); } \
+    id classname::allocateInstance() { return new classname; }
 #endif
 
 #define RUNTIMECLASS(classname) struct runtimeclass(classname) { \
 static struct method_list_t *methods() {\
 static method_list_t method[] = {{.method = {0, overloadFunc(Class(*)(std::nullptr_t),classname::getClass), selector(getClass), __Static|__Overload} },\
 {.method = {0, overloadFunc(Class(classname::*)()const, &classname::getClass), selector(getClass), __Member|__Overload} },\
+{.method = {0, funcAddr(&classname::allocateInstance), selector(allocateInstance), __Static} },\
 };\
 return method;}}
 

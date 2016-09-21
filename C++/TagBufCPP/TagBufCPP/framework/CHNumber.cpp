@@ -19,6 +19,7 @@ struct runtimeclass(CHNumber)
         static method_list_t method[] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static|__Overload} },
             {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHNumber::allocateInstance), selector(allocateInstance), __Static} },
         };
         return method;
     }
@@ -31,9 +32,9 @@ static class_t ClassNamed(CHNumber) = {
     nullptr,
     allocateCache(),
     selector(^#CHNumber),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber), CHNumber::getClass(nullptr)), sizeof(CHNumber))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber), CHObject::getClass(nullptr)), sizeof(CHNumber))),
     0,
-    2
+    3
 };
 
 Implement(CHNumber);

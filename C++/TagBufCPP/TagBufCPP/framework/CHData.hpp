@@ -19,10 +19,9 @@ CLASS_TAGGEDPOINTER_AVAILABLE class CHData : public CHObject
 {
     __SUPPORTRUNTIME__(CHData);
 protected:
-    explicit CHData(uint32_t capacity);
+    explicit CHData(uint32_t capacity = 0);
     CHData *duplicate() const;
 public:
-    CHData() = delete ;
     ~CHData() override;
 //    explicit CHData(CHData &&other);
 //    void operator=(CHData &&right);
@@ -43,6 +42,8 @@ public:
     // runtime
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+private:
+    static id allocateInstance();
 };
 
 #endif /* CHBuffer_hpp */

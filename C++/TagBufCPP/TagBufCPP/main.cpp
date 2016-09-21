@@ -11,11 +11,12 @@
 #include "runtime.hpp"
 #include "CHNumber.hpp"
 #include "TaggedPointer.h"
+#include "id.hpp"
 #include "CHData.hpp"
 
 int main(int argc, const char * argv[]) {
     auto cls = CHData::getClass(nullptr);
-    uint32_t count = 0;
-    auto method = class_copyMethodList(cls, &count);
+    id instance = allocateInstance(cls);
+    printf("%s\n", instance->objectType());
     return 0;
 }

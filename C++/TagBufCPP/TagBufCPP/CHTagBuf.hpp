@@ -15,11 +15,14 @@
 class CHTagBuf : public CHObject
 {
     friend struct CHTagBufFactor;
+    __SUPPORTRUNTIME__(CHTagBuf);
 protected:
     CHTagBuf() :CHObject(){};
 public:
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+private:
+    static id allocateInstance();
 };
 
 struct CHTagBufFactor

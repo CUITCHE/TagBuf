@@ -63,11 +63,51 @@ bool class_registerClass(Class cls, Class superClass)
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
-void *allocateInstance(Class cls)
+IMP runtime_lookup_method(Class cls, SEL selector)
 {
+    IMP imp = cache_lookup_method(cls, selector);
+    if (imp == (IMP)0) {
+        do {
+            Class _cls = cls;
+        ReTry:
+            uint32_t outcount = _cls->methodCount;
+            method_list_t *list = _cls->methodList;
+            while (outcount-->0) {
+                if (!strcmp(list->method[0].name, selector)) {
+                    imp = reinterpret_cast<IMP>(&list->method);
+                    break;
+                }
+                ++list;
+            }
+            if (imp != (IMP)0) {
+                cache_fill_method(cls, selector, imp);
+                break;
+            }
+            _cls = _cls->super_class;
+            if (!_cls) {
+                break;
+            } else {
+                goto ReTry;
+            }
+        } while (0);
+    }
+    return imp;
+}
+
+id allocateInstance(Class cls)
+{
+    struct idPrivate
+    {
+        void *obj;
+        const char *CType;
+    };
     assert(cls);
-    void *s = calloc(cls->size, 1);
-    return s;
+    id instance = methodInvoke<id>(nullptr, selector(allocateInstance), cls);
+    Ivar ivar = class_getIvar(CHObject::getClass(nullptr), selector(d));
+    int offset = ivar_getOffset(ivar);
+    struct idPrivate **s = (struct idPrivate **)((char *)instance + offset);
+    (*s)->CType = cls->typeName;
+    return instance;
 }
 
 int ivar_getOffset(Ivar ivar)
@@ -132,6 +172,19 @@ Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
         }
     }
     return result;
+}
+
+Ivar class_getIvar(Class cls, SEL ivarName)
+{
+    ivar_list_t *list = cls->ivarList - 1;
+    uint32_t count = cls->ivarCount;
+    Ivar ivar = 0;
+    while (count-->0) {
+        if (!strcmp((++list)->ivar[0].ivar_name, ivarName)) {
+            ivar = list->ivar;
+        }
+    }
+    return ivar;
 }
 
 IMP method_getImplementation(Method m)

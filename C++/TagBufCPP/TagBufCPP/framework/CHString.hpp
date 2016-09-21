@@ -14,6 +14,7 @@
 CLASS_TAGGEDPOINTER_AVAILABLE class CHString : protected CHData
 {
     __SUPPORTRUNTIME__(CHString);
+protected:
     CHString();
     CHString(const CHString&) = delete;
     CHString& operator=(const CHString &) = delete;
@@ -29,11 +30,15 @@ public:
     // runtime
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+private:
+    static id allocateInstance();
 };
 
 class CHMutableString : public CHString
 {
     __SUPPORTRUNTIME__(CHMutableString);
+protected:
+    CHMutableString();
 public:
     CHString& appendString(const CHString *other);
     CHString& appendString(const char *str);
@@ -44,6 +49,8 @@ public:
     // runtime
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+private:
+    static id allocateInstance();
 };
 
 #endif /* CHString_hpp */
