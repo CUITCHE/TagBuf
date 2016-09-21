@@ -21,6 +21,7 @@ protected:
 public:
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+    void desctructor(CHTagBuf *obj);
 private:
     static id allocateInstance();
 };

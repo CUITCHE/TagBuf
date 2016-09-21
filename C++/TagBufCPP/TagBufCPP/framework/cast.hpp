@@ -94,10 +94,15 @@ class CHNumber;
 class CHString;
 class CHMutableString;
 class CHTagBuf;
+class CHMutableData;
 
 template <> struct __encode__<CHData>
 { static const char *type() { return "#CHData"; } }; __ENCODE_CV__(CHData,);
 __ENCODE_TYPE_POINTER(CHData, ^#CHData,);
+
+template <> struct __encode__<CHMutableData>
+{ static const char *type() { return "#CHMutableData"; } }; __ENCODE_CV__(CHMutableData,);
+__ENCODE_TYPE_POINTER(CHMutableData, ^#CHMutableData,);
 
 template <> struct __encode__<CHString>
 { static const char *type() { return "#CHString"; } }; __ENCODE_CV__(CHString,);

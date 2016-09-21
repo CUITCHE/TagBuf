@@ -72,9 +72,9 @@ IMP runtime_lookup_method(Class cls, SEL selector)
         do {
             Class _cls = cls;
         ReTry:
-            uint32_t outcount = _cls->methodCount;
+            int outcount = _cls->methodCount;
             method_list_t *list = _cls->methodList;
-            while (outcount-->0) {
+            while (outcount --> 0) {
                 if (!strcmp(list->method[0].name, selector)) {
                     imp = reinterpret_cast<IMP>(&list->method);
                     break;
@@ -166,8 +166,50 @@ id object_getIvar(id obj, Ivar ivar)
                 return number(*v);
             }
             case '^': {
-                id *idx = (id *)((char *)obj + offset);
-                return *idx;
+                switch (encodeType[1]) {
+                    case '#': {
+                        id *idx = (id *)((char *)obj + offset);
+                        return *idx;
+                    }
+                    case 'C':
+                    case 'c': {
+                        auto v = (char **)obj + offset;
+                        return (id)*v;
+                    }
+                    case 'i':
+                    case 'I': {
+                        auto v = (int **)((char *)obj + offset);
+                        return number(*v);
+                    }
+                    case 'l':
+                    case 'L': {
+                        auto v = (long **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    case 'q':
+                    case 'Q': {
+                        auto *v = (long long **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    case 'f': {
+                        auto v = (float **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    case 'd': {
+                        auto v = (double **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    case 'B': {
+                        auto v = (bool **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    case 'v': {
+                        auto v = (void **)((char *)obj + offset);
+                        return (id)*v;
+                    }
+                    default:
+                        break;
+                }
             }
             case ':': {
                 auto v = (SEL *)((char *)obj + offset);
@@ -221,8 +263,50 @@ void object_setIvar(id obj, const Ivar ivar, id value)
                 *v = *(CHNumber *)value;
             }
             case '^': {
-                id *idx = (id *)((char *)obj + offset);
-                *idx = value;
+                switch (encodeType[1]) {
+                    case '#': {
+                        id *idx = (id *)((char *)obj + offset);
+                        *idx = value;
+                    }
+                    case 'C':
+                    case 'c': {
+                        auto v = (char **)obj + offset;
+                        *v = (char *)value;
+                    }
+                    case 'i':
+                    case 'I': {
+                        auto v = (int **)((char *)obj + offset);
+                        *v = (int *)value;
+                    }
+                    case 'l':
+                    case 'L': {
+                        auto v = (long **)((char *)obj + offset);
+                        *v = (long *)value;
+                    }
+                    case 'q':
+                    case 'Q': {
+                        auto *v = (long long **)((char *)obj + offset);
+                        *v = (long long *)value;
+                    }
+                    case 'f': {
+                        auto v = (float **)((char *)obj + offset);
+                        *v = (float *)value;
+                    }
+                    case 'd': {
+                        auto v = (double **)((char *)obj + offset);
+                        *v = (double *)value;
+                    }
+                    case 'B': {
+                        auto v = (bool **)((char *)obj + offset);
+                        *v = (bool *)value;
+                    }
+                    case 'v': {
+                        auto v = (void **)((char *)obj + offset);
+                        *v = (void *)value;
+                    }
+                    default:
+                        break;
+                }
             }
             case ':': {
                 // do nothing...
@@ -244,7 +328,7 @@ Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
     }
     Ivar *result = nullptr;
     ivar_list_t *ivars = cls->ivarList;
-    uint32_t count = cls->ivarCount;
+    int count = cls->ivarCount;
     if (outCount) {
         *outCount = count;
     }
@@ -263,9 +347,9 @@ Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
 Ivar class_getIvar(Class cls, SEL ivarName)
 {
     ivar_list_t *list = cls->ivarList - 1;
-    uint32_t count = cls->ivarCount;
+    int count = cls->ivarCount;
     Ivar ivar = 0;
-    while (count-->0) {
+    while (count --> 0) {
         if (!strcmp((++list)->ivar[0].ivar_name, ivarName)) {
             ivar = list->ivar;
         }

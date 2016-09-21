@@ -8,7 +8,6 @@
 
 #include "CHString.hpp"
 #include "TaggedPointer.h"
-
 #include "TagBufDefines.h"
 #include "tagBuf.hpp"
 #include "runtime.hpp"

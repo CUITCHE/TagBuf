@@ -64,11 +64,11 @@ Class CHObject::getClass(std::nullptr_t)
 
 struct idPrivate
 {
-    void *obj;
-    const char *CType;
+    void *obj = 0;
+    const char *CType = 0;
 };
 
-CHObject::CHObject() :d(new idPrivate){}
+CHObject::CHObject() {}
 
 CHObject::~CHObject()
 {
@@ -101,6 +101,9 @@ CHObject::operator CHTagBuf *() const
 void CHObject::setReserved(void *obj)
 {
     if (!isTaggedPointer()) {
+        if (!d) {
+            d = new idPrivate;
+        }
         d->obj = obj;
     }
 }
@@ -116,6 +119,9 @@ void *CHObject::reserved() const
 void CHObject::setObjectType(const char *type)
 {
     if (!isTaggedPointer()) {
+        if (!d) {
+            d = new idPrivate;
+        }
         d->CType = type;
     }
 }
@@ -135,7 +141,11 @@ const char *CHObject::objectType() const
         }
         return nullptr;
     }
-    return d->CType ?: this->getClass()->typeName;
+    if (d) {
+        return d->CType ?: this->getClass()->typeName;
+    } else {
+        return this->getClass()->typeName;
+    }
 }
 
 id CHObject::allocateInstance()

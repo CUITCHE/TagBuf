@@ -266,7 +266,7 @@ CHData *CHData::duplicate() const
     d_d(obj, chunk_pos) = d->chunk_pos;
     d_d(obj, chunk_pointer) = d->chunk_pointer;
     d_d(obj, lengthOfChunks) = d->lengthOfChunks;
-    uint32_t count = d->lengthOfChunks;
+    int count = d->lengthOfChunks;
     char **p = d->chunks - 1;
     char *sv = nullptr;
 
@@ -340,7 +340,7 @@ void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
         return;
     }
     CHDataPrivate *d = (CHDataPrivate *)reserved();
-    uint32_t count = d->lengthOfChunks;
+    int count = d->lengthOfChunks;
     char **p = d->chunks - 1;
     char *v = nullptr;
     while (count --> 0) {

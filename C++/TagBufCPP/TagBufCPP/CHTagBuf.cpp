@@ -31,3 +31,27 @@ static class_t ClassNamed(CHTagBuf) = {
 };
 
 Implement(CHTagBuf);
+
+void CHTagBuf::desctructor(CHTagBuf *obj)
+{
+    Class cls = obj->getClass();
+    Class endCls = &class_CHTagBuf;
+    do {
+        if (!cls || cls == endCls) {
+            break;
+        }
+        ivar_list_t *list = cls->ivarList - 1;
+        int count = cls->ivarCount;
+        const char *encodeType = 0;
+        while (count --> 0) {
+            encodeType = ivar_getTypeEncoding((++list)->ivar);
+            if (encodeType[0] == '^') {
+                if (encodeType[1] == '#') {
+                    id value = object_getIvar(this, list->ivar);
+                    release(value);
+                }
+            }
+        }
+        cls = cls->super_class;
+    } while (0);
+}

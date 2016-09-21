@@ -15,8 +15,11 @@
 #include "CHData.hpp"
 
 int main(int argc, const char * argv[]) {
-    auto cls = CHData::getClass(nullptr);
-    id instance = allocateInstance(cls);
-    printf("%s\n", instance->objectType());
+    int i = 1e8;
+    while (i --> 0) {
+        CHDemo *obj = CHTagBufFactor::tagBuf<CHDemo>();
+        obj->_2 = CHTagBufFactor::tagBuf<CHDemo2>();
+        release(obj);
+    }
     return 0;
 }

@@ -30,12 +30,13 @@
                                 friend struct CHTagBufFactor; \
                                 __SUPPORTRUNTIME__(classname);\
                                 protected:\
-                                classname() :CHTagBuf(){};\
+                                    classname() :CHTagBuf(){};\
+                                    ~classname();\
                                 public:\
-                                Class getClass() const override; \
-                                static Class getClass(std::nullptr_t);\
+                                    Class getClass() const override; \
+                                    static Class getClass(std::nullptr_t);\
                                 private:\
-                                static id allocateInstance();
+                                    static id allocateInstance();
 #endif
 
 #ifndef ClassNamed
@@ -50,6 +51,11 @@
 #define Implement(classname) Class classname::getClass() const { return &ClassNamed(classname); } \
     Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); } \
     id classname::allocateInstance() { return new classname; }
+#endif
+
+#ifndef ImplementTagBuf
+#define ImplementTagBuf(classname) Implement(classname) \
+    classname::~classname() { desctructor(this); }
 #endif
 
 #define RUNTIMECLASS(classname) struct runtimeclass(classname) { \

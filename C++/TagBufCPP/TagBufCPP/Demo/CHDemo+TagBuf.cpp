@@ -34,7 +34,7 @@ static class_t ClassNamed(CHDemo2) = {
     3
 };
 
-Implement(CHDemo2);
+ImplementTagBuf(CHDemo2);
 
 //------------------
 // class CHDemo
@@ -62,4 +62,4 @@ static class_t ClassNamed(CHDemo) = {
     3
 };
 
-Implement(CHDemo);
+ImplementTagBuf(CHDemo);
