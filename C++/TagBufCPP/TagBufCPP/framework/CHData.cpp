@@ -14,25 +14,23 @@
 #include "TagBufDefines.h"
 #include "tagBuf.hpp"
 #include "runtime.hpp"
+#include "TaggedPointer.h"
 
 struct runtimeclass(CHData)
 {
     static struct method_list_t *methods()
     {
         static method_list_t method[] = {
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member|__Overload} },
             {.method = {0, funcAddr(&CHData::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, funcAddr(&CHData::duplicate), selector(duplicate), __Member} },
-            {.method = {0, funcAddr(&CHData::appendBytes), selector(appendBytes), __Member} },
-            {.method = {0, funcAddr(&CHData::appendBytesNoCopy), selector(appendBytesNoCopy), __Member} },
-            {.method = {0, funcAddr(&CHData::appendData), selector(appendData), __Member} },
             {.method = {0, funcAddr(&CHData::enumerateByteUsingBlock), selector(enumerateByteUsingBlock), __Member} },
             {.method = {0, funcAddr(&CHData::length), selector(length), __Member} },
             {.method = {0, funcAddr(&CHData::capacity), selector(capacity), __Member} },
-            {.method = {0, funcAddr(&CHData::dataWithBytes), selector(dataWithBytes), __Member} },
-            {.method = {0, funcAddr(&CHData::dataWithCapacity), selector(dataWithCapacity), __Member} },
-            {.method = {0, funcAddr(&CHData::dataWithData), selector(dataWithData), __Member} },
+            {.method = {0, funcAddr(&CHData::dataWithBytes), selector(dataWithBytes), __Static} },
+            {.method = {0, funcAddr(&CHData::dataWithData), selector(dataWithData), __Static} },
+            {.method = {0, funcAddr(&CHData::dataWithUTF8Data), selector(dataWithUTF8Data), __Static} },
 
         };
         return method;
@@ -46,9 +44,9 @@ static class_t ClassNamed(CHData) = {
     nullptr,
     allocateCache(),
     selector(^#CHData),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHData), CHObject::getClass(nullptr)), sizeof(CHData))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHData)), sizeof(CHData))),
     0,
-    13
+    10
 };
 
 Implement(CHData);
@@ -260,6 +258,9 @@ CHData::CHData(uint32_t capacity) : CHObject()
 
 CHData *CHData::duplicate() const
 {
+    if (isTaggedPointer()) {
+        return (CHData *)this;
+    }
     CHData *obj = new CHData(0);
     CHDataPrivate *d = (CHDataPrivate *)reserved();
     d_d(obj, chunk_pos) = d->chunk_pos;
@@ -328,28 +329,18 @@ CHData::~CHData()
 //    d_d(this, swap)(std::move(*(CHDataPrivate *)right.reserved()));
 //}
 
-void CHData::appendBytes(const char *bytes, uint32_t length)
-{
-    d_d(this, write)(bytes, length);
-}
-
-void CHData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone /*= false*/)
-{
-    d_d(this, writeNoCopy)((char *)bytes, length, freeWhenDone);
-}
-
-void CHData::appendData(const CHData *other)
-{
-    other->enumerateByteUsingBlock([this](const char *bytes, uint32_t byteLength, bool *stop) {
-        this->appendBytes(bytes, byteLength);
-    });
-}
-
 void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
 {
+    assert(block);
+    bool stop = false;
+    if (isTaggedPointer()) {
+        const char *str = reinterpret_cast<const char *>((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1)
+                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
+        block(str, this->length(), &stop);
+        return;
+    }
     CHDataPrivate *d = (CHDataPrivate *)reserved();
     uint32_t count = d->lengthOfChunks;
-    bool stop = false;
     char **p = d->chunks - 1;
     char *v = nullptr;
     while (count --> 0) {
@@ -377,16 +368,8 @@ void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
 
 CHData *CHData::dataWithBytes(const char *bytes, uint32_t length)
 {
-    CHData *obj = nullptr;
-    if (length < 8) {
-        ;
-    }
-    return obj;
-}
-
-CHData *CHData::dataWithCapacity(uint32_t capacity)
-{
-    CHData *obj = new CHData(capacity);
+    CHData *obj = new CHData(1);
+    d_d(obj, write(bytes, length));
     return obj;
 }
 
@@ -395,12 +378,129 @@ CHData *CHData::dataWithData(const CHData *other)
     return other->duplicate();
 }
 
+CHData *CHData::dataWithUTF8Data(const char *str)
+{
+    const char *p = str;
+    uint32_t length = -1;
+    while (++length, *++p) {
+        continue;
+    }
+    uintptr_t ptr = (uintptr_t)str;
+    if (ptr <= MAX_CONSTANT_ADDRESS) {
+        ptr |= ((uintptr_t)length << TAGGED_POINTER_DATA_LENGTH_OFFSET);
+        CHData *o = reinterpret_cast<CHData *>(ptr << 1 | TAGGED_POINTER_DATA_FLAG);
+        return o;
+    }
+    return CHData::dataWithBytes(str, length);
+}
+
 uint32_t CHData::length() const
 {
+    if (isTaggedPointer()) {
+        uint32_t len = (uint32_t)((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1) >> TAGGED_POINTER_DATA_LENGTH_OFFSET);
+        return len;
+    }
     return d_d(this, size)();
 }
 
 uint32_t CHData::capacity() const
 {
+    if (isTaggedPointer()) {
+        return -1;
+    }
     return d_d(this, capacity)();
+}
+
+
+/// CHMutableData
+
+struct runtimeclass(CHMutableData)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[] = {
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHMutableData::getClass), selector(getClass), __Static} },
+            {.method = {0, overloadFunc(Class(CHMutableData::*)()const, &CHMutableData::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHMutableData::allocateInstance), selector(allocateInstance), __Static} },
+            {.method = {0, funcAddr(&CHMutableData::appendBytes), selector(appendBytes), __Member} },
+            {.method = {0, funcAddr(&CHMutableData::appendBytesNoCopy), selector(appendBytesNoCopy), __Member} },
+            {.method = {0, funcAddr(&CHMutableData::appendData), selector(appendData), __Member} },
+            {.method = {0, funcAddr(&CHMutableData::dataWithBytes), selector(dataWithBytes), __Static} },
+            {.method = {0, funcAddr(&CHMutableData::dataWithData), selector(dataWithData), __Static} },
+            {.method = {0, funcAddr(&CHMutableData::dataWithUTF8Data), selector(dataWithUTF8Data), __Static} },
+            {.method = {0, funcAddr(&CHMutableData::dataWithCapacity), selector(dataWithCapacity), __Static} },
+        };
+        return method;
+    }
+};
+
+static class_t ClassNamed(CHMutableData) = {
+    CHData::getClass(nullptr),
+    selector(CHMutableData),
+    runtimeclass(CHMutableData)::methods(),
+    nullptr,
+    allocateCache(),
+    selector(^#CHMutableData),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableData)), sizeof(CHMutableData))),
+    0,
+    10
+};
+
+Implement(CHMutableData);
+
+CHMutableData::CHMutableData(uint32_t capacity) : CHData(capacity) {}
+
+void CHMutableData::appendBytes(const char *bytes, uint32_t length)
+{
+    d_d(this, write)(bytes, length);
+}
+
+void CHMutableData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone /*= false*/)
+{
+    d_d(this, writeNoCopy)((char *)bytes, length, freeWhenDone);
+}
+
+void CHMutableData::appendData(const CHData *other)
+{
+    if (other->isTaggedPointer()) {
+        const char *str = reinterpret_cast<const char *>((((uintptr_t)other ^ TAGGED_POINTER_DATA_FLAG) >> 1)
+                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
+        this->appendBytes(str, other->length());
+    }
+    other->enumerateByteUsingBlock([this](const char *bytes, uint32_t byteLength, bool *stop) {
+        this->appendBytes(bytes, byteLength);
+    });
+}
+
+CHMutableData *CHMutableData::dataWithBytes(const char *bytes, uint32_t length)
+{
+    CHMutableData *obj = new CHMutableData(length);
+    d_d(obj, write(bytes, length));
+    return obj;
+}
+
+CHMutableData *CHMutableData::dataWithData(const CHData *other)
+{
+    if (other->isTaggedPointer()) {
+        CHMutableData *obj = new CHMutableData(other->length());
+        other->enumerateByteUsingBlock([obj](const char *bytes, uint32_t byteLength, bool *stop) {
+            obj->appendBytes(bytes, byteLength);
+        });
+    }
+    return (CHMutableData *)other->duplicate();
+}
+
+CHMutableData *CHMutableData::dataWithUTF8Data(const char *str)
+{
+    const char *p = str;
+    uint32_t length = -1;
+    while (++length, *++p) {
+        continue;
+    }
+    return CHMutableData::dataWithBytes(str, length);
+}
+
+CHMutableData *CHMutableData::dataWithCapacity(uint32_t capacity)
+{
+    return new CHMutableData(capacity);
 }

@@ -11,7 +11,7 @@
 
 #include "CHData.hpp"
 
-CLASS_TAGGEDPOINTER_AVAILABLE class CHString : protected CHData
+CLASS_TAGGEDPOINTER_AVAILABLE class CHString : protected CHMutableData
 {
     __SUPPORTRUNTIME__(CHString);
 protected:
@@ -40,9 +40,9 @@ class CHMutableString : public CHString
 protected:
     CHMutableString();
 public:
-    CHString& appendString(const CHString *other);
-    CHString& appendString(const char *str);
-    CHString& appendString(const void *bytes, uint32_t length);
+    CHMutableString& appendString(const CHString *other);
+    CHMutableString& appendString(const char *str);
+    CHMutableString& appendString(const void *bytes, uint32_t length);
 
 //    void clear();
 

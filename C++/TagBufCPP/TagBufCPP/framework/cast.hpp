@@ -11,6 +11,7 @@
 
 #include <typeinfo>
 #include <type_traits>
+#include "TaggedPointer.h"
 
 template<typename T> struct __encode__
 { static const char *type(){ return typeid(T).name(); } };
@@ -136,7 +137,7 @@ const char *encode(__unused T unused)
 template <>
 inline const char *encode<const char *>(const char *s)
 {
-    if (reinterpret_cast<uintptr_t>(&s[0]) <= 0x1FFFFFFFFull) {
+    if (reinterpret_cast<uintptr_t>(&s[0]) <= MAX_CONSTANT_ADDRESS) {
         return "*";
     }
     return "^c";

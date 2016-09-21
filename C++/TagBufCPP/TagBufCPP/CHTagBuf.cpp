@@ -25,7 +25,7 @@ static class_t ClassNamed(CHTagBuf) = {
     nullptr,
     allocateCache(),
     selector(^#CHTagBuf),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHTagBuf), CHObject::getClass(nullptr)), sizeof(CHTagBuf))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHTagBuf)), sizeof(CHTagBuf))),
     0,
     3
 };

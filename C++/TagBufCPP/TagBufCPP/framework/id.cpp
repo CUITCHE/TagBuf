@@ -20,7 +20,7 @@ struct runtimeclass(CHObject)
     {
         static method_list_t method[] = {
             {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static} },
             {.method = {0, funcAddr(&CHObject::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload} },
             {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
@@ -45,7 +45,7 @@ static class_t ClassNamed(CHObject) = {
     runtimeclass(CHObject)::ivars(),
     allocateCache(),
     selector(^#CHObject),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject), nullptr), sizeof(CHObject))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject)), sizeof(CHObject))),
     1,
     7
 };
@@ -121,15 +121,21 @@ void CHObject::setObjectType(const char *type)
 }
 
 #include "CHNumber.hpp"
+#include "CHString.hpp"
+#include "CHData.hpp"
 const char *CHObject::objectType() const
 {
     if (isTaggedPointer()) {
         if (is_number(this)) {
-            return CHNumber::getClass(nullptr)->typeName;
+            return encode<CHNumber *>();
+        } else if (is_string(this)) {
+            return encode<CHString *>();
+        } else if (is_data(this)) {
+            return encode<CHData *>();
         }
         return nullptr;
     }
-    return d->CType;
+    return d->CType ?: this->getClass()->typeName;
 }
 
 id CHObject::allocateInstance()

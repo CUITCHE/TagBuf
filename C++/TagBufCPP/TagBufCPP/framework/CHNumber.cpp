@@ -17,7 +17,7 @@ struct runtimeclass(CHNumber)
     static struct method_list_t *methods()
     {
         static method_list_t method[] = {
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload} },
             {.method = {0, funcAddr(&CHNumber::allocateInstance), selector(allocateInstance), __Static} },
         };
@@ -32,7 +32,7 @@ static class_t ClassNamed(CHNumber) = {
     nullptr,
     allocateCache(),
     selector(^#CHNumber),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber), CHObject::getClass(nullptr)), sizeof(CHNumber))),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHNumber)), sizeof(CHNumber))),
     0,
     3
 };
@@ -42,6 +42,7 @@ Implement(CHNumber);
 struct CHNumberPrivate
 {
     union {
+        bool boolValue;
         char charValue;
         short shortValue;
         int intValue;
@@ -66,6 +67,14 @@ CHNumber::~CHNumber()
 }
 
 #define d_d(obj, field) ((CHNumberPrivate *)obj->reserved())->internal.field
+
+CHNumber::operator bool() const
+{
+    if (isTaggedPointer()) {
+        return (bool)(((uintptr_t)this ^ TAGGED_POINTER_NUMBER_FLAG) >> 1);
+    }
+    return d_d(this, boolValue);
+}
 
 CHNumber::operator unsigned char() const
 {
@@ -156,6 +165,10 @@ CHNumber::operator double() const
     }
     return d_d(this, doubleValue);
 }
+CHNumber *numberWithValue(bool v)
+{
+    return numberWithValue((unsigned int)v);
+}
 
 CHNumber *numberWithValue(char v)
 {
@@ -226,7 +239,7 @@ CHNumber *numberWithValue(long v)
 
 CHNumber *numberWithValue(unsigned long v)
 {
-    if (v & MAX_INDICATE_FLAG) {
+    if (v & MAX_INDICATE_NUMBER) {
         CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }
@@ -241,7 +254,7 @@ CHNumber *numberWithValue(long long v)
 
 CHNumber *numberWithValue(unsigned long long v)
 {
-    if (v & MAX_INDICATE_FLAG) {
+    if (v & MAX_INDICATE_NUMBER) {
         CHNumber *o = CHNumberHelper::standardNumber(v);
         return o;
     }

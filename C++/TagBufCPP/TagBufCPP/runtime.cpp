@@ -8,6 +8,8 @@
 
 #include "runtime.hpp"
 #include "cache.hpp"
+#include "CHNumber.hpp"
+#include "CHString.hpp"
 #include <assert.h>
 
 #include <unordered_map>
@@ -59,7 +61,7 @@ Class class_getClass(const char *classname)
 
 bool class_registerClass(Class cls, Class superClass)
 {
-    cls->super_class = superClass;
+//    cls->super_class = superClass;
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
@@ -129,13 +131,56 @@ id object_getIvar(id obj, Ivar ivar)
 {
     if (obj && ivar && !obj->isTaggedPointer()) {
         int offset = ivar_getOffset(ivar);
-        id *idx = (id *)((char *)obj + offset);
-        return *idx;
+        const char *encodeType = ivar_getTypeEncoding(ivar);
+        switch (encodeType[0]) {
+            case 'C':
+            case 'c': {
+                auto *v = (char *)obj + offset;
+                return number(*v);
+            }
+            case 'i':
+            case 'I': {
+                auto *v = (int *)((char *)obj + offset);
+                return number(*v);
+            }
+            case 'l':
+            case 'L': {
+                auto *v = (long *)((char *)obj + offset);
+                return number(*v);
+            }
+            case 'q':
+            case 'Q': {
+                auto *v = (long long *)((char *)obj + offset);
+                return number(*v);
+            }
+            case 'f': {
+                auto *v = (float *)((char *)obj + offset);
+                return number(*v);
+            }
+            case 'd': {
+                auto *v = (double *)((char *)obj + offset);
+                return number(*v);
+            }
+            case 'B': {
+                auto *v = (bool *)((char *)obj + offset);
+                return number(*v);
+            }
+            case '^': {
+                id *idx = (id *)((char *)obj + offset);
+                return *idx;
+            }
+            case ':': {
+                auto *v = (SEL *)((char *)obj + offset);
+                CHString *str = CHString::stringWithCString(*v);
+                return (id)str;
+            }
+                
+            default:
+                break;
+        }
     }
     return nullptr;
 }
-
-#include "CHNumber.hpp"
 
 void object_setIvar(id obj, const Ivar ivar, id value)
 {

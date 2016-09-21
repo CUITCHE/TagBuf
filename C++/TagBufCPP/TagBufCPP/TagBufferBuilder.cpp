@@ -29,7 +29,7 @@ TagBufferBuilder::~TagBufferBuilder()
 void TagBufferBuilder::startBuildingWithObject(CHTagBuf *object)
 {
     if (!d->writeBuffer) {
-        d->writeBuffer = CHData::dataWithCapacity(0);
+        d->writeBuffer = CHMutableData::dataWithCapacity(0);
     }
 }
 
@@ -40,7 +40,7 @@ void *TagBufferBuilder::readTagBuffer(CHData &data, Class cls)
             break;
         }
         if (!d->readBuffer) {
-            d->readBuffer = CHData::dataWithCapacity(0);
+            d->readBuffer = CHMutableData::dataWithCapacity(0);
         }
         *d->readBuffer = std::move(data);
     } while (0);

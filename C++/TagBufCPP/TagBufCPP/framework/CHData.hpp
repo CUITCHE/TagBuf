@@ -20,15 +20,11 @@ CLASS_TAGGEDPOINTER_AVAILABLE class CHData : public CHObject
     __SUPPORTRUNTIME__(CHData);
 protected:
     explicit CHData(uint32_t capacity = 0);
-    CHData *duplicate() const;
 public:
+    CHData *duplicate() const;
     ~CHData() override;
 //    explicit CHData(CHData &&other);
 //    void operator=(CHData &&right);
-
-    void appendBytes(const char *bytes, uint32_t length);
-    void appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone = false);
-    void appendData(const CHData *other);
 
     void enumerateByteUsingBlock(CHDataChunkCallback block) const;
 
@@ -36,8 +32,8 @@ public:
     uint32_t capacity() const;
 
     static CHData *dataWithBytes(const char *bytes, uint32_t length);
-    static CHData *dataWithCapacity(uint32_t capacity);
     static CHData *dataWithData(const CHData *other);
+    static CHData *dataWithUTF8Data(const char *data);
 
     // runtime
     Class getClass() const override;
@@ -46,4 +42,25 @@ private:
     static id allocateInstance();
 };
 
+class CHMutableData : public CHData
+{
+    __SUPPORTRUNTIME__(CHMutableData);
+protected:
+    explicit CHMutableData(uint32_t capacity = 0);
+public:
+    void appendBytes(const char *bytes, uint32_t length);
+    void appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone = false);
+    void appendData(const CHData *other);
+
+    static CHMutableData *dataWithBytes(const char *bytes, uint32_t length);
+    static CHMutableData *dataWithData(const CHData *other);
+    static CHMutableData *dataWithUTF8Data(const char *str);
+    static CHMutableData *dataWithCapacity(uint32_t capacity);
+
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
+private:
+    static id allocateInstance();
+};
 #endif /* CHBuffer_hpp */

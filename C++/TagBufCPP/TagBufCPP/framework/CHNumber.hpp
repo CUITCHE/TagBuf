@@ -16,6 +16,7 @@ CLASS_TAGGEDPOINTER_AVAILABLE class CHNumber : public CHObject
     __SUPPORTRUNTIME__(CHNumber);
     friend struct CHNumberHelper;
 public:
+    operator bool() const;
     operator char() const;
     operator unsigned char() const;
     operator short() const;
@@ -40,6 +41,7 @@ private:
     static id allocateInstance();
 };
 
+CHNumber *numberWithValue(bool v);
 CHNumber *numberWithValue(char v);
 CHNumber *numberWithValue(unsigned char v);
 CHNumber *numberWithValue(short v);
