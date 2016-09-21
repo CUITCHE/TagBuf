@@ -174,7 +174,7 @@ id object_getIvar(id obj, Ivar ivar)
                 CHString *str = CHString::stringWithCString(*v);
                 return (id)str;
             }
-                
+
             default:
                 break;
         }
@@ -184,12 +184,53 @@ id object_getIvar(id obj, Ivar ivar)
 
 void object_setIvar(id obj, const Ivar ivar, id value)
 {
-    if (!strcmp(ivar->ivar_type, "i")) {
-        int *dst = (int *)((char *)obj + ivar->ivar_offset);
-        *dst = *(CHNumber *)value;
-    } else if (strstr(ivar->ivar_type, "^#") == ivar->ivar_type) {
-        id *dst = (id *)((char *)obj + ivar->ivar_offset);
-        *dst = value;
+    if (obj && ivar && !obj->isTaggedPointer()) {
+        const char *encodeType = ivar_getTypeEncoding(ivar);
+        int offset = ivar_getOffset(ivar);
+        switch (encodeType[0]) {
+            case 'C':
+            case 'c': {
+                auto v = (char *)obj + offset;
+                *v = *(CHNumber *)value;
+            }
+            case 'i':
+            case 'I': {
+                auto v = (int *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case 'l':
+            case 'L': {
+                auto v = (long *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case 'q':
+            case 'Q': {
+                auto *v = (long long *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case 'f': {
+                auto v = (float *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case 'd': {
+                auto v = (double *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case 'B': {
+                auto v = (bool *)((char *)obj + offset);
+                *v = *(CHNumber *)value;
+            }
+            case '^': {
+                id *idx = (id *)((char *)obj + offset);
+                *idx = value;
+            }
+            case ':': {
+                // do nothing...
+            }
+                
+            default:
+                break;
+        }
     }
 }
 
