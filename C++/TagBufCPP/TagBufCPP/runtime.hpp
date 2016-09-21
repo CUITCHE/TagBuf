@@ -37,12 +37,10 @@ enum {
 
 struct method_t
 {
-    size_t *const hash; // [return type hash, parma0 type hash, ...]
+    const char *const description; // method signature
     IMP imp;
     SEL name;
-    uint32_t flag : 3;
-    uint32_t isProperty : 1;
-    uint32_t count : 28; // params count(contains return type. And it is first place).
+    uint32_t flag;
 #ifdef __LP64__
     int space;
 #endif

@@ -154,7 +154,7 @@ Method *class_copyMethodList(Class cls, unsigned int *outCount)
     }
     Method *result = nullptr;
     method_list_t *methods = cls->methodList;
-    uint32_t count = cls->methodCount;
+    int count = cls->methodCount;
     if (outCount) {
         *outCount = count;
     }

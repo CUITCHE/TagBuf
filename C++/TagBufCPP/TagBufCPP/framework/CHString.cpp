@@ -13,33 +13,37 @@
 #include "tagBuf.hpp"
 #include "runtime.hpp"
 
+struct runtimeclass(CHString)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[] = {
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHString::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(CHString::*)()const, &CHString::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHString::length), selector(length), __Member} },
+            {.method = {0, funcAddr(&CHString::capacity), selector(length), __Member} },
+            {.method = {0, funcAddr(&CHString::stringWithCString), selector(stringWithCString), __Member} },
+            {.method = {0, funcAddr(&CHString::stringWithString), selector(stringWithString), __Member} },
+            {.method = {0, funcAddr(&CHString::stringWithBytes), selector(stringWithBytes), __Member} },
+
+        };
+        return method;
+    }
+};
+
 static class_t ClassNamed(CHString) = {
     CHData::getClass(nullptr),
     selector(CHString),
-    nullptr,
+    runtimeclass(CHString)::methods(),
     nullptr,
     allocateCache(),
     selector(^#CHString),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHString), CHString::getClass(nullptr)), sizeof(CHString))),
     0,
-    0
+    7
 };
 
 Implement(CHString);
-
-static class_t ClassNamed(CHMutableString) = {
-    CHString::getClass(nullptr),
-    selector(CHMutableString),
-    nullptr,
-    nullptr,
-    allocateCache(),
-    selector(^#CHMutableString),
-    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableString), CHMutableString::getClass(nullptr)), sizeof(CHMutableString))),
-    0,
-    0
-};
-
-Implement(CHMutableString);
 
 CHString::CHString() : CHData(0)
 {}
@@ -74,6 +78,35 @@ CHString *CHString::stringWithString(const CHString *other)
     return (CHString *)other->duplicate();
 }
 
+struct runtimeclass(CHMutableString)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[] = {
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHMutableString::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(CHMutableString::*)()const, &CHMutableString::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, overloadFunc(CHString&(CHMutableString::*)(const CHString *), &CHMutableString::appendString), selector(appendString), __Member|__Overload} },
+            {.method = {0, overloadFunc(CHString&(CHMutableString::*)(const char *), &CHMutableString::appendString), selector(appendString), __Member|__Overload} },
+            {.method = {0, overloadFunc(CHString&(CHMutableString::*)(const void *, uint32_t), &CHMutableString::appendString), selector(appendString), __Member|__Overload} },
+
+        };
+        return method;
+    }
+};
+
+static class_t ClassNamed(CHMutableString) = {
+    CHString::getClass(nullptr),
+    selector(CHMutableString),
+    nullptr,
+    nullptr,
+    allocateCache(),
+    selector(^#CHMutableString),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableString), CHMutableString::getClass(nullptr)), sizeof(CHMutableString))),
+    0,
+    5
+};
+
+Implement(CHMutableString);
 
 /// CHMutableString
 CHString& CHMutableString::appendString(const CHString *other)

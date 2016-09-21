@@ -17,9 +17,18 @@
 
 #include "CHTagBuf.hpp"
 
+#ifndef runtimeclass
+#define runtimeclass(classname) __##classname##RuntimeClass__
+#endif
+
+#ifndef __SUPPORTRUNTIME__
+#define __SUPPORTRUNTIME__(classname) friend struct runtimeclass(classname)
+#endif
+
 #ifndef Interface
 #define Interface(classname) class classname final : public CHTagBuf { \
                                 friend struct CHTagBufFactor; \
+                                __SUPPORTRUNTIME__(classname);\
                                 protected:\
                                 classname() :CHTagBuf(){};\
                                 public:\
@@ -39,6 +48,13 @@
 #define Implement(classname) Class classname::getClass() const { return &ClassNamed(classname); } \
     Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); }
 #endif
+
+#define RUNTIMECLASS(classname) struct runtimeclass(classname) { \
+static struct method_list_t *methods() {\
+static method_list_t method[] = {{.method = {0, overloadFunc(Class(*)(std::nullptr_t),classname::getClass), selector(getClass), __Static|__Overload} },\
+{.method = {0, overloadFunc(Class(classname::*)()const, &classname::getClass), selector(getClass), __Member|__Overload} },\
+};\
+return method;}}
 
 #ifndef tagbuf_class_check
 #define tagbuf_class_check(type) static_assert(std::is_final<type>::value, "Your TagBuf class is not final class. Please use macro TagBufClass(classname) to declare TagBuf class.")

@@ -17,8 +17,8 @@ struct runtimeclass(CHNumber)
     static struct method_list_t *methods()
     {
         static method_list_t method[] = {
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static|__Overload, 0, 1, 0} },
-            {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload, 0, 1, 0} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload} },
         };
         return method;
     }

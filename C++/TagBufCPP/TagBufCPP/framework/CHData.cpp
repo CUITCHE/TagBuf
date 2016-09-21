@@ -20,8 +20,19 @@ struct runtimeclass(CHData)
     static struct method_list_t *methods()
     {
         static method_list_t method[] = {
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static|__Overload, 0, 1, 0} },
-            {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member|__Overload, 0, 1, 0} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHData::duplicate), selector(duplicate), __Member} },
+            {.method = {0, funcAddr(&CHData::appendBytes), selector(appendBytes), __Member} },
+            {.method = {0, funcAddr(&CHData::appendBytesNoCopy), selector(appendBytesNoCopy), __Member} },
+            {.method = {0, funcAddr(&CHData::appendData), selector(appendData), __Member} },
+            {.method = {0, funcAddr(&CHData::enumerateByteUsingBlock), selector(enumerateByteUsingBlock), __Member} },
+            {.method = {0, funcAddr(&CHData::length), selector(length), __Member} },
+            {.method = {0, funcAddr(&CHData::capacity), selector(capacity), __Member} },
+            {.method = {0, funcAddr(&CHData::dataWithBytes), selector(dataWithBytes), __Member} },
+            {.method = {0, funcAddr(&CHData::dataWithCapacity), selector(dataWithCapacity), __Member} },
+            {.method = {0, funcAddr(&CHData::dataWithData), selector(dataWithData), __Member} },
+
         };
         return method;
     }

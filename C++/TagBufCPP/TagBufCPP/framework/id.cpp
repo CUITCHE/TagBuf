@@ -18,12 +18,12 @@ struct runtimeclass(CHObject)
     static struct method_list_t *methods()
     {
         static method_list_t method[] = {
-            {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member, 0, 1, 0} },
-            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static|__Overload, 0, 1, 0} },
-            {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload, 0, 1, 0} },
-            {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member, 0, 2, 0} },
-            {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member, 0, 1, 0} },
-            {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member, 0, 2, 0} },
+            {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static|__Overload} },
+            {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
+            {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member} },
+            {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member} },
         };
         return method;
     }

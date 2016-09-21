@@ -13,13 +13,14 @@
 
 CLASS_TAGGEDPOINTER_AVAILABLE class CHString : protected CHData
 {
+    __SUPPORTRUNTIME__(CHString);
     CHString();
     CHString(const CHString&) = delete;
     CHString& operator=(const CHString &) = delete;
 public:
     uint32_t length() const;
     uint32_t capacity() const;
-    void print() const;
+//    void print() const;
 
     static CHString* stringWithCString(const char *str);
     static CHString* stringWithString(const CHString *other);
@@ -32,12 +33,13 @@ public:
 
 class CHMutableString : public CHString
 {
+    __SUPPORTRUNTIME__(CHMutableString);
 public:
     CHString& appendString(const CHString *other);
     CHString& appendString(const char *str);
     CHString& appendString(const void *bytes, uint32_t length);
 
-    void clear();
+//    void clear();
 
     // runtime
     Class getClass() const override;

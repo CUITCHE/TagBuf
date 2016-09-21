@@ -11,9 +11,10 @@
 #include "runtime.hpp"
 #include "CHNumber.hpp"
 #include "TaggedPointer.h"
+#include "CHData.hpp"
 
 int main(int argc, const char * argv[]) {
-    auto cls = CHObject::getClass(nullptr);
+    auto cls = CHData::getClass(nullptr);
     uint32_t count = 0;
     auto method = class_copyMethodList(cls, &count);
     return 0;

@@ -20,10 +20,12 @@ static ivar_list_t IvarListNamed(CHDemo2)[] = {
     {.ivar[0] = {.ivar_name = selector(_1), .ivar_type = encode<double>(), .ivar_offset = OFFSET(CHDemo2, _1)}}
 };
 
+RUNTIMECLASS(CHDemo2);
+
 static class_t ClassNamed(CHDemo2) = {
     CHTagBuf::getClass(nullptr),
     selector(CHDemo2),
-    nullptr,
+    runtimeclass(CHDemo2)::methods(),
     &ivar_list_CHDemo2[0],
     allocateCache(),
     selector(^#CHDemo2),
@@ -46,10 +48,12 @@ static ivar_list_t IvarListNamed(CHDemo)[] = {
     {.ivar[0] = {.ivar_name = selector(tableId), .ivar_type = encode<int>(), .ivar_offset = OFFSET(CHDemo, tableId)}}
 };
 
+RUNTIMECLASS(CHDemo);
+
 static class_t ClassNamed(CHDemo) = {
     CHTagBuf::getClass(nullptr),
     selector(CHDemo),
-    nullptr,
+    runtimeclass(CHDemo)::methods(),
     &ivar_list_CHDemo[0],
     allocateCache(),
     selector(^#CHDemo),

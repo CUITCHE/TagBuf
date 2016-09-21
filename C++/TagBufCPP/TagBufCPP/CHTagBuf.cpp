@@ -15,10 +15,13 @@
 //------------------
 // class CHTagBuf
 //------------------
+
+RUNTIMECLASS(CHTagBuf);
+
 static class_t ClassNamed(CHTagBuf) = {
     CHObject::getClass(nullptr),
     selector(CHTagBuf),
-    nullptr,
+    runtimeclass(CHTagBuf)::methods(),
     nullptr,
     allocateCache(),
     selector(^#CHTagBuf),
