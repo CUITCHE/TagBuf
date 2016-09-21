@@ -33,16 +33,16 @@ void TagBufferBuilder::startBuildingWithObject(CHTagBuf *object)
     }
 }
 
-void *TagBufferBuilder::readTagBuffer(CHData &data, Class cls)
+void *TagBufferBuilder::readTagBuffer(const CHData *data, Class cls)
 {
     do {
-        if (!data.length()) {
+        if (!data->length()) {
             break;
         }
         if (!d->readBuffer) {
             d->readBuffer = CHMutableData::dataWithCapacity(0);
         }
-        *d->readBuffer = std::move(data);
+        d->readBuffer = data;
     } while (0);
     return nullptr;
 }

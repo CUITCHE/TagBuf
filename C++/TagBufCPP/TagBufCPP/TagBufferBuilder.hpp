@@ -26,7 +26,7 @@ public:
     ~TagBufferBuilder();
 
     void startBuildingWithObject(CHTagBuf *object);
-    void *readTagBuffer(CHData &data, Class cls);
+    void *readTagBuffer(const CHData *data, Class cls);
 
     CHData &buildedData() const;
 };

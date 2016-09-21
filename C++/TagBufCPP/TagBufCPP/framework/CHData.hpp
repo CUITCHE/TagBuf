@@ -31,9 +31,10 @@ public:
     uint32_t length() const;
     uint32_t capacity() const;
 
-    static CHData *dataWithBytes(const char *bytes, uint32_t length);
+    static CHData *dataWithBytes(const void *bytes, uint32_t length);
     static CHData *dataWithData(const CHData *other);
-    static CHData *dataWithUTF8Data(const char *data);
+    static CHData *dataWithUTF8Data(const char *str);
+    static CHData *dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenDone = false);
 
     // runtime
     Class getClass() const override;
@@ -48,14 +49,15 @@ class CHMutableData : public CHData
 protected:
     explicit CHMutableData(uint32_t capacity = 0);
 public:
-    void appendBytes(const char *bytes, uint32_t length);
-    void appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone = false);
+    void appendBytes(const void *bytes, uint32_t length);
+    void appendBytesNoCopy(const void *bytes, uint32_t length, bool freeWhenDone = false);
     void appendData(const CHData *other);
 
-    static CHMutableData *dataWithBytes(const char *bytes, uint32_t length);
+    static CHMutableData *dataWithBytes(const void *bytes, uint32_t length);
     static CHMutableData *dataWithData(const CHData *other);
     static CHMutableData *dataWithUTF8Data(const char *str);
     static CHMutableData *dataWithCapacity(uint32_t capacity);
+    static CHMutableData *dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenDone = false);
 
     // runtime
     Class getClass() const override;

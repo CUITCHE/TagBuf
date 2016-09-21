@@ -91,6 +91,7 @@ struct CHBufferIOType {
     #include <assert.h>
     #define CHCAssert(cond, ...) assert(cond)
     #define CH_INLINE static inline
+class CHMutableData;
 class CHData;
 #else
 #error This code only supports C++ or Objective-C.
@@ -181,13 +182,12 @@ extern void release(CHObject *);
 
 struct TagBufferBuilderPrivate
 {
-    CHData *writeBuffer = 0;
-    CHData *readBuffer = 0;
+    CHMutableData *writeBuffer = 0;
+    const CHData *readBuffer = 0;
 
     ~TagBufferBuilderPrivate()
     {
         release(writeBuffer);
-        release(readBuffer);
     }
 };
 #endif

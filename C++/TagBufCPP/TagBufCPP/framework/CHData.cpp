@@ -31,6 +31,7 @@ struct runtimeclass(CHData)
             {.method = {0, funcAddr(&CHData::dataWithBytes), selector(dataWithBytes), __Static} },
             {.method = {0, funcAddr(&CHData::dataWithData), selector(dataWithData), __Static} },
             {.method = {0, funcAddr(&CHData::dataWithUTF8Data), selector(dataWithUTF8Data), __Static} },
+            {.method = {0, funcAddr(&CHData::dataWithBytesNoCopy), selector(dataWithBytesNoCopy), __Static} },
 
         };
         return method;
@@ -312,9 +313,11 @@ CHData *CHData::duplicate() const
 
 CHData::~CHData()
 {
-    CHDataPrivate *d = (CHDataPrivate *)reserved();
-    if (d) {
-        delete d;
+    if (!isTaggedPointer()) {
+        CHDataPrivate *d = (CHDataPrivate *)reserved();
+        if (d) {
+            delete d;
+        }
     }
 }
 
@@ -366,10 +369,10 @@ void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
     }
 }
 
-CHData *CHData::dataWithBytes(const char *bytes, uint32_t length)
+CHData *CHData::dataWithBytes(const void *bytes, uint32_t length)
 {
     CHData *obj = new CHData(1);
-    d_d(obj, write(bytes, length));
+    d_d(obj, write((const char *)bytes, length));
     return obj;
 }
 
@@ -386,12 +389,19 @@ CHData *CHData::dataWithUTF8Data(const char *str)
         continue;
     }
     uintptr_t ptr = (uintptr_t)str;
-    if (ptr <= MAX_CONSTANT_ADDRESS) {
+    if (ptr <= MAX_CONSTANT_ADDRESS && length <= MAX_INDICATE_STRING_DATA_LENGTH) {
         ptr |= ((uintptr_t)length << TAGGED_POINTER_DATA_LENGTH_OFFSET);
         CHData *o = reinterpret_cast<CHData *>(ptr << 1 | TAGGED_POINTER_DATA_FLAG);
         return o;
     }
     return CHData::dataWithBytes(str, length);
+}
+
+CHData *CHData::dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenDone /*= false*/)
+{
+    CHData *obj = new CHData(length);
+    d_d(obj, writeNoCopy((char *)bytes, length, freeWhenDone));
+    return obj;
 }
 
 uint32_t CHData::length() const
@@ -429,6 +439,7 @@ struct runtimeclass(CHMutableData)
             {.method = {0, funcAddr(&CHMutableData::dataWithData), selector(dataWithData), __Static} },
             {.method = {0, funcAddr(&CHMutableData::dataWithUTF8Data), selector(dataWithUTF8Data), __Static} },
             {.method = {0, funcAddr(&CHMutableData::dataWithCapacity), selector(dataWithCapacity), __Static} },
+            {.method = {0, funcAddr(&CHMutableData::dataWithBytesNoCopy), selector(dataWithBytesNoCopy), __Static} },
         };
         return method;
     }
@@ -450,12 +461,12 @@ Implement(CHMutableData);
 
 CHMutableData::CHMutableData(uint32_t capacity) : CHData(capacity) {}
 
-void CHMutableData::appendBytes(const char *bytes, uint32_t length)
+void CHMutableData::appendBytes(const void *bytes, uint32_t length)
 {
-    d_d(this, write)(bytes, length);
+    d_d(this, write)((const char *)bytes, length);
 }
 
-void CHMutableData::appendBytesNoCopy(const char *bytes, uint32_t length, bool freeWhenDone /*= false*/)
+void CHMutableData::appendBytesNoCopy(const void *bytes, uint32_t length, bool freeWhenDone /*= false*/)
 {
     d_d(this, writeNoCopy)((char *)bytes, length, freeWhenDone);
 }
@@ -472,10 +483,10 @@ void CHMutableData::appendData(const CHData *other)
     });
 }
 
-CHMutableData *CHMutableData::dataWithBytes(const char *bytes, uint32_t length)
+CHMutableData *CHMutableData::dataWithBytes(const void *bytes, uint32_t length)
 {
     CHMutableData *obj = new CHMutableData(length);
-    d_d(obj, write(bytes, length));
+    d_d(obj, write((const char *)bytes, length));
     return obj;
 }
 
@@ -503,4 +514,11 @@ CHMutableData *CHMutableData::dataWithUTF8Data(const char *str)
 CHMutableData *CHMutableData::dataWithCapacity(uint32_t capacity)
 {
     return new CHMutableData(capacity);
+}
+
+CHMutableData *CHMutableData::dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenDone/* = false*/)
+{
+    CHMutableData *obj = new CHMutableData(length);
+    d_d(obj, writeNoCopy((char *)bytes, length, freeWhenDone));
+    return obj;
 }
