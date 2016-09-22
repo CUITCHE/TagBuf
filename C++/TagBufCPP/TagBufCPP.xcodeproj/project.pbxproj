@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FB8EDD6E1D93F880003D8D1E /* CHArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB8EDD6C1D93F880003D8D1E /* CHArray.cpp */; };
 		FBBBB62A1D8EAE98008DF84F /* cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6101D8EAE98008DF84F /* cache.cpp */; };
 		FBBBB62B1D8EAE98008DF84F /* CHTagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6121D8EAE98008DF84F /* CHTagBuf.cpp */; };
 		FBBBB62C1D8EAE98008DF84F /* CHDemo+TagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6151D8EAE98008DF84F /* CHDemo+TagBuf.cpp */; };
@@ -34,6 +35,8 @@
 
 /* Begin PBXFileReference section */
 		FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaggedPointer.h; sourceTree = "<group>"; };
+		FB8EDD6C1D93F880003D8D1E /* CHArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHArray.cpp; sourceTree = "<group>"; };
+		FB8EDD6D1D93F880003D8D1E /* CHArray.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHArray.hpp; sourceTree = "<group>"; };
 		FBBBB6061D8EAE64008DF84F /* TagBufCPP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TagBufCPP; sourceTree = BUILT_PRODUCTS_DIR; };
 		FBBBB6101D8EAE98008DF84F /* cache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cache.cpp; sourceTree = "<group>"; };
 		FBBBB6111D8EAE98008DF84F /* cache.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cache.hpp; sourceTree = "<group>"; };
@@ -132,6 +135,8 @@
 				FBBBB6201D8EAE98008DF84F /* id.cpp */,
 				FBBBB6211D8EAE98008DF84F /* id.hpp */,
 				FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */,
+				FB8EDD6C1D93F880003D8D1E /* CHArray.cpp */,
+				FB8EDD6D1D93F880003D8D1E /* CHArray.hpp */,
 			);
 			path = framework;
 			sourceTree = "<group>";
@@ -199,6 +204,7 @@
 				FBBBB62A1D8EAE98008DF84F /* cache.cpp in Sources */,
 				FBBBB62C1D8EAE98008DF84F /* CHDemo+TagBuf.cpp in Sources */,
 				FBBBB62D1D8EAE98008DF84F /* cast.cpp in Sources */,
+				FB8EDD6E1D93F880003D8D1E /* CHArray.cpp in Sources */,
 				FBBBB62E1D8EAE98008DF84F /* CHData.cpp in Sources */,
 				FBBBB6331D8EAE98008DF84F /* runtime.cpp in Sources */,
 				FBBBB6311D8EAE98008DF84F /* id.cpp in Sources */,

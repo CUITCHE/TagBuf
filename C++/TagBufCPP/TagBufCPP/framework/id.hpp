@@ -13,6 +13,7 @@
 #include "types.h"
 
 class CHTagBuf;
+class CHString;
 
 #ifndef runtimeclass
 #define runtimeclass(classname) __##classname##RuntimeClass__
@@ -22,7 +23,14 @@ class CHTagBuf;
 #define __SUPPORTRUNTIME__(classname) friend struct runtimeclass(classname)
 #endif
 
-CLASS_TAGGEDPOINTER_AVAILABLE class CHObject
+class CHProtocol
+{
+public:
+//    virtual bool equalTo(id anObject) const = 0;
+//    virtual CHString *description() const = 0;
+};
+
+CLASS_TAGGEDPOINTER_AVAILABLE class CHObject : public CHProtocol
 {
     __SUPPORTRUNTIME__(CHObject);
 public:

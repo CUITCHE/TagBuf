@@ -22,7 +22,7 @@ struct runtimeclass(CHData)
     {
         static method_list_t method[] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHData::getClass), selector(getClass), __Static} },
-            {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, overloadFunc(Class(CHData::*)()const, &CHData::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHData::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, funcAddr(&CHData::duplicate), selector(duplicate), __Member} },
             {.method = {0, funcAddr(&CHData::enumerateByteUsingBlock), selector(enumerateByteUsingBlock), __Member} },
