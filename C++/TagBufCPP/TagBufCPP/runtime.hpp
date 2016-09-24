@@ -180,15 +180,16 @@ _T& propertyInvoke(id self, SEL propertyName)
 }
 
 extern size_t bkdr_hash(const char *str);
+extern uint64_t bkdr_hash(const char *str, uint32_t length);
 
 int ivar_getOffset(Ivar ivar);
 const char *ivar_getName(Ivar ivar);
 const char *ivar_getTypeEncoding(Ivar ivar);
-id object_getIvar(id obj, Ivar ivar);
+id object_getIvar(const id obj, Ivar ivar);
 void object_setIvar(id obj, const Ivar ivar, id value);
 
-Ivar *class_copyIvarList(Class cls, uint32_t *outCount);
-Ivar class_getIvar(Class cls, SEL ivarName);
+Ivar *class_copyIvarList(const Class cls, uint32_t *outCount);
+Ivar class_getIvar(const Class cls, const SEL ivarName);
 
 
 IMP method_getImplementation(Method m);
@@ -198,8 +199,8 @@ SEL method_getName(Method m);
 //Method class_getInstanceMethod(Class cls, SEL sel);
 Method *class_copyMethodList(Class cls, unsigned int *outCount);
 
-const char *object_getClassName();
-Class object_getClass();
+const char *object_getClassName(const id object);
+Class object_getClass(const id object);
 
 
 #endif /* runtime_hpp */

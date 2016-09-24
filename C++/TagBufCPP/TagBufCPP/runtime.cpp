@@ -27,6 +27,17 @@ size_t bkdr_hash(const char *str)
     return hash & (0x7FFFFFFFFFFFFFFFULL);
 }
 
+uint64_t bkdr_hash(const char *str, uint32_t length)
+{
+    const unsigned char *s = (const unsigned char *)str;
+    --s;
+    uint64_t hash = 0;
+    while (length --> 0) {
+        hash = 31 * hash + *++s;
+    }
+    return hash & (0x7FFFFFFFFFFFFFFFULL);
+}
+
 struct _hash_
 {
     size_t operator()(const char *str) const
@@ -213,7 +224,7 @@ id object_getIvar(id obj, Ivar ivar)
             }
             case ':': {
                 auto v = (SEL *)((char *)obj + offset);
-                CHString *str = CHString::stringWithCString(*v);
+                CHString *str = CHString::stringWithUTF8String(*v);
                 return (id)str;
             }
 
@@ -318,7 +329,7 @@ void object_setIvar(id obj, const Ivar ivar, id value)
     }
 }
 
-Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
+Ivar *class_copyIvarList(const Class cls, uint32_t *outCount)
 {
     if (!cls) {
         if (outCount) {
@@ -344,7 +355,7 @@ Ivar *class_copyIvarList(Class cls, uint32_t *outCount)
     return result;
 }
 
-Ivar class_getIvar(Class cls, SEL ivarName)
+Ivar class_getIvar(const Class cls, const SEL ivarName)
 {
     ivar_list_t *list = cls->ivarList - 1;
     int count = cls->ivarCount;
@@ -367,7 +378,7 @@ SEL method_getName(Method m)
     return m ? m->name : nullptr;
 }
 
-Method *class_copyMethodList(Class cls, unsigned int *outCount)
+Method *class_copyMethodList(const Class cls, unsigned int *outCount)
 {
     if (!cls) {
         if (outCount) {
@@ -391,4 +402,14 @@ Method *class_copyMethodList(Class cls, unsigned int *outCount)
         }
     }
     return result;
+}
+
+const char *object_getClassName(const id object)
+{
+    return object->getClass()->name;
+}
+
+Class object_getClass(const id object)
+{
+    return object->getClass();
 }

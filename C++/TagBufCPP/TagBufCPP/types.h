@@ -38,4 +38,8 @@ using Method = struct method_t *;
 class CHObject;
 using id = CHObject *;
 
+const constexpr uint32_t CHNotFound = (uint32_t)-1;
+
+#define ARRAY_CONTAINS_TYPE(objType, containsType) objType
+
 #endif /* types_h */

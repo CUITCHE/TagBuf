@@ -7,21 +7,15 @@
 //
 
 #include <stdio.h>
-#include "CHDemo.hpp"
-#include "runtime.hpp"
-#include "CHNumber.hpp"
-#include "TaggedPointer.h"
-#include "id.hpp"
-#include "CHData.hpp"
+#include "CHString.hpp"
+#include "tprintf.hpp"
 
 int main(int argc, const char * argv[]) {
-    int i = 1e7;
-    while (i --> 0) {
-        CHDemo *obj = CHTagBufFactor::tagBuf<CHDemo>();
-        obj->_2 = CHTagBufFactor::tagBuf<CHDemo2>();
-        release(obj);
-    }
-    char *bytes = new char[1024]{1,2,3,4};
-    printf("%p\n", bytes);
+    const char *text = "123456789012asdfgh12";
+    CHString *string = CHString::stringWithUTF8String(text);
+//    CHString *pattern = CHString::stringWithUTF8String("12");
+    CHString *replacement = CHString::stringWithUTF8String("zxcvbnm,.");
+    CHString *mod = string->stringByReplacingCharactersInRange(CHMakeRange(3, 4), replacement);
+    tprintf("%@\n", mod);
     return 0;
 }

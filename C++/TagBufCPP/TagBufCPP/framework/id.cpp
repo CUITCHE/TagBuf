@@ -18,11 +18,16 @@ struct runtimeclass(CHObject)
 {
     static struct method_list_t *methods()
     {
-        static method_list_t method[] = {
-            {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
+        static method_list_t method[11] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static} },
+            {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHObject::allocateInstance), selector(allocateInstance), __Static} },
-            {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHObject::equalTo), selector(equalTo), __Member} },
+            {.method = {0, funcAddr(&CHObject::description), selector(description), __Member} },
+            {.method = {0, funcAddr(&CHObject::hash), selector(hash), __Member} },
+            {.method = {0, funcAddr(&CHObject::superclass), selector(superclass), __Member} },
+
+            {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
             {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
             {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member} },
             {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member} },
@@ -47,10 +52,8 @@ static class_t ClassNamed(CHObject) = {
     selector(^#CHObject),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject)), sizeof(CHObject))),
     1,
-    7
+    11
 };
-
-//Implement(CHObject);
 
 Class CHObject::getClass() const
 {
@@ -146,6 +149,46 @@ const char *CHObject::objectType() const
     } else {
         return this->getClass()->typeName;
     }
+}
+
+// protocol
+bool CHObject::equalTo(id anObject) const
+{
+    return this == anObject;
+}
+
+CHString *CHObject::description() const
+{
+    return CHString::stringWithFormat("<%s:%p>", object_getClassName((id)this), this);
+}
+
+uint64_t CHObject::hash() const
+{
+    return (uint64_t)this >> 4;
+}
+
+Class CHObject::superclass() const
+{
+    return this->getClass()->super_class;
+}
+
+bool CHObject::isKindOfClass(Class aClass) const
+{
+    Class cls = this->getClass();
+    while (cls && cls != aClass) {
+        cls = cls->super_class;
+    }
+    return cls != nullptr;
+}
+
+bool CHObject::isMemberOfClass(Class aClass) const
+{
+    return this->getClass() == aClass;
+}
+
+bool CHObject::respondsToSelector(SEL selector) const
+{
+    return runtime_lookup_method(this->getClass(), selector);
 }
 
 id CHObject::allocateInstance()
