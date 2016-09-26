@@ -50,6 +50,7 @@
 #define SIGNEDFLAG   0x00000100
 #define LEFTFORMATFLAG 0x00000200
 #define LEADZEROFLAG 0x00000400
+#define OBJECTFLAG 0x00000800
 
 static char *tlonglong_to_string(char *buf, unsigned long long n, int len, uint flag)
 {
@@ -100,14 +101,28 @@ uint64_t tprintf(const char *format, ...)
     va_list ap;
     va_start(ap, format);
     char *str = nullptr;
-    uint64_t n = tprintf(str, nullptr, format, ap);
+    uint64_t n = tprintf_c(str, nullptr, format, ap);
+    va_end(ap);
     puts(str);
     fflush(stdout);
     free(str);
     return n;
 }
 
-uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap)
+uint64_t tprintf_error(const char *format, ...)
+{
+    va_list ap;
+    va_start(ap, format);
+    char *str = nullptr;
+    uint64_t n = tprintf_c(str, nullptr, format, ap);
+    va_end(ap);
+    fprintf(stderr, "%s", str);
+    fflush(stderr);
+    free(str);
+    return n;
+}
+
+uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap)
 {
     char c;
     unsigned char uc;
@@ -140,8 +155,9 @@ uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list 
     next_format:
         /* grab the next format character */
         c = *fmt++;
-        if(c == 0)
+        if(c == 0) {
             break;
+        }
 
         switch(c) {
             case '0'...'9':
@@ -163,7 +179,7 @@ uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list 
             case 's':
                 s = va_arg(ap, const char *);
                 if(s == 0)
-                    s = "<null>";
+                    s = "(null)";
                 goto _output_string;
             case '-':
                 flags |= LEFTFORMATFLAG;
@@ -214,6 +230,10 @@ uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list 
                 s = tlonglong_to_string(num_buffer, n, sizeof(num_buffer), flags);
                 goto _output_string;
             case 'p':
+                if (*fmt == '@') {
+                    flags = OBJECTFLAG;
+                    goto next_format;
+                }
                 flags |= LONGFLAG | ALTFLAG;
                 goto hex;
             case 'X':
@@ -251,13 +271,12 @@ uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list 
             case '@':
                 obj = va_arg(ap, id);
                 if (!obj) {
-                    s = "<null>";
+                    s = "(null)";
                     goto _output_string;
                 }
-                // TODO: complete CHString
             {
                 CHString *string = (CHString *)obj;
-                if (!obj->isKindOfClass(CHString::getClass(nullptr))) {
+                if (!string->isKindOfClass(CHString::getClass(nullptr))) {
                     string = obj->description();
                 }
                 uint32_t length = string->length();
@@ -265,10 +284,13 @@ uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list 
                 if (len - chars_written < length) {
                     len += length < 512 ? 512 : (length + 1);
                     outBuffer = (char *)realloc(outBuffer, len);
-                    str += chars_written;
                 }
                 (void) string->getBytes(str, length);
                 str += length;
+                chars_written += length;
+                if (string != obj) {
+                    release(string);
+                }
             }
                 break;
             default:

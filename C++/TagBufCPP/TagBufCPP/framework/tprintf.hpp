@@ -14,5 +14,7 @@
 
 extern uint64_t tprintf(const char *format, ...) __attribute__((__format__ (__printf__, 1, 2)));
 
-extern uint64_t tprintf(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap);
+extern uint64_t tprintf_error(const char *format, ...) __attribute__((__format__ (__printf__, 1, 2)));
+
+extern uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap);
 #endif /* tprintf_hpp */

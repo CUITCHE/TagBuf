@@ -53,5 +53,5 @@ void CHTagBuf::desctructor(CHTagBuf *obj)
             }
         }
         cls = cls->super_class;
-    } while (0);
+    } while (true);
 }

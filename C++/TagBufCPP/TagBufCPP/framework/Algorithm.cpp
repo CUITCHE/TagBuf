@@ -65,7 +65,9 @@ tmp = (buf)[i]; \
         unsigned int *goodSubstringShift = (unsigned int *)malloc(needleLength * sizeof(unsigned int));
         unsigned int *suffixLengths = (unsigned int *)malloc(needleLength * sizeof(unsigned int));
         if (!goodSubstringShift || !suffixLengths) {
-            return 0;
+            free(goodSubstringShift);
+            free(suffixLengths);
+            return nullptr;
         }
 
         if(backwards) {
@@ -198,6 +200,8 @@ tmp = (buf)[i]; \
         unsigned int *goodSubstringShift = (unsigned int *)malloc(needleLength * sizeof(unsigned int));
         unsigned int *suffixLengths = (unsigned int *)malloc(needleLength * sizeof(unsigned int));
         if (!goodSubstringShift || !suffixLengths) {
+            free(goodSubstringShift);
+            free(suffixLengths);
             return;
         }
 

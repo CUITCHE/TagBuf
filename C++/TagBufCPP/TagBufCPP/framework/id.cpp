@@ -13,12 +13,13 @@
 #include "tagBuf.hpp"
 #include "runtime.hpp"
 #include "cast.hpp"
+#include "__tassert.h"
 
 struct runtimeclass(CHObject)
 {
     static struct method_list_t *methods()
     {
-        static method_list_t method[11] = {
+        static method_list_t method[13] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHObject::allocateInstance), selector(allocateInstance), __Static} },
@@ -31,6 +32,9 @@ struct runtimeclass(CHObject)
             {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
             {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member} },
             {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member} },
+            // copy
+            {.method = {0, funcAddr(&CHObject::copy), selector(copy), __Member} },
+            {.method = {0, funcAddr(&CHObject::mutableCopy), selector(mutableCopy), __Member} },
         };
         return method;
     }
@@ -52,7 +56,7 @@ static class_t ClassNamed(CHObject) = {
     selector(^#CHObject),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject)), sizeof(CHObject))),
     1,
-    11
+    13
 };
 
 Class CHObject::getClass() const
@@ -119,6 +123,29 @@ void *CHObject::reserved() const
     return d->obj;
 }
 
+// copy
+id CHObject::copy() const
+{
+    id cp = 0;
+    if (this->respondsToSelector(selector(copyWithZone))) {
+        cp = methodInvoke<id>((id)this, selector(copyWithZone), this->getClass(), nullptr);
+    } else {
+        __tassert(false, "Class:%s has not implement method:[copyWithZone]", object_getClassName((id)this));
+    }
+    return cp;
+}
+
+id CHObject::mutableCopy() const
+{
+    id cp = 0;
+    if (this->respondsToSelector(selector(mutableCopyWithZone))) {
+        cp = methodInvoke<id>((id)this, selector(mutableCopyWithZone), this->getClass(), nullptr);
+    } else {
+        __tassert(false, "Class:%s has not implement method:[mutableCopyWithZone]", object_getClassName((id)this));
+    }
+    return cp;
+}
+
 void CHObject::setObjectType(const char *type)
 {
     if (!isTaggedPointer()) {
@@ -174,7 +201,18 @@ Class CHObject::superclass() const
 
 bool CHObject::isKindOfClass(Class aClass) const
 {
-    Class cls = this->getClass();
+    Class cls = 0;
+    if (isTaggedPointer()) {
+        if (is_number(this)) {
+            cls = CHNumber::getClass(nullptr);
+        } else if (is_string(this)) {
+            cls = CHString::getClass(nullptr);
+        } else if (is_data(this)) {
+            cls = CHData::getClass(nullptr);
+        }
+    } else {
+        cls = this->getClass();
+    }
     while (cls && cls != aClass) {
         cls = cls->super_class;
     }

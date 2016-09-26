@@ -11,11 +11,14 @@
 
 #include "id.hpp"
 #include "CHRange.hpp"
+#include <stdarg.h>
 
 class CHArray;
 class CHData;
 
-CLASS_TAGGEDPOINTER_AVAILABLE class CHString : public CHObject
+CLASS_TAGGEDPOINTER_AVAILABLE class CHString : public CHObject,
+                                               protocolTo CHCopy,
+                                               protocolTo CHMutableCopy
 {
     __SUPPORTRUNTIME__(CHString);
 protected:
@@ -73,6 +76,7 @@ public:
     static CHString* stringWithBytesNoCopy(void *bytes, uint32_t length);
     static CHString* stringWithUTF8String(const char *nullTerminatedCString);
     static CHString* stringWithFormat(const char *format, ...) __printflike(1, 2);
+    static CHString* stringWithFormat(const char *format, va_list argList);
 
     // runtime
     Class getClass() const override;
@@ -84,6 +88,9 @@ public:
     uint64_t hash() const override;
 private:
     static id allocateInstance();
+protected:
+    id copyWithZone(std::nullptr_t) const;
+    id mutableCopyWithZone(std::nullptr_t) const;
 };
 
 class CHMutableString : public CHString
@@ -93,7 +100,7 @@ protected:
     CHMutableString();
 public:
     void insertString(CHString *aString, uint32_t index);
-    void deleteCharactersInRange(CHRange range);
+    void deleteCharactersInRange(CHRange range) throw();
     void appendString(const CHString *other);
     void appendFormat(const char *format, ...);
     void setString(CHString *aString);
@@ -109,6 +116,10 @@ public:
     static Class getClass(std::nullptr_t);
 private:
     static id allocateInstance();
+protected:
+    id copyWithZone(std::nullptr_t) const;
+    id mutableCopyWithZone(std::nullptr_t) const;
 };
 
+#define tstr(s) CHString::stringWithUTF8String(s)
 #endif /* CHString_hpp */

@@ -11,6 +11,8 @@
 
 #include "id.hpp"
 
+class CHString;
+
 CLASS_TAGGEDPOINTER_AVAILABLE class CHNumber : public CHObject
 {
     __SUPPORTRUNTIME__(CHNumber);
@@ -35,6 +37,9 @@ public:
     // runtime
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+
+    // protocol
+    CHString *description() const override;
 protected:
     CHNumber();
 private:

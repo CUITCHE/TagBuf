@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include "id.hpp"
 #include <stdlib.h>
+#include "CHException.hpp"
 
 #define selector(method) #method
 
@@ -139,13 +140,28 @@ IMP runtime_lookup_method(Class cls, SEL selector);
 id allocateInstance(Class cls);
 
 template <typename _T, typename... Args>
-_T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
+_T methodInvoke(id self, SEL selector, Class cls, Args... args)
 {
-    struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls ?: self->getClass(), selector));
+    if (!cls) {
+        if (!self) {
+            exception(CHInvalidArgumentException, "Firstly. If 'cls' is null, 'self' must not be nil!");
+        }
+        cls = self->getClass();
+    }
+    if (!cls || !selector) {
+        exception(CHInvalidArgumentException, "Param must not be nil!(cls:%p\nselector:%p)", cls, selector);
+    }
+    struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls, selector));
+    if (!method) {
+        exception(CHInvalidArgumentException, "<Class:%s>Unrecognized selector:%s",cls->name ,selector);
+    }
     typedef _T(*Function)(Args...);
     Function f = (Function)method->imp;
     if ((method->flag & __Static)) {
-        return f(std::forward<Args&&...>(args)...);
+        return f(std::forward<Args>(args)...);
+    }
+    if (!self) {
+        exception(CHInvalidArgumentException, "self must not be nil!");
     }
     uintptr_t object_addr = (uintptr_t)self;
 #ifdef __GNUC__ // GCC Compiler
@@ -170,7 +186,7 @@ _T methodInvoke(id self, SEL selector, Class cls, Args&&... args)
         mov ecx, object_addr
     }
 #endif
-    return f(std::forward<Args&&...>(args)...);
+    return f(std::forward<Args>(args)...);
 }
 
 template<typename _T>

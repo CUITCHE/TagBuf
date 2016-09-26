@@ -430,7 +430,7 @@ struct runtimeclass(CHMutableData)
     {
         static method_list_t method[] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHMutableData::getClass), selector(getClass), __Static} },
-            {.method = {0, overloadFunc(Class(CHMutableData::*)()const, &CHMutableData::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, overloadFunc(Class(CHMutableData::*)()const, &CHMutableData::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHMutableData::allocateInstance), selector(allocateInstance), __Static} },
             {.method = {0, funcAddr(&CHMutableData::appendBytes), selector(appendBytes), __Member} },
             {.method = {0, funcAddr(&CHMutableData::appendBytesNoCopy), selector(appendBytesNoCopy), __Member} },

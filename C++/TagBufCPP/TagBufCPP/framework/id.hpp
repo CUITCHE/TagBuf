@@ -24,8 +24,9 @@ class CHString;
 #endif
 
 #define protocolTo public
+#define protocol class
 
-class CHProtocol
+class CHObjectProtocol
 {
 public:
     virtual bool equalTo(id anObject) const = 0;
@@ -40,7 +41,19 @@ public:
     virtual bool respondsToSelector(SEL selector) const = 0;
 };
 
-CLASS_TAGGEDPOINTER_AVAILABLE class CHObject : protocolTo CHProtocol
+protocol CHCopy
+{
+protected:
+    id copyWithZone(std::nullptr_t) const { return nullptr; };
+};
+
+protocol CHMutableCopy
+{
+protected:
+    id mutableCopyWithZone(std::nullptr_t) const { return nullptr; };
+};
+
+CLASS_TAGGEDPOINTER_AVAILABLE class CHObject : protocolTo CHObjectProtocol
 {
     __SUPPORTRUNTIME__(CHObject);
 public:
@@ -52,6 +65,10 @@ public:
 
     bool isTaggedPointer() const;
     const char *objectType() const;
+
+    // copy
+    id copy() const;
+    id mutableCopy() const;
 
     // runtime
     virtual Class getClass() const;

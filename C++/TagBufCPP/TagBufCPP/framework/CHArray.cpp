@@ -24,13 +24,13 @@ struct runtimeclass(CHArray)
             {.method = {0, overloadFunc(Class(CHArray::*)()const, &CHArray::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHArray::allocateInstance), selector(allocateInstance), __Static} },
 
-            {.method = {0, overloadFunc(const id(CHArray::*)(uint32_t)const, &CHArray::objectAtIndex), selector(objectAtIndex), __Member} },
-            {.method = {0, overloadFunc(id(CHArray::*)(uint32_t), &CHArray::objectAtIndex), selector(objectAtIndex), __Member} },
-            {.method = {0, overloadFunc(CHArray*(CHArray::*)()const, &CHArray::duplicate), selector(duplicate), __Member} },
+            {.method = {0, overloadFunc(const id(CHArray::*)(uint32_t)const, &CHArray::objectAtIndex), selector(objectAtIndex), __Member|__Overload} },
+            {.method = {0, overloadFunc(id(CHArray::*)(uint32_t), &CHArray::objectAtIndex), selector(objectAtIndex), __Member|__Overload} },
+            {.method = {0, funcAddr(&CHArray::duplicate), selector(duplicate), __Member} },
 
             {.method = {0, funcAddr(&CHArray::arrayWithObject), selector(arrayWithObject), __Static} },
-            {.method = {0, overloadFunc(CHArray *(*)(const id[], uint32_t), &CHArray::arrayWithObjects), selector(arrayWithObjects), __Static} },
-            {.method = {0, overloadFunc(CHArray *(*)(id, ...), &CHArray::arrayWithObjects), selector(arrayWithObjects), __Static} },
+            {.method = {0, overloadFunc(CHArray *(*)(const id[], uint32_t), &CHArray::arrayWithObjects), selector(arrayWithObjects), __Static|__Overload} },
+            {.method = {0, overloadFunc(CHArray *(*)(id, ...), &CHArray::arrayWithObjects), selector(arrayWithObjects), __Static|__Overload} },
             {.method = {0, funcAddr(&CHArray::arrayWithArray), selector(arrayWithArray), __Static} },
 
             {.method = {0, funcAddr(&CHArray::arrayByAddiObject), selector(arrayByAddiObject), __Member} },
@@ -65,9 +65,9 @@ struct CHArrayPrivate
 {
     id *_begin = 0;
     uint32_t size = 0;
-    uint32_t capacity;
+    uint32_t capacity = 0;
 
-    CHArrayPrivate(uint32_t capacity) : capacity(capacity)
+    CHArrayPrivate(uint32_t capacity)
     {
         resize(capacity);
     }
@@ -88,11 +88,12 @@ struct CHArrayPrivate
             }
             size = newSize;
         } else if (newSize > size) {
-            if (size > capacity) {
+            if (!capacity || size > capacity) {
                 id *_new = (id *)malloc(sizeof(id) * newSize);
                 memcpy(_new, _begin, size);
                 free(_begin);
                 _begin = _new;
+                capacity = newSize;
             }
         }
     }

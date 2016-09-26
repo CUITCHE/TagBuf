@@ -9,8 +9,8 @@
 #ifndef TaggedPointer_h
 #define TaggedPointer_h
 
-
-#define MAX_CONSTANT_ADDRESS 0x1FFFFFFFFull
+/// Its value is the size of program.
+extern const uintptr_t MAX_CONSTANT_ADDRESS;
 
 #define TAG_MASK 0x8000000000000001ull
 #define ISTAGGEDPOINTER() (uintptr_t)this & TAG_MASK

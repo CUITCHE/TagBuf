@@ -11,6 +11,7 @@
 #include "TagBufDefines.h"
 #include "tagBuf.hpp"
 #include "runtime.hpp"
+#include "CHString.hpp"
 
 struct runtimeclass(CHNumber)
 {
@@ -18,7 +19,7 @@ struct runtimeclass(CHNumber)
     {
         static method_list_t method[] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHNumber::getClass), selector(getClass), __Static} },
-            {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member|__Overload} },
+            {.method = {0, overloadFunc(Class(CHNumber::*)()const, &CHNumber::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHNumber::allocateInstance), selector(allocateInstance), __Static} },
         };
         return method;
@@ -207,6 +208,12 @@ CHNumber *numberWithValue(float v)
     uintptr_t ret = f.ff;
     CHNumber * o = reinterpret_cast<CHNumber *>((ret) << 1 | TAGGED_POINTER_NUMBER_FLAG);
     return o;
+}
+
+CHString *CHNumber::description() const
+{
+    CHString *str = CHString::stringWithFormat("%d", (int)(*this));
+    return str;
 }
 
 struct CHNumberHelper

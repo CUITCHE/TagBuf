@@ -8,8 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		FB35B44E1D963F0E002F1ED9 /* Algorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB35B44C1D963F0E002F1ED9 /* Algorithm.cpp */; };
+		FB5CBE091D98F0F2002CE3AB /* CHException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB5CBE071D98F0F2002CE3AB /* CHException.cpp */; };
 		FB6C3E1B1D94E20A00DB7411 /* tprintf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6C3E191D94E20A00DB7411 /* tprintf.cpp */; };
 		FB6C3E1E1D94FD6000DB7411 /* CHRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6C3E1C1D94FD6000DB7411 /* CHRange.cpp */; };
+		FB6E77801D9A672F00934649 /* TAGObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB6E777E1D9A672F00934649 /* TAGObject.cpp */; };
 		FB8EDD6E1D93F880003D8D1E /* CHArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB8EDD6C1D93F880003D8D1E /* CHArray.cpp */; };
 		FBBBB62A1D8EAE98008DF84F /* cache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6101D8EAE98008DF84F /* cache.cpp */; };
 		FBBBB62B1D8EAE98008DF84F /* CHTagBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6121D8EAE98008DF84F /* CHTagBuf.cpp */; };
@@ -22,6 +24,7 @@
 		FBBBB6321D8EAE98008DF84F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6221D8EAE98008DF84F /* main.cpp */; };
 		FBBBB6331D8EAE98008DF84F /* runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6231D8EAE98008DF84F /* runtime.cpp */; };
 		FBBBB6341D8EAE98008DF84F /* TagBufferBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6271D8EAE98008DF84F /* TagBufferBuilder.cpp */; };
+		FBE7BD351D991052009F4113 /* CHLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBE7BD331D991052009F4113 /* CHLog.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,11 +42,16 @@
 /* Begin PBXFileReference section */
 		FB35B44C1D963F0E002F1ED9 /* Algorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Algorithm.cpp; sourceTree = "<group>"; };
 		FB35B44D1D963F0E002F1ED9 /* Algorithm.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Algorithm.hpp; sourceTree = "<group>"; };
+		FB5CBE061D98D20C002CE3AB /* __tassert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = __tassert.h; sourceTree = "<group>"; };
+		FB5CBE071D98F0F2002CE3AB /* CHException.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHException.cpp; sourceTree = "<group>"; };
+		FB5CBE081D98F0F2002CE3AB /* CHException.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHException.hpp; sourceTree = "<group>"; };
 		FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TaggedPointer.h; sourceTree = "<group>"; };
 		FB6C3E191D94E20A00DB7411 /* tprintf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tprintf.cpp; sourceTree = "<group>"; };
 		FB6C3E1A1D94E20A00DB7411 /* tprintf.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = tprintf.hpp; sourceTree = "<group>"; };
 		FB6C3E1C1D94FD6000DB7411 /* CHRange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHRange.cpp; sourceTree = "<group>"; };
 		FB6C3E1D1D94FD6000DB7411 /* CHRange.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHRange.hpp; sourceTree = "<group>"; };
+		FB6E777E1D9A672F00934649 /* TAGObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TAGObject.cpp; sourceTree = "<group>"; };
+		FB6E777F1D9A672F00934649 /* TAGObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TAGObject.hpp; sourceTree = "<group>"; };
 		FB8EDD6C1D93F880003D8D1E /* CHArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHArray.cpp; sourceTree = "<group>"; };
 		FB8EDD6D1D93F880003D8D1E /* CHArray.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHArray.hpp; sourceTree = "<group>"; };
 		FBBBB6061D8EAE64008DF84F /* TagBufCPP */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TagBufCPP; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -71,6 +79,8 @@
 		FBBBB6271D8EAE98008DF84F /* TagBufferBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagBufferBuilder.cpp; sourceTree = "<group>"; };
 		FBBBB6281D8EAE98008DF84F /* TagBufferBuilder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TagBufferBuilder.hpp; sourceTree = "<group>"; };
 		FBBBB6291D8EAE98008DF84F /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		FBE7BD331D991052009F4113 /* CHLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHLog.cpp; sourceTree = "<group>"; };
+		FBE7BD341D991052009F4113 /* CHLog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHLog.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +94,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FB6E777D1D9A672F00934649 /* ARC */ = {
+			isa = PBXGroup;
+			children = (
+				FB6E777E1D9A672F00934649 /* TAGObject.cpp */,
+				FB6E777F1D9A672F00934649 /* TAGObject.hpp */,
+			);
+			path = ARC;
+			sourceTree = "<group>";
+		};
 		FBBBB5FD1D8EAE64008DF84F = {
 			isa = PBXGroup;
 			children = (
@@ -133,6 +152,7 @@
 		FBBBB6171D8EAE98008DF84F /* framework */ = {
 			isa = PBXGroup;
 			children = (
+				FB6E777D1D9A672F00934649 /* ARC */,
 				FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */,
 				FBBBB6181D8EAE98008DF84F /* cast.cpp */,
 				FBBBB6191D8EAE98008DF84F /* cast.hpp */,
@@ -152,6 +172,11 @@
 				FB6C3E1D1D94FD6000DB7411 /* CHRange.hpp */,
 				FB35B44C1D963F0E002F1ED9 /* Algorithm.cpp */,
 				FB35B44D1D963F0E002F1ED9 /* Algorithm.hpp */,
+				FB5CBE061D98D20C002CE3AB /* __tassert.h */,
+				FB5CBE071D98F0F2002CE3AB /* CHException.cpp */,
+				FB5CBE081D98F0F2002CE3AB /* CHException.hpp */,
+				FBE7BD331D991052009F4113 /* CHLog.cpp */,
+				FBE7BD341D991052009F4113 /* CHLog.hpp */,
 			);
 			path = framework;
 			sourceTree = "<group>";
@@ -222,10 +247,13 @@
 				FBBBB62C1D8EAE98008DF84F /* CHDemo+TagBuf.cpp in Sources */,
 				FBBBB62D1D8EAE98008DF84F /* cast.cpp in Sources */,
 				FB8EDD6E1D93F880003D8D1E /* CHArray.cpp in Sources */,
+				FB6E77801D9A672F00934649 /* TAGObject.cpp in Sources */,
 				FBBBB62E1D8EAE98008DF84F /* CHData.cpp in Sources */,
 				FB35B44E1D963F0E002F1ED9 /* Algorithm.cpp in Sources */,
 				FBBBB6331D8EAE98008DF84F /* runtime.cpp in Sources */,
+				FBE7BD351D991052009F4113 /* CHLog.cpp in Sources */,
 				FBBBB6311D8EAE98008DF84F /* id.cpp in Sources */,
+				FB5CBE091D98F0F2002CE3AB /* CHException.cpp in Sources */,
 				FBBBB6321D8EAE98008DF84F /* main.cpp in Sources */,
 				FBBBB6301D8EAE98008DF84F /* CHString.cpp in Sources */,
 			);
@@ -327,6 +355,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -335,6 +364,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
