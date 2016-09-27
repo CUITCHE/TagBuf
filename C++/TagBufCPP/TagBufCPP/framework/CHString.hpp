@@ -84,7 +84,7 @@ public:
 
     // protocol
     bool equalTo(id anObject) const override;
-    CHString *description() const override;
+    CHString *description() const;
     uint64_t hash() const override;
 private:
     static id allocateInstance();

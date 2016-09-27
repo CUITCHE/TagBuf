@@ -202,17 +202,24 @@ Class CHObject::superclass() const
 bool CHObject::isKindOfClass(Class aClass) const
 {
     Class cls = 0;
-    if (isTaggedPointer()) {
-        if (is_number(this)) {
-            cls = CHNumber::getClass(nullptr);
-        } else if (is_string(this)) {
-            cls = CHString::getClass(nullptr);
-        } else if (is_data(this)) {
-            cls = CHData::getClass(nullptr);
+    do {
+        if (isTaggedPointer()) {
+            uintptr_t dd = (((uintptr_t)this) & TAGGED_POINTER_DATA_FLAG);
+            if (is_data(this) == TAGGED_POINTER_DATA_FLAG) {
+                cls = CHData::getClass(nullptr);
+                break;
+            }
+            if (is_string(this) == TAGGED_POINTER_STRING_FLAG) {
+                cls = CHString::getClass(nullptr);
+                break;
+            }
+            if (is_number(this) == TAGGED_POINTER_NUMBER_FLAG) {
+                cls = CHNumber::getClass(nullptr);
+                break;
+            }
         }
-    } else {
         cls = this->getClass();
-    }
+    } while (0);
     while (cls && cls != aClass) {
         cls = cls->super_class;
     }

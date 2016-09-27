@@ -39,7 +39,7 @@ public:
     static Class getClass(std::nullptr_t);
 
     // protocol
-    CHString *description() const override;
+    CHString *description() const;
 protected:
     CHNumber();
 private:

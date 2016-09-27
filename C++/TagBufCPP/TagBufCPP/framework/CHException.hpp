@@ -9,10 +9,7 @@
 #ifndef _exception_hpp
 #define _exception_hpp
 
-#include <stdio.h>
-#include <exception>
 #include <stdarg.h>
-using std::exception;
 
 #include "id.hpp"
 
@@ -43,7 +40,7 @@ public:
 
     // protocol
     bool equalTo(id anObject) const override;
-    CHString *description() const override;
+    CHString *description() const;
 private:
     static id allocateInstance();
 };
@@ -52,5 +49,5 @@ extern CHString *const CHRangeException;
 extern CHString *const CHInvalidArgumentException;
 extern CHString *const CHOutOfRangeException;
 
-#define exception(name, format, ...) throw CHException::exceptionWithExceptionName(name, format, ##__VA_ARGS__)
+#define __exception__(name, format, ...) throw CHException::exceptionWithExceptionName(name, format, ##__VA_ARGS__)
 #endif /* _exception_hpp */

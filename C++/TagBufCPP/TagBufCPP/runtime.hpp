@@ -144,16 +144,16 @@ _T methodInvoke(id self, SEL selector, Class cls, Args... args)
 {
     if (!cls) {
         if (!self) {
-            exception(CHInvalidArgumentException, "Firstly. If 'cls' is null, 'self' must not be nil!");
+            __exception__(CHInvalidArgumentException, "Firstly. If 'cls' is null, 'self' must not be nil!");
         }
         cls = self->getClass();
     }
     if (!cls || !selector) {
-        exception(CHInvalidArgumentException, "Param must not be nil!(cls:%p\nselector:%p)", cls, selector);
+        __exception__(CHInvalidArgumentException, "Param must not be nil!(cls:%p\nselector:%p)", cls, selector);
     }
     struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls, selector));
     if (!method) {
-        exception(CHInvalidArgumentException, "<Class:%s>Unrecognized selector:%s",cls->name ,selector);
+        __exception__(CHInvalidArgumentException, "<Class:%s>Unrecognized selector:%s",cls->name ,selector);
     }
     typedef _T(*Function)(Args...);
     Function f = (Function)method->imp;
@@ -161,7 +161,7 @@ _T methodInvoke(id self, SEL selector, Class cls, Args... args)
         return f(std::forward<Args>(args)...);
     }
     if (!self) {
-        exception(CHInvalidArgumentException, "self must not be nil!");
+        __exception__(CHInvalidArgumentException, "self must not be nil!");
     }
     uintptr_t object_addr = (uintptr_t)self;
 #ifdef __GNUC__ // GCC Compiler

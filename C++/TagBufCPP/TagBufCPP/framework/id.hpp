@@ -30,15 +30,15 @@ class CHObjectProtocol
 {
 public:
     virtual bool equalTo(id anObject) const = 0;
-    virtual CHString *description() const = 0;
+    CHString *description() const  { return nullptr; }
 
     virtual uint64_t hash() const = 0;
     virtual Class superclass() const = 0;
 
-    virtual bool isKindOfClass(Class aClass) const = 0;
-    virtual bool isMemberOfClass(Class aClass) const = 0;
+    bool isKindOfClass(Class aClass) const { return false; }
+    bool isMemberOfClass(Class aClass) const { return false; }
 
-    virtual bool respondsToSelector(SEL selector) const = 0;
+    bool respondsToSelector(SEL selector) const { return false; }
 };
 
 protocol CHCopy
@@ -76,12 +76,12 @@ public:
 
     // protocol
     bool equalTo(id anObject) const override;
-    CHString *description() const override;
+    CHString *description() const;
     uint64_t hash() const override;
     Class superclass() const override;
-    bool isKindOfClass(Class aClass) const override;
-    bool isMemberOfClass(Class aClass) const override;
-    bool respondsToSelector(SEL selector) const override;
+    bool isKindOfClass(Class aClass) const;
+    bool isMemberOfClass(Class aClass) const;
+    bool respondsToSelector(SEL selector) const;
 protected:
     CHObject();
 

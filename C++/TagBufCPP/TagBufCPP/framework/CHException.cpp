@@ -10,17 +10,17 @@
 #include "runtime.hpp"
 #include "tagBuf.hpp"
 #include "CHString.hpp"
-#include "tprintf.hpp"
 #include <execinfo.h>
 #include "CHLog.hpp"
 #include "CHArray.hpp"
 #include "CHNumber.hpp"
+#include <exception>
 
 using namespace std;
 
-CHString *const CHRangeException = CHString::stringWithUTF8String("CHRangeException");
-CHString *const CHInvalidArgumentException = CHString::stringWithUTF8String("CHInvalidArgumentException");
-CHString *const CHOutOfRangeException = CHString::stringWithUTF8String("CHOutOfRangeException");
+CHString *const CHRangeException = tstr("CHRangeException");
+CHString *const CHInvalidArgumentException = tstr("CHInvalidArgumentException");
+CHString *const CHOutOfRangeException = tstr("CHOutOfRangeException");
 
 static inline void exceptionHandler()
 {
