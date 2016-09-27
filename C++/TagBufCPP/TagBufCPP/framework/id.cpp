@@ -204,7 +204,6 @@ bool CHObject::isKindOfClass(Class aClass) const
     Class cls = 0;
     do {
         if (isTaggedPointer()) {
-            uintptr_t dd = (((uintptr_t)this) & TAGGED_POINTER_DATA_FLAG);
             if (is_data(this) == TAGGED_POINTER_DATA_FLAG) {
                 cls = CHData::getClass(nullptr);
                 break;

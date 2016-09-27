@@ -122,6 +122,8 @@ uint64_t tprintf_error(const char *format, ...)
     return n;
 }
 
+#define ALLOC_SIZE 512
+
 uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap)
 {
     char c;
@@ -136,8 +138,8 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
     char num_buffer[32];
     char *str = (char *)malloc(256);
     outBuffer = str;
-    size_t len = 256;
-#define OUTPUT_CHAR(c) do { (*str++ = c); chars_written++; if (chars_written + 1 == len) {len+=512; outBuffer = (char *)realloc(outBuffer, len); str += chars_written; } } while(0)
+    size_t len = ALLOC_SIZE/2;
+#define OUTPUT_CHAR(c) do { (*str++ = c); chars_written++; if (chars_written + 1 == len) {len+=ALLOC_SIZE; outBuffer = (char *)realloc(outBuffer, len); str += chars_written; } } while(0)
 #define OUTPUT_CHAR_NOLENCHECK(c) do { (*str++ = c); chars_written++; } while(0)
     for(;;) {
         /* handle regular chars that aren't format related */
@@ -282,7 +284,7 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
                 uint32_t length = string->length();
                 // check rest memory
                 if (len - chars_written < length) {
-                    len += length < 512 ? 512 : (length + 1);
+                    len = (length + chars_written) > ALLOC_SIZE ? (length + chars_written + 1) : ALLOC_SIZE;
                     outBuffer = (char *)realloc(outBuffer, len);
                 }
                 (void) string->getBytes(str, length);
