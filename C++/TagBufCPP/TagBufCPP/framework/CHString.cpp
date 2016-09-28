@@ -726,7 +726,7 @@ CHString *CHString::stringByAppendingFormat(const char *format, ...) const
     va_start(ap, format);
     char *buffer = nullptr;
     uint32_t capacity = 0;
-    uint32_t length = (uint32_t)tprintf_c(buffer, &capacity, format, ap);
+    uint32_t length = (uint32_t)tprintf_c(buffer, &capacity, format, ap, OUTPUT_FLAG_DESCRIPTION);
     va_end(ap);
 
     CHStringPrivate *d = 0;
@@ -925,7 +925,7 @@ CHString *CHString::stringWithFormat(const char *format, va_list argList)
 {
     char *buffer = nullptr;
     uint32_t capacity = 0;
-    uint32_t length = (uint32_t)tprintf_c(buffer, &capacity,format, argList);
+    uint32_t length = (uint32_t)tprintf_c(buffer, &capacity,format, argList, OUTPUT_FLAG_DESCRIPTION);
     CHString *str = CHString::stringWithBytesNoCopy(buffer, length);
     d_d(str, capacity) = capacity;
     return str;
@@ -1033,7 +1033,7 @@ void CHMutableString::appendFormat(const char *format, ...)
     va_list ap;
     va_start(ap, format);
     char *buffer = nullptr;
-    uint32_t length = (uint32_t)tprintf_c(buffer, nullptr, format, ap);
+    uint32_t length = (uint32_t)tprintf_c(buffer, nullptr, format, ap, OUTPUT_FLAG_DESCRIPTION);
     if (buffer) {
         d_d(this, appendBytes(buffer, length, CHStringBufferTypeMutable));
     }

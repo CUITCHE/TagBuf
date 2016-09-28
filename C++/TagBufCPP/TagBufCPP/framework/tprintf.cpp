@@ -52,6 +52,9 @@
 #define LEADZEROFLAG 0x00000400
 #define OBJECTFLAG 0x00000800
 
+#define ALLOC_SIZE 512
+static char output_buffer[ALLOC_SIZE];
+
 static char *tlonglong_to_string(char *buf, unsigned long long n, int len, uint flag)
 {
     int pos = len;
@@ -101,11 +104,13 @@ uint64_t tprintf(const char *format, ...)
     va_list ap;
     va_start(ap, format);
     char *str = nullptr;
-    uint64_t n = tprintf_c(str, nullptr, format, ap);
+    uint64_t n = tprintf_c(str, nullptr, format, ap, OUTPUT_FLAG_LOG);
     va_end(ap);
     puts(str);
     fflush(stdout);
-    free(str);
+    if (str != output_buffer) {
+        free(str);
+    }
     return n;
 }
 
@@ -114,17 +119,17 @@ uint64_t tprintf_error(const char *format, ...)
     va_list ap;
     va_start(ap, format);
     char *str = nullptr;
-    uint64_t n = tprintf_c(str, nullptr, format, ap);
+    uint64_t n = tprintf_c(str, nullptr, format, ap, OUTPUT_FLAG_LOG);
     va_end(ap);
     fprintf(stderr, "%s", str);
     fflush(stderr);
-    free(str);
+    if (str != output_buffer) {
+        free(str);
+    }
     return n;
 }
 
-#define ALLOC_SIZE 512
-
-uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap)
+uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap, uint32_t objectOutputFlag)
 {
     char c;
     unsigned char uc;
@@ -136,17 +141,35 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
     uint64_t chars_written = 0;
     id obj = nullptr;
     char num_buffer[32];
-    char *str = (char *)malloc(256);
+    char *str = output_buffer;
     outBuffer = str;
-    size_t len = ALLOC_SIZE/2;
-#define OUTPUT_CHAR(c) do { (*str++ = c); chars_written++; if (chars_written + 1 == len) {len+=ALLOC_SIZE; outBuffer = (char *)realloc(outBuffer, len); str += chars_written; } } while(0)
+    size_t len = ALLOC_SIZE;
+
+    auto __realloc = [&](uint32_t lengthOfWillWrite){
+        if (chars_written + lengthOfWillWrite > len) {
+            len  = chars_written + lengthOfWillWrite;
+            if (output_buffer == outBuffer) {
+                outBuffer = (char *)malloc(len);
+                memcpy(outBuffer, output_buffer, chars_written);
+            } else {
+                outBuffer = (char *)realloc(outBuffer, len);
+            }
+            str = outBuffer;
+            str += chars_written;
+        }
+    };
+    auto output_char = [&](char c){
+        *str++ = c;
+        chars_written++;
+        __realloc(1);
+    };
 #define OUTPUT_CHAR_NOLENCHECK(c) do { (*str++ = c); chars_written++; } while(0)
     for(;;) {
         /* handle regular chars that aren't format related */
         while((c = *fmt++) != 0) {
             if(c == '%')
                 break; /* we saw a '%', break and start parsing format */
-            OUTPUT_CHAR(c);
+            output_char(c);
         }
         /* make sure we haven't just hit the end of the string */
         if(c == 0)
@@ -172,11 +195,11 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
                 /* XXX for now eat numeric formatting */
                 goto next_format;
             case '%':
-                OUTPUT_CHAR('%');
+                output_char('%');
                 break;
             case 'c':
                 uc = va_arg(ap, unsigned int);
-                OUTPUT_CHAR(uc);
+                output_char(uc);
                 break;
             case 's':
                 s = va_arg(ap, const char *);
@@ -251,8 +274,8 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
                 va_arg(ap, unsigned int);
                 s = tlonglong_to_hexstring(num_buffer, n, sizeof(num_buffer), flags);
                 if(flags & ALTFLAG) {
-                    OUTPUT_CHAR('0');
-                    OUTPUT_CHAR((flags & CAPSFLAG) ? 'X': 'x');
+                    output_char('0');
+                    output_char((flags & CAPSFLAG) ? 'X': 'x');
                 }
                 goto _output_string;
             case 'n':
@@ -283,10 +306,7 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
                 }
                 uint32_t length = string->length();
                 // check rest memory
-                if (len - chars_written < length) {
-                    len = (length + chars_written) > ALLOC_SIZE ? (length + chars_written + 1) : ALLOC_SIZE;
-                    outBuffer = (char *)realloc(outBuffer, len);
-                }
+                __realloc(length);
                 (void) string->getBytes(str, length);
                 str += length;
                 chars_written += length;
@@ -296,8 +316,8 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
             }
                 break;
             default:
-                OUTPUT_CHAR('%');
-                OUTPUT_CHAR(c);
+                output_char('%');
+                output_char(c);
                 break;
         }
         /* move on to the next field */
@@ -308,21 +328,21 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
             /* left justify the text */
             uint count = 0;
             while(*s != 0) {
-                OUTPUT_CHAR(*s++);
+                output_char(*s++);
                 count++;
             }
             /* pad to the right (if necessary) */
             for (; format_num > count; format_num--)
-                OUTPUT_CHAR(' ');
+                output_char(' ');
         } else {
             /* right justify the text (digits) */
             size_t string_len = strlen(s);
             char outchar = (flags & LEADZEROFLAG) ? '0' : ' ';
             for (; format_num > string_len; format_num--)
-                OUTPUT_CHAR(outchar);
+                output_char(outchar);
             /* output the string */
             while(*s != 0)
-                OUTPUT_CHAR(*s++);
+                output_char(*s++);
         }
         continue;
     }
@@ -330,7 +350,6 @@ done:
     /* null terminate */
     OUTPUT_CHAR_NOLENCHECK('\0');
     chars_written--; /* don't count the null */
-#undef OUTPUT_CHAR
 #undef OUTPUT_CHAR_NOLENCHECK
     if (capacity) {
         *capacity = (uint32_t)len;
