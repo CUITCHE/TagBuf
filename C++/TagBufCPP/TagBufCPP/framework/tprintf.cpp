@@ -53,7 +53,7 @@
 #define OBJECTFLAG 0x00000800
 
 #define ALLOC_SIZE 512
-static char output_buffer[ALLOC_SIZE];
+char output_buffer[ALLOC_SIZE];
 
 static char *tlonglong_to_string(char *buf, unsigned long long n, int len, uint flag)
 {
@@ -131,6 +131,7 @@ uint64_t tprintf_error(const char *format, ...)
 
 uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap, uint32_t objectOutputFlag)
 {
+    printf("static:%p\n", output_buffer);
     char c;
     unsigned char uc;
     const char *s;

@@ -119,19 +119,6 @@ struct CHArrayPrivate
     id *end() const { return _begin + size; }
     uint32_t count() const { return size; }
 
-    bool containsObject(id anObject) const
-    {
-        // TODO: id需要实现EqualTo函数
-        id *_end = end();
-        id *begin = _begin - 1;
-        while (++begin < _end) {
-            if (anObject == *begin) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     uint32_t indexOfObject(id anObject, CHRange inRange) const
     {
         do {
@@ -307,13 +294,29 @@ CHArray *CHArray::arrayByAddingObjectsFromArray(const CHArray *otherArray) const
 
 CHString *CHArray::componentsJoinedByString(const CHString *separator) const
 {
-    // TODO: need to be done. need to change CHString'API.
-    return nullptr;
+    if (count() == 0) {
+        return tstr("");
+    }
+
+    id obj = firstObject();
+    CHMutableString *string = CHMutableString::stringWithCapacity(128);
+    CHString *str = obj->description();
+    string->appendString(str);
+    str->release();
+
+    id *begin = d_d(this, _begin);
+    id *end = d_d(this, end());
+    while (++begin < end) {
+        str = (*begin)->description();
+        string->appendFormat("%p@%p@", separator, str);
+        str->release();
+    }
+    return string;
 }
 
 bool CHArray::containsObject(id anObject) const
 {
-    return d_d(this, containsObject(anObject));
+    return indexOfObjectInRange(anObject, CHMakeRange(0, this->count())) != CHNotFound;
 }
 
 uint32_t CHArray::indexOfObject(id anObject) const
@@ -353,15 +356,38 @@ void CHArray::sortedArrayUsingComparator(CHArraySortedComparator cmptr)
 
 CHString *CHArray::description() const
 {
-    return nullptr;
+    if (count() == 0) {
+        return tstr("");
+    }
+
+    CHMutableString *string = CHMutableString::stringWithCapacity(128);
+    string->appendString(tstr("("));
+
+    id obj = firstObject();
+    CHString *str = obj->description();
+    string->appendString(str);
+    str->release();
+
+    id *begin = d_d(this, _begin);
+    id *end = d_d(this, end());
+    while (++begin < end) {
+        str = (*begin)->description();
+        string->appendFormat(",%p@", str);
+        str->release();
+    }
+    string->appendString(tstr(")"));
+    return string;
 }
 
 id CHArray::copyWithZone(std::nullptr_t) const
 {
-    return nullptr;
+    CHArrayPrivate *d = d_d(this, duplicate());
+    CHArray *array = new CHArray();
+    array->setReserved(d);
+    return array;
 }
 
 id CHArray::mutableCopyWithZone(std::nullptr_t) const
 {
-    return nullptr;
+    return copyWithZone(nullptr);
 }

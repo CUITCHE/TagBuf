@@ -239,11 +239,7 @@ id CHObject::allocateInstance()
 // destructor
 void release_outer(id obj)
 {
-#if __LP64__
     if (!obj->isTaggedPointer()) {
         delete obj;
     }
-#else
-    delete obj;
-#endif
 }

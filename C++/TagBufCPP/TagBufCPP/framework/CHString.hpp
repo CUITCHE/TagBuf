@@ -102,7 +102,7 @@ public:
     void insertString(CHString *aString, uint32_t index);
     void deleteCharactersInRange(CHRange range) throw();
     void appendString(const CHString *other);
-    void appendFormat(const char *format, ...);
+    void appendFormat(const char *format, ...) __printflike(2,3);
     void setString(CHString *aString);
 
     void replaceOccurrencesOfStringWithString(CHString *target, CHString *replacement);

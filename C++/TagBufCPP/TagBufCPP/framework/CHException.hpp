@@ -49,5 +49,5 @@ extern CHString *const CHRangeException;
 extern CHString *const CHInvalidArgumentException;
 extern CHString *const CHOutOfRangeException;
 
-#define __exception__(name, format, ...) throw CHException::exceptionWithExceptionName(name, format, ##__VA_ARGS__)
+#define throwException(name, format, ...) throw CHException::exceptionWithExceptionName(name, format, ##__VA_ARGS__)
 #endif /* _exception_hpp */

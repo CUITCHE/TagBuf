@@ -436,7 +436,7 @@ struct CHStringPrivate
     {
         uint32_t max = CHMaxRange(range);
         if (max > length) {
-            __exception__(CHOutOfRangeException, "Argument:range's max(%u) is over CHString'length(%u)", max, length);
+            throwException(CHOutOfRangeException, "Argument:range's max(%u) is over CHString'length(%u)", max, length);
         }
         memcpy((char *)buffer + range.location, (char *)buffer + max, length - max);
         length -= range.length;

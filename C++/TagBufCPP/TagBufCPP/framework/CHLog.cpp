@@ -9,6 +9,9 @@
 #include "CHLog.hpp"
 #include "tprintf.hpp"
 #include <stdlib.h>
+#include "TaggedPointer.h"
+
+extern char *output_buffer;
 
 void CHLog(const char *fmt, ...)
 {
@@ -18,5 +21,7 @@ void CHLog(const char *fmt, ...)
     (void) tprintf_c(buffer, nullptr, fmt, ap, OUTPUT_FLAG_LOG);
     va_end(ap);
     puts(buffer);
-    free(buffer);
+    if (buffer > output_buffer) {
+        free(buffer);
+    }
 }
