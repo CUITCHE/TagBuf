@@ -942,7 +942,7 @@ bool CHString::equalTo(id anObject) const
 
 CHString *CHString::description() const
 {
-    CHString *str = CHString::stringWithFormat("<%s:%p>%p@", object_getClassName((id)this), this, this);
+    CHString *str = CHString::stringWithFormat("%p@", this);
     return str;
 }
 

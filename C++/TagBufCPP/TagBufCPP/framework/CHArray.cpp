@@ -14,19 +14,19 @@
 #include "TaggedPointer.h"
 #include <stdarg.h>
 #include <algorithm>
+#include "CHString.hpp"
 
 struct runtimeclass(CHArray)
 {
     static struct method_list_t *methods()
     {
-        static method_list_t method[] = {
+        static method_list_t method[23] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHArray::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHArray::*)()const, &CHArray::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHArray::allocateInstance), selector(allocateInstance), __Static} },
 
-            {.method = {0, overloadFunc(const id(CHArray::*)(uint32_t)const, &CHArray::objectAtIndex), selector(objectAtIndex), __Member|__Overload} },
-            {.method = {0, overloadFunc(id(CHArray::*)(uint32_t), &CHArray::objectAtIndex), selector(objectAtIndex), __Member|__Overload} },
-            {.method = {0, funcAddr(&CHArray::duplicate), selector(duplicate), __Member} },
+            {.method = {0, funcAddr(&CHArray::count), selector(count), __Member} },
+            {.method = {0, funcAddr(&CHArray::objectAtIndex), selector(objectAtIndex), __Member} },
 
             {.method = {0, funcAddr(&CHArray::arrayWithObject), selector(arrayWithObject), __Static} },
             {.method = {0, overloadFunc(CHArray *(*)(const id[], uint32_t), &CHArray::arrayWithObjects), selector(arrayWithObjects), __Static|__Overload} },
@@ -36,12 +36,21 @@ struct runtimeclass(CHArray)
             {.method = {0, funcAddr(&CHArray::arrayByAddiObject), selector(arrayByAddiObject), __Member} },
             {.method = {0, funcAddr(&CHArray::arrayByAddingObjectsFromArray), selector(arrayByAddingObjectsFromArray), __Member} },
             {.method = {0, funcAddr(&CHArray::componentsJoinedByString), selector(componentsJoinedByString), __Member} },
+
             {.method = {0, funcAddr(&CHArray::containsObject), selector(containsObject), __Member} },
             {.method = {0, funcAddr(&CHArray::indexOfObject), selector(indexOfObject), __Member} },
+            {.method = {0, funcAddr(&CHArray::indexOfObjectInRange), selector(indexOfObjectInRange), __Member} },
+            {.method = {0, funcAddr(&CHArray::isEqualToArray), selector(isEqualToArray), __Member} },
+
             {.method = {0, funcAddr(&CHArray::firstObject), selector(firstObject), __Member} },
             {.method = {0, funcAddr(&CHArray::lastObject), selector(lastObject), __Member} },
+
             {.method = {0, funcAddr(&CHArray::enumerateObjectsUsingBlock), selector(enumerateObjectsUsingBlock), __Member} },
             {.method = {0, funcAddr(&CHArray::sortedArrayUsingComparator), selector(sortedArrayUsingComparator), __Member} },
+
+            {.method = {0, funcAddr(&CHArray::description), selector(description), __Member} },
+            {.method = {0, funcAddr(&CHArray::copyWithZone), selector(copyWithZone), __Member} },
+            {.method = {0, funcAddr(&CHArray::mutableCopyWithZone), selector(mutableCopyWithZone), __Member} },
         };
         return method;
     }
@@ -72,6 +81,15 @@ struct CHArrayPrivate
         resize(capacity);
     }
 
+    ~CHArrayPrivate() { desctructor(); }
+
+    CHArrayPrivate *duplicate() const
+    {
+        CHArrayPrivate *d = new CHArrayPrivate(size);
+        memcpy(d->_begin, _begin, size);
+        return d;
+    }
+
     void insertObjectAtIndex(id obj, uint32_t index)
     {
         checkMemoryWithInsertCount(count() + 1);
@@ -84,7 +102,7 @@ struct CHArrayPrivate
             id *_end = end();
             id *begin = _begin + newSize - 1;
             while (++begin < _end) {
-                release(*begin);
+                (*begin)->release();
             }
             size = newSize;
         } else if (newSize > size) {
@@ -114,17 +132,37 @@ struct CHArrayPrivate
         return false;
     }
 
-    uint32_t indexOfObject(id anObject) const
+    uint32_t indexOfObject(id anObject, CHRange inRange) const
     {
-        // TODO: id需要实现EqualTo函数
-        id *_end = end();
-        id *begin = _begin - 1;
-        while (++begin < _end) {
-            if (anObject == *begin) {
-                return (uint32_t)(begin - _begin);
+        do {
+            if (CHMaxRange(inRange) > count()) {
+                break;
+            }
+            id *_end = _begin + CHMaxRange(inRange);
+            id *begin = _begin - 1 + inRange.location;
+            while (++begin < _end) {
+                if (anObject->equalTo(*begin)) {
+                    return (uint32_t)(begin - _begin);
+                }
+            }
+        } while (0);
+        return CHNotFound;
+    }
+
+    bool isEqualToArray(CHArrayPrivate *otherArray) const
+    {
+        if (count() != otherArray->count()) {
+            return false;
+        }
+        id *end = _begin + count();
+        id *begin = _begin;
+        id *otherBegin = otherArray->_begin;
+        while (begin < end) {
+            if (!(*begin++)->equalTo(*otherBegin++)) {
+                return false;
             }
         }
-        return -1;
+        return true;
     }
 
     id firstObject() const
@@ -162,6 +200,17 @@ private:
             resize(size + insertCount * 2);
         }
     }
+
+    void desctructor()
+    {
+        int64_t i = size;
+        id *obj = _begin;
+        while (i--> 0) {
+            (*obj++)->release();
+        }
+        free(_begin);
+        _begin = NULL;
+    }
 };
 
 #define d_d(obj,field) ((CHArrayPrivate *)obj->reserved())->field
@@ -188,23 +237,9 @@ uint32_t CHArray::count() const
     return d_d(this, count)();
 }
 
-id CHArray::objectAtIndex(uint32_t index)
+ id CHArray::objectAtIndex(uint32_t index) const
 {
     return d_d(this, _begin)[index];
-}
-
-const id CHArray::objectAtIndex(uint32_t index) const
-{
-    return d_d(this, _begin)[index];
-}
-
-CHArray *CHArray::duplicate() const
-{
-    uint32_t size = count();
-    CHArray *array = new CHArray(size);
-    memcpy(d_d(array, _begin), d_d(this, _begin), sizeof(id) * size);
-    d_d(array, size) = size;
-    return array;
 }
 
 // creation
@@ -250,19 +285,23 @@ CHArray *CHArray::arrayWithArray(const CHArray *other)
 
 CHArray *CHArray::arrayByAddiObject(id object) const
 {
-    CHArray *array = this->duplicate();
-    array->indexOfObject(object);
+    CHArrayPrivate *d = d_d(this, duplicate());
+    CHArray *array = new CHArray();
+    d->insertObjectAtIndex(object, d->count());
+    array->setReserved(d);
     return array;
 }
 
 CHArray *CHArray::arrayByAddingObjectsFromArray(const CHArray *otherArray) const
 {
-    CHArray *array = this->duplicate();
-    uint32_t oldSize = count();
-    uint32_t newSize = count() + otherArray->count();
-    d_d(array, resize)(newSize);
-    memcpy(d_d(array, _begin) + oldSize, d_d(otherArray, _begin), sizeof(id) * (newSize - oldSize));
-    d_d(array, size) = newSize;
+    CHArrayPrivate *d = d_d(this, duplicate());
+    uint32_t oldSize = d->count();
+    uint32_t newSize = oldSize + otherArray->count();
+    d->resize(newSize);
+    memcpy(d->_begin + oldSize, d_d(otherArray, _begin), sizeof(id) * (newSize - oldSize));
+
+    CHArray *array = new CHArray();
+    array->setReserved(d);
     return array;
 }
 
@@ -279,7 +318,17 @@ bool CHArray::containsObject(id anObject) const
 
 uint32_t CHArray::indexOfObject(id anObject) const
 {
-    return d_d(this, indexOfObject(anObject));
+    return indexOfObjectInRange(anObject, CHMakeRange(0, this->count()));
+}
+
+uint32_t CHArray::indexOfObjectInRange(id anObject, CHRange range) const
+{
+    return d_d(this, indexOfObject(anObject, range));
+}
+
+bool CHArray::isEqualToArray(CHArray *otherArray) const
+{
+    return d_d(this, isEqualToArray((CHArrayPrivate *)otherArray->reserved()));
 }
 
 id CHArray::firstObject() const
@@ -300,4 +349,19 @@ void CHArray::enumerateObjectsUsingBlock(CHArrayObjectCallback block) const
 void CHArray::sortedArrayUsingComparator(CHArraySortedComparator cmptr)
 {
     d_d(this, sortedArrayUsingComparator(cmptr));
+}
+
+CHString *CHArray::description() const
+{
+    return nullptr;
+}
+
+id CHArray::copyWithZone(std::nullptr_t) const
+{
+    return nullptr;
+}
+
+id CHArray::mutableCopyWithZone(std::nullptr_t) const
+{
+    return nullptr;
 }

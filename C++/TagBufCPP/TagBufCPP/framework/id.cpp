@@ -19,7 +19,7 @@ struct runtimeclass(CHObject)
 {
     static struct method_list_t *methods()
     {
-        static method_list_t method[13] = {
+        static method_list_t method[12] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHObject::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHObject::*)()const, &CHObject::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHObject::allocateInstance), selector(allocateInstance), __Static} },
@@ -31,7 +31,6 @@ struct runtimeclass(CHObject)
             {.method = {0, funcAddr(&CHObject::isTaggedPointer), selector(isTaggedPointer), __Member} },
             {.method = {0, funcAddr(&CHObject::setReserved), selector(setReserved), __Member} },
             {.method = {0, funcAddr(&CHObject::reserved), selector(reserved), __Member} },
-            {.method = {0, funcAddr(&CHObject::setObjectType), selector(setObjectType), __Member} },
             // copy
             {.method = {0, funcAddr(&CHObject::copy), selector(copy), __Member} },
             {.method = {0, funcAddr(&CHObject::mutableCopy), selector(mutableCopy), __Member} },
@@ -56,7 +55,7 @@ static class_t ClassNamed(CHObject) = {
     selector(^#CHObject),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHObject)), sizeof(CHObject))),
     1,
-    13
+    12
 };
 
 Class CHObject::getClass() const
@@ -72,7 +71,7 @@ Class CHObject::getClass(std::nullptr_t)
 struct idPrivate
 {
     void *obj = 0;
-    const char *CType = 0;
+//    const char *CType = 0;
 };
 
 CHObject::CHObject() {}
@@ -146,16 +145,6 @@ id CHObject::mutableCopy() const
     return cp;
 }
 
-void CHObject::setObjectType(const char *type)
-{
-    if (!isTaggedPointer()) {
-        if (!d) {
-            d = new idPrivate;
-        }
-        d->CType = type;
-    }
-}
-
 #include "CHNumber.hpp"
 #include "CHString.hpp"
 #include "CHData.hpp"
@@ -171,11 +160,7 @@ const char *CHObject::objectType() const
         }
         return nullptr;
     }
-    if (d) {
-        return d->CType ?: this->getClass()->typeName;
-    } else {
-        return this->getClass()->typeName;
-    }
+    return this->getClass()->typeName;
 }
 
 // protocol
@@ -199,20 +184,31 @@ Class CHObject::superclass() const
     return this->getClass()->super_class;
 }
 
+id CHObject::retain()
+{
+    return this;
+}
+
+void CHObject::release()
+{
+    // Referrence count == 1
+    release_outer(this);
+}
+
 bool CHObject::isKindOfClass(Class aClass) const
 {
     Class cls = 0;
     do {
         if (isTaggedPointer()) {
-            if (is_data(this) == TAGGED_POINTER_DATA_FLAG) {
+            if (is_data(this)) {
                 cls = CHData::getClass(nullptr);
                 break;
             }
-            if (is_string(this) == TAGGED_POINTER_STRING_FLAG) {
+            if (is_string(this)) {
                 cls = CHString::getClass(nullptr);
                 break;
             }
-            if (is_number(this) == TAGGED_POINTER_NUMBER_FLAG) {
+            if (is_number(this)) {
                 cls = CHNumber::getClass(nullptr);
                 break;
             }
@@ -241,7 +237,7 @@ id CHObject::allocateInstance()
 }
 
 // destructor
-void release(id obj)
+void release_outer(id obj)
 {
 #if __LP64__
     if (!obj->isTaggedPointer()) {

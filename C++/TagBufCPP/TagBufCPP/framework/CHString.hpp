@@ -17,8 +17,8 @@ class CHArray;
 class CHData;
 
 CLASS_TAGGEDPOINTER_AVAILABLE class CHString : public CHObject,
-                                               protocolTo CHCopy,
-                                               protocolTo CHMutableCopy
+                                               protocolTo CHCopying,
+                                               protocolTo CHMutableCopying
 {
     __SUPPORTRUNTIME__(CHString);
 protected:

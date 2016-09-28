@@ -109,17 +109,8 @@ IMP runtime_lookup_method(Class cls, SEL selector)
 
 id allocateInstance(Class cls)
 {
-    struct idPrivate
-    {
-        void *obj;
-        const char *CType;
-    };
     assert(cls);
     id instance = methodInvoke<id>(nullptr, selector(allocateInstance), cls);
-    Ivar ivar = class_getIvar(CHObject::getClass(nullptr), selector(d));
-    int offset = ivar_getOffset(ivar);
-    struct idPrivate **s = (struct idPrivate **)((char *)instance + offset);
-    (*s)->CType = cls->typeName;
     return instance;
 }
 

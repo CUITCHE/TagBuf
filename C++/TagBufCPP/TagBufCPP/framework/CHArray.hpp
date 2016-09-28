@@ -10,15 +10,18 @@
 #define CHArray_hpp
 
 #include <stdio.h>
-#include "id.hpp"
 #include <functional>
+#include "id.hpp"
+#include "CHRange.hpp"
 
 using CHArrayObjectCallback = std::function<void(const id obj, uint32_t index, bool *stop)>;
 using CHArraySortedComparator = std::function<bool(const id obj1, const id obj2)>;
 
 class CHString;
 
-class CHArray : public CHObject
+class CHArray : public CHObject,
+                protocolTo CHCopying,
+                protocolTo CHMutableCopying
 {
     __SUPPORTRUNTIME__(CHArray);
 protected:
@@ -29,10 +32,7 @@ public:
 
     uint32_t count() const;
 
-    id objectAtIndex(uint32_t index);
-    const id objectAtIndex(uint32_t index) const;
-
-    CHArray *duplicate() const;
+    id objectAtIndex(uint32_t index) const;
 
     // creation
     static CHArray *arrayWithObject(id obj);
@@ -44,8 +44,11 @@ public:
     CHArray *arrayByAddiObject(id object) const;
     CHArray *arrayByAddingObjectsFromArray(const CHArray *otherArray) const;
     CHString *componentsJoinedByString(const CHString *separator) const;
+
     bool containsObject(id anObject) const;
     uint32_t indexOfObject(id anObject) const;
+    uint32_t indexOfObjectInRange(id anObject, CHRange range) const;
+    bool isEqualToArray(ARRAY_CONTAINS(id) otherArray) const;
 
     id firstObject() const;
     id lastObject() const;
@@ -56,6 +59,12 @@ public:
     // runtime
     Class getClass() const override;
     static Class getClass(std::nullptr_t);
+
+    // protocol
+    CHString *description() const;
+protected:
+    id copyWithZone(std::nullptr_t) const;
+    id mutableCopyWithZone(std::nullptr_t) const;
 private:
     static id allocateInstance();
 };

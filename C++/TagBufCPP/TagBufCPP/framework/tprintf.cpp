@@ -291,7 +291,7 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
                 str += length;
                 chars_written += length;
                 if (string != obj) {
-                    release(string);
+                    string->release();
                 }
             }
                 break;

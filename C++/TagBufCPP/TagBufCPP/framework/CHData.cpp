@@ -337,9 +337,9 @@ void CHData::enumerateByteUsingBlock(CHDataChunkCallback block) const
     assert(block);
     bool stop = false;
     if (isTaggedPointer()) {
-        const char *str = reinterpret_cast<const char *>((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1)
-                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
-        block(str, this->length(), &stop);
+//        const char *str = reinterpret_cast<const char *>((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1)
+//                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
+//        block(str, this->length(), &stop);
         return;
     }
     CHDataPrivate *d = (CHDataPrivate *)reserved();
@@ -388,12 +388,12 @@ CHData *CHData::dataWithUTF8Data(const char *str)
     while (++length, *++p) {
         continue;
     }
-    uintptr_t ptr = (uintptr_t)str;
-    if (ptr <= MAX_CONSTANT_ADDRESS && length <= MAX_INDICATE_STRING_DATA_LENGTH) {
-        ptr |= ((uintptr_t)length << TAGGED_POINTER_DATA_LENGTH_OFFSET);
-        CHData *o = reinterpret_cast<CHData *>(ptr << 1 | TAGGED_POINTER_DATA_FLAG);
-        return o;
-    }
+//    uintptr_t ptr = (uintptr_t)str;
+//    if (ptr <= MAX_CONSTANT_ADDRESS && length <= MAX_INDICATE_STRING_DATA_LENGTH) {
+//        ptr |= ((uintptr_t)length << TAGGED_POINTER_DATA_LENGTH_OFFSET);
+//        CHData *o = reinterpret_cast<CHData *>(ptr << 1 | TAGGED_POINTER_DATA_FLAG);
+//        return o;
+//    }
     return CHData::dataWithBytes(str, length);
 }
 
@@ -406,10 +406,10 @@ CHData *CHData::dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenD
 
 uint32_t CHData::length() const
 {
-    if (isTaggedPointer()) {
-        uint32_t len = (uint32_t)((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1) >> TAGGED_POINTER_DATA_LENGTH_OFFSET);
-        return len;
-    }
+//    if (isTaggedPointer()) {
+//        uint32_t len = (uint32_t)((((uintptr_t)this ^ TAGGED_POINTER_DATA_FLAG) >> 1) >> TAGGED_POINTER_DATA_LENGTH_OFFSET);
+//        return len;
+//    }
     return d_d(this, size)();
 }
 
@@ -474,9 +474,9 @@ void CHMutableData::appendBytesNoCopy(const void *bytes, uint32_t length, bool f
 void CHMutableData::appendData(const CHData *other)
 {
     if (other->isTaggedPointer()) {
-        const char *str = reinterpret_cast<const char *>((((uintptr_t)other ^ TAGGED_POINTER_DATA_FLAG) >> 1)
-                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
-        this->appendBytes(str, other->length());
+//        const char *str = reinterpret_cast<const char *>((((uintptr_t)other ^ TAGGED_POINTER_DATA_FLAG) >> 1)
+//                                                         & ~TAGGED_POINTER_DATA_LENGTH_MASK);
+//        this->appendBytes(str, other->length());
     }
     other->enumerateByteUsingBlock([this](const char *bytes, uint32_t byteLength, bool *stop) {
         this->appendBytes(bytes, byteLength);

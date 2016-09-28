@@ -30,7 +30,7 @@ class CHObjectProtocol
 {
 public:
     virtual bool equalTo(id anObject) const = 0;
-    CHString *description() const  { return nullptr; }
+    CHString *description() const { return nullptr; }
 
     virtual uint64_t hash() const = 0;
     virtual Class superclass() const = 0;
@@ -39,15 +39,18 @@ public:
     bool isMemberOfClass(Class aClass) const { return false; }
 
     bool respondsToSelector(SEL selector) const { return false; }
+
+    id retain();
+    void release();
 };
 
-protocol CHCopy
+protocol CHCopying
 {
 protected:
     id copyWithZone(std::nullptr_t) const { return nullptr; };
 };
 
-protocol CHMutableCopy
+protocol CHMutableCopying
 {
 protected:
     id mutableCopyWithZone(std::nullptr_t) const { return nullptr; };
@@ -60,7 +63,7 @@ public:
     operator void*() const;
     operator CHTagBuf*() const;
 
-    friend void release(CHObject *obj);
+    friend void release_outer(CHObject *obj);
     virtual ~CHObject();
 
     bool isTaggedPointer() const;
@@ -79,6 +82,10 @@ public:
     CHString *description() const;
     uint64_t hash() const override;
     Class superclass() const override;
+
+    id retain(); // Will not be added to runtime.
+    void release();
+
     bool isKindOfClass(Class aClass) const;
     bool isMemberOfClass(Class aClass) const;
     bool respondsToSelector(SEL selector) const;
@@ -89,8 +96,6 @@ protected:
 
     void setReserved(void *obj);
     void *reserved() const;
-
-    void setObjectType(const char *type);
 private:
     static id allocateInstance();
 };

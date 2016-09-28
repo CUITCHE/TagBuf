@@ -48,7 +48,7 @@ void CHTagBuf::desctructor(CHTagBuf *obj)
             if (encodeType[0] == '^') {
                 if (encodeType[1] == '#') {
                     id value = object_getIvar(this, list->ivar);
-                    release(value);
+                    value->release();
                 }
             }
         }
