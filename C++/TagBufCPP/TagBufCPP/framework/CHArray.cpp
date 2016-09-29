@@ -20,7 +20,7 @@ struct runtimeclass(CHArray)
 {
     static struct method_list_t *methods()
     {
-        static method_list_t method[23] = {
+        static method_list_t method[24] = {
             {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHArray::getClass), selector(getClass), __Static} },
             {.method = {0, overloadFunc(Class(CHArray::*)()const, &CHArray::getClass), selector(getClass), __Member} },
             {.method = {0, funcAddr(&CHArray::allocateInstance), selector(allocateInstance), __Static} },
@@ -49,6 +49,7 @@ struct runtimeclass(CHArray)
             {.method = {0, funcAddr(&CHArray::sortedArrayUsingComparator), selector(sortedArrayUsingComparator), __Member} },
 
             {.method = {0, funcAddr(&CHArray::description), selector(description), __Member} },
+            {.method = {0, funcAddr(&CHArray::equalTo), selector(equalTo), __Member} },
             {.method = {0, funcAddr(&CHArray::copyWithZone), selector(copyWithZone), __Member} },
             {.method = {0, funcAddr(&CHArray::mutableCopyWithZone), selector(mutableCopyWithZone), __Member} },
         };
@@ -65,10 +66,12 @@ static class_t ClassNamed(CHArray) = {
     selector(^#CHArray),
     static_cast<uint32_t>((class_registerClass(&ClassNamed(CHArray)), sizeof(CHArray))),
     0,
-    18
+    24
 };
 
 Implement(CHArray);
+
+#define STABLE_LENGTH_SET 8
 
 struct CHArrayPrivate
 {
@@ -96,24 +99,14 @@ struct CHArrayPrivate
         _begin[size++] = obj;
     }
 
-    void resize(uint32_t newSize)
+    CHArrayPrivate *arrayByAddingObjectsFromArray(CHArrayPrivate *other)
     {
-        if (newSize < size) {
-            id *_end = end();
-            id *begin = _begin + newSize - 1;
-            while (++begin < _end) {
-                (*begin)->release();
-            }
-            size = newSize;
-        } else if (newSize > size) {
-            if (!capacity || size > capacity) {
-                id *_new = (id *)malloc(sizeof(id) * newSize);
-                memcpy(_new, _begin, size);
-                free(_begin);
-                _begin = _new;
-                capacity = newSize;
-            }
-        }
+        CHArrayPrivate *d = duplicate();
+        uint32_t oldSize = d->count();
+        uint32_t newSize = oldSize + other->count();
+        d->resize(newSize);
+        memcpy(d->_begin + oldSize, other->_begin, sizeof(id) * (newSize - oldSize));
+        return d;
     }
 
     id *end() const { return _begin + size; }
@@ -138,6 +131,9 @@ struct CHArrayPrivate
 
     bool isEqualToArray(CHArrayPrivate *otherArray) const
     {
+        if (!otherArray) {
+            return false;
+        }
         if (count() != otherArray->count()) {
             return false;
         }
@@ -180,6 +176,101 @@ struct CHArrayPrivate
         std::sort(_begin, end(), cmptr);
     }
 
+    void removeObjectInRange(CHRange range)
+    {
+        uint32_t offset = CHMaxRange(range);
+        if (offset > count()) {
+            throwException(CHRangeException, "Argument range(%p@) is out of bounds(%u)", showRange(range), count());
+        }
+        for (uint32_t i=range.location; i<offset; ++i) {
+            data()[i]->release();
+        }
+        if (offset != count()) {
+            memcpy(data() + range.location, data() + offset, count() - offset);
+        }
+        size = count() - range.length;
+    }
+
+    void replaceObjectAtIndexWithObject(uint32_t index, id anObject)
+    {
+        if (index >= count()) {
+            throwException(CHRangeException, "Argumnet index(%u) is out of bounds(%u-1)", index, count());
+        }
+        data()[index]->release();
+        data()[index] = anObject;
+    }
+
+    void addObjectsFromArray(const CHArrayPrivate *other)
+    {
+        checkMemoryWithInsertCount(other->count());
+        memcpy(data() + count(), other->data(), other->count());
+        size += other->count();
+    }
+
+    void removeAllObjects()
+    {
+        int64_t i = count();
+        id *obj = data();
+        while (i --> 0) {
+            (*obj++)->release();
+        }
+        size = 0;
+    }
+
+    void removeObjectInRange(id anObject, CHRange range)
+    {
+        uint32_t offset = CHMaxRange(range);
+        if (offset > count()) {
+            throwException(CHRangeException, "Argument range(%p@) is out of bounds(%u)", showRange(range), count());
+        }
+        CHRange removeRange{0, 1};
+    continued:
+        for (uint32_t i=range.location; i<offset; ++i) {
+            if (data()[i]->equalTo(anObject)) {
+                removeRange.location = i;
+                removeObjectInRange(removeRange);
+                offset -= i - range.location + 1;
+                range.location = i;
+                goto continued;
+            }
+        }
+    }
+
+    void removeObjectIdenticalToInRange(id anObject, CHRange range)
+    {
+        uint32_t offset = CHMaxRange(range);
+        if (offset > count()) {
+            throwException(CHRangeException, "Argument range(%p@) is out of bounds(%u)", showRange(range), count());
+        }
+        CHRange removeRange{0, 1};
+    continued:
+        for (uint32_t i=range.location; i<offset; ++i) {
+            if (data()[i] == anObject) {
+                removeRange.location = i;
+                removeObjectInRange(removeRange);
+                offset -= i - range.location + 1;
+                range.location = i;
+                goto continued;
+            }
+        }
+    }
+
+    void setArray(CHArrayPrivate *other)
+    {
+        removeAllObjects();
+        size = 0;
+        if (other == nullptr) {
+            if (capacity > STABLE_LENGTH_SET) {
+                _begin = (id *)realloc(_begin, sizeof(id *) * STABLE_LENGTH_SET);
+                capacity = STABLE_LENGTH_SET;
+            }
+        } else {
+            if (capacity < other->size) {
+                resize(other->size);
+            }
+            memcpy(_begin, other->_begin, other->size);
+        }
+    }
 private:
     void checkMemoryWithInsertCount(uint32_t insertCount)
     {
@@ -190,22 +281,38 @@ private:
 
     void desctructor()
     {
-        int64_t i = size;
-        id *obj = _begin;
-        while (i--> 0) {
-            (*obj++)->release();
-        }
+        removeAllObjects();
         free(_begin);
         _begin = NULL;
+    }
+
+    inline id *data() { return _begin; }
+    inline const id *data() const { return _begin; }
+
+    void resize(uint32_t newSize)
+    {
+        if (newSize < size) {
+            id *_end = end();
+            id *begin = _begin + newSize - 1;
+            while (++begin < _end) {
+                (*begin)->release();
+            }
+            size = newSize;
+        } else if (newSize > size) {
+            if (!capacity || newSize > capacity) {
+                id *_new = (id *)malloc(sizeof(id) * newSize);
+                memcpy(_new, _begin, size);
+                free(_begin);
+                _begin = _new;
+                capacity = newSize;
+            }
+        }
     }
 };
 
 #define d_d(obj,field) ((CHArrayPrivate *)obj->reserved())->field
 
-CHArray::CHArray() :CHObject()
-{
-    ;
-}
+CHArray::CHArray() :CHObject() {}
 
 CHArray::CHArray(uint32_t capacity) :CHObject()
 {
@@ -281,11 +388,7 @@ CHArray *CHArray::arrayByAddiObject(id object) const
 
 CHArray *CHArray::arrayByAddingObjectsFromArray(const CHArray *otherArray) const
 {
-    CHArrayPrivate *d = d_d(this, duplicate());
-    uint32_t oldSize = d->count();
-    uint32_t newSize = oldSize + otherArray->count();
-    d->resize(newSize);
-    memcpy(d->_begin + oldSize, d_d(otherArray, _begin), sizeof(id) * (newSize - oldSize));
+    CHArrayPrivate *d = d_d(this, arrayByAddingObjectsFromArray((CHArrayPrivate *)otherArray->reserved()));
 
     CHArray *array = new CHArray();
     array->setReserved(d);
@@ -349,9 +452,13 @@ void CHArray::enumerateObjectsUsingBlock(CHArrayObjectCallback block) const
     d_d(this, enumerateObjectsUsingBlock(block));
 }
 
-void CHArray::sortedArrayUsingComparator(CHArraySortedComparator cmptr)
+CHArray *CHArray::sortedArrayUsingComparator(CHArraySortedComparator cmptr) const
 {
-    d_d(this, sortedArrayUsingComparator(cmptr));
+    CHArray *array = new CHArray();
+    CHArrayPrivate *d = d_d(this, duplicate());
+    d->sortedArrayUsingComparator(cmptr);
+    array->setReserved(d);
+    return array;
 }
 
 CHString *CHArray::description() const
@@ -379,6 +486,17 @@ CHString *CHArray::description() const
     return string;
 }
 
+bool CHArray::equalTo(id anObject) const
+{
+    if (this == anObject) {
+        return true;
+    }
+    if (!anObject->isKindOfClass(CHArray::getClass(nullptr))) {
+        return false;
+    }
+    return this->isEqualToArray((CHArray *)anObject);
+}
+
 id CHArray::copyWithZone(std::nullptr_t) const
 {
     CHArrayPrivate *d = d_d(this, duplicate());
@@ -388,6 +506,228 @@ id CHArray::copyWithZone(std::nullptr_t) const
 }
 
 id CHArray::mutableCopyWithZone(std::nullptr_t) const
+{
+    return copyWithZone(nullptr);
+}
+
+// CHMutableArray
+struct runtimeclass(CHMutableArray)
+{
+    static struct method_list_t *methods()
+    {
+        static method_list_t method[27] = {
+            {.method = {0, overloadFunc(Class(*)(std::nullptr_t),CHMutableArray::getClass), selector(getClass), __Static} },
+            {.method = {0, overloadFunc(Class(CHMutableArray::*)()const, &CHMutableArray::getClass), selector(getClass), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::allocateInstance), selector(allocateInstance), __Static} },
+
+            {.method = {0, funcAddr(&CHMutableArray::addObject), selector(addObject), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::insertObjectAtIndex), selector(insertObjectAtIndex), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeLastObject), selector(removeLastObjectremoveLastObject), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectAtIndex), selector(removeObjectAtIndex), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::replaceObjectAtIndexWithObject), selector(replaceObjectAtIndexWithObject), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::addObjectsFromArray), selector(addObjectsFromArray), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::exchangeObjectAtIndexWithObjectAtIndex), selector(exchangeObjectAtIndexWithObjectAtIndex), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeAllObjects), selector(removeAllObjects), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectInRange), selector(removeObjectInRange), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObject), selector(removeObject), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectIdenticalToInRange), selector(removeObjectIdenticalToInRange), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectIdenticalTo), selector(removeObjectIdenticalTo), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectsInArray), selector(removeObjectsInArray), __Static} },
+            {.method = {0, funcAddr(&CHMutableArray::removeObjectsInRange), selector(removeObjectsInRange), __Static} },
+            {.method = {0, funcAddr(&CHMutableArray::setArray), selector(setArray), __Static} },
+            {.method = {0, funcAddr(&CHMutableArray::sortUsingComparator), selector(sortUsingComparator), __Static} },
+
+            {.method = {0, funcAddr(&CHMutableArray::arrayWithObject), selector(arrayWithObject), __Static} },
+            {.method = {0, overloadFunc(CHMutableArray *(*)(const id[], uint32_t), &CHMutableArray::arrayWithObjects), selector(arrayWithObjects), __Static|__Overload} },
+            {.method = {0, overloadFunc(CHMutableArray *(*)(id, ...), &CHMutableArray::arrayWithObjects), selector(arrayWithObjects), __Static|__Overload} },
+            {.method = {0, funcAddr(&CHMutableArray::arrayWithArray), selector(arrayWithArray), __Static} },
+
+            {.method = {0, funcAddr(&CHMutableArray::arrayByAddiObject), selector(arrayByAddiObject), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::arrayByAddingObjectsFromArray), selector(arrayByAddingObjectsFromArray), __Member} },
+
+            {.method = {0, funcAddr(&CHMutableArray::copyWithZone), selector(copyWithZone), __Member} },
+            {.method = {0, funcAddr(&CHMutableArray::mutableCopyWithZone), selector(mutableCopyWithZone), __Member} },
+        };
+        return method;
+    }
+};
+
+static class_t ClassNamed(CHMutableArray) = {
+    CHArray::getClass(nullptr),
+    selector(CHMutableArray),
+    runtimeclass(CHMutableArray)::methods(),
+    nullptr,
+    allocateCache(),
+    selector(^#CHMutableArray),
+    static_cast<uint32_t>((class_registerClass(&ClassNamed(CHMutableArray)), sizeof(CHMutableArray))),
+    0,
+    27
+};
+
+Implement(CHMutableArray);
+
+CHMutableArray::CHMutableArray() : CHArray() {}
+
+CHMutableArray::~CHMutableArray() {}
+
+void CHMutableArray::addObject(id anObject)
+{
+    d_d(this, insertObjectAtIndex(anObject, count()));
+}
+
+void CHMutableArray::insertObjectAtIndex(id anObject, uint32_t index)
+{
+    if (anObject == nullptr) {
+        throwException(CHInvalidArgumentException, "Unexcepted argument: object is nil.");
+    }
+    if (index > count()) {
+        throwException(CHRangeException, "Argument index(%u) is out of bounds(%u)", index, count());
+    }
+    d_d(this, insertObjectAtIndex(anObject, index));
+}
+
+void CHMutableArray::removeLastObject()
+{
+    d_d(this, removeObjectInRange(CHMakeRange(count() - 1, 1)));
+}
+
+void CHMutableArray::removeObjectAtIndex(uint32_t index)
+{
+    d_d(this, removeObjectInRange(CHMakeRange(index, 1)));
+}
+
+void CHMutableArray::replaceObjectAtIndexWithObject(uint32_t index, id anObject)
+{
+    d_d(this, replaceObjectAtIndexWithObject(index, anObject));
+}
+
+void CHMutableArray::addObjectsFromArray(CHArray *otherArray)
+{
+    d_d(this, addObjectsFromArray((CHArrayPrivate *)(((CHMutableArray *)otherArray)->reserved())));
+}
+
+void CHMutableArray::exchangeObjectAtIndexWithObjectAtIndex(uint32_t idx1, uint32_t idx2)
+{
+    if (idx1 == idx2) {
+        return;
+    }
+    if (idx1 >= count()) {
+        throwException(CHRangeException, "Argument idx1(%u) is out of bounds(%u)", idx1, count());
+    }
+    if (idx2 >= count()) {
+        throwException(CHRangeException, "Argument idx2(%u) is out of bounds(%u)", idx2, count());
+    }
+    id *buffer = d_d(this, _begin);
+    std::swap(buffer[idx1], buffer[idx2]);
+}
+
+void CHMutableArray::removeAllObjects()
+{
+    d_d(this, removeAllObjects());
+}
+
+void CHMutableArray::removeObjectInRange(id anObject, CHRange range)
+{
+    d_d(this, removeObjectInRange(anObject, range));
+}
+
+void CHMutableArray::removeObject(id anObject)
+{
+    d_d(this, removeObjectInRange(anObject, CHMakeRange(0, count())));
+}
+
+void CHMutableArray::removeObjectIdenticalTo(id anObject)
+{
+    d_d(this, removeObjectIdenticalToInRange(anObject, CHMakeRange(0, count())));
+}
+
+void CHMutableArray::removeObjectIdenticalToInRange(id anObject, CHRange range)
+{
+    d_d(this, removeObjectIdenticalToInRange(anObject, range));
+}
+
+void CHMutableArray::removeObjectsInArray(CHArray *otherArray)
+{
+    id *begin = d_d(((CHMutableArray *)otherArray), _begin);
+    id *end = d_d(((CHMutableArray *)otherArray), end());
+    while (begin < end) {
+        removeObject(*begin++);
+    }
+}
+
+void CHMutableArray::removeObjectsInRange(CHRange range)
+{
+    d_d(this, removeObjectInRange(range));
+}
+
+void CHMutableArray::setArray(CHArray *otherArray)
+{
+    d_d(this, setArray((CHArrayPrivate *)(((CHMutableArray *)otherArray)->reserved())));
+}
+
+void CHMutableArray::sortUsingComparator(CHArraySortedComparator cmptr)
+{
+    d_d(this, sortedArrayUsingComparator(cmptr));
+}
+
+id& CHMutableArray::operator[](uint32_t index) throw()
+{
+    if (index >= count()) {
+        throwException(CHRangeException, "Argument idnex(%u) is out of bounds(%u)", index, count());
+    }
+    id &r = (d_d(this, _begin))[index];
+    return r;
+}
+
+// creation
+CHMutableArray *CHMutableArray::arrayWithCapacity(uint32_t capacity)
+{
+    CHMutableArray *array = new CHMutableArray();
+    CHArrayPrivate *d = new CHArrayPrivate(capacity);
+    array->setReserved(d);
+    return array;
+}
+
+CHMutableArray *CHMutableArray::arrayWithObject(id obj)
+{
+    return (CHMutableArray *)CHArray::arrayWithObject(obj);
+}
+
+CHMutableArray *CHMutableArray::arrayWithObjects(const id objects[], uint32_t count)
+{
+    return (CHMutableArray *)CHArray::arrayWithObjects(objects, count);
+}
+
+CHMutableArray *CHMutableArray::arrayWithObjects(id object, ...)
+{
+    CHMutableArray *array = new CHMutableArray();
+    array->setReserved(new CHArrayPrivate(16));
+    uint32_t index = -1;
+    va_list ap;
+    va_start(ap, object);
+    d_d(array, insertObjectAtIndex(object, ++index));
+    id obj = va_arg(ap, id);
+    while (obj) {
+        d_d(array, insertObjectAtIndex(obj, ++index));
+        obj = va_arg(ap, id);
+    }
+    va_end(ap);
+    return array;
+}
+
+CHMutableArray *CHMutableArray::arrayWithArray(const CHArray *array)
+{
+    return (CHMutableArray *)CHArray::arrayWithArray(array);
+}
+
+// protocol
+
+id CHMutableArray::copyWithZone(std::nullptr_t) const
+{
+    return CHArray::copyWithZone(nullptr);
+}
+
+id CHMutableArray::mutableCopyWithZone(std::nullptr_t) const
 {
     return copyWithZone(nullptr);
 }

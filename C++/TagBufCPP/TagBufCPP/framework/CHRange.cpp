@@ -7,3 +7,11 @@
 //
 
 #include "CHRange.hpp"
+#include "CHString.hpp"
+
+extern CHString *showRange(CHRange range)
+{
+    CHString *str = CHString::stringWithFormat("{.location=%u, .length=%u}",
+                                               range.location, range.length);
+    return str;
+}

@@ -95,6 +95,7 @@ struct CHStringPrivate
     void *buffer = 0;
     uint32_t length = 0;
     uint32_t capacity = 0;
+    uint64_t hash = 0;
 
     CHStringPrivate(uint32_t capacity) :capacity(capacity)
     {
@@ -124,6 +125,7 @@ struct CHStringPrivate
     CHStringPrivate *duplicate() const
     {
         CHStringPrivate *d = new CHStringPrivate(buffer, length, false);
+        d->hash = hash;
         return d;
     }
 
@@ -248,9 +250,13 @@ struct CHStringPrivate
 
     void appendBytes(const void *bytes, uint32_t length, CHStringBufferType bufferType)
     {
+        if (bytes == 0) {
+            throwException(CHInvalidArgumentException, "Argument bytes must not be nil.");
+        }
         checkMemory(length, bufferType);
         memcpy((char *)buffer + this->length, bytes, length);
         this->length += length;
+        hash = 0;
     }
 
     static CHStringPrivate *stringByReplacingOccurrencesOfStringWithString(const char *src,
@@ -430,6 +436,7 @@ struct CHStringPrivate
             memcpy((char *)buffer + index, (char *)buffer + index + length, length);
             memcpy((char *)buffer + index, aString, length);
         }
+        hash = 0;
     }
 
     void deleteCharactersInRange(CHRange range) throw()
@@ -440,6 +447,7 @@ struct CHStringPrivate
         }
         memcpy((char *)buffer + range.location, (char *)buffer + max, length - max);
         length -= range.length;
+        hash = 0;
     }
 
     void setString(void *bytes, uint32_t length)
@@ -948,7 +956,11 @@ CHString *CHString::description() const
 
 uint64_t CHString::hash() const
 {
-    return bkdr_hash((const char *)d_d(this, buffer), d_d(this, length));
+    uint64_t &hash = d_d(this, hash);
+    if (hash == 0) {
+        hash = bkdr_hash((const char *)d_d(this, buffer), d_d(this, length));
+    }
+    return hash;
 }
 
 // copy

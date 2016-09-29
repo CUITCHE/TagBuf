@@ -11,6 +11,8 @@
 
 #include "types.h"
 
+class CHString;
+
 typedef struct _CHRange {
     uint32_t location;
     uint32_t length;
@@ -34,5 +36,7 @@ static inline bool CHLocationInRange(uint32_t loc, CHRange range) {
 static inline bool CHEqualRanges(CHRange range1, CHRange range2) {
     return (range1.location == range2.location && range1.length == range2.length);
 }
+
+extern CHString *showRange(CHRange range);
 
 #endif /* CHRange_hpp */

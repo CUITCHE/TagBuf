@@ -197,6 +197,9 @@ void CHObject::release()
 
 bool CHObject::isKindOfClass(Class aClass) const
 {
+    if (!aClass) {
+        return false;
+    }
     Class cls = 0;
     do {
         if (isTaggedPointer()) {

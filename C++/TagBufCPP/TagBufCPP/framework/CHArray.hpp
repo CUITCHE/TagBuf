@@ -54,7 +54,7 @@ public:
     id lastObject() const;
 
     void enumerateObjectsUsingBlock(CHArrayObjectCallback block) const;
-    void sortedArrayUsingComparator(CHArraySortedComparator cmptr);
+    ARRAY_CONTAINS(id) sortedArrayUsingComparator(CHArraySortedComparator cmptr) const;
 
     // runtime
     Class getClass() const override;
@@ -62,6 +62,7 @@ public:
 
     // protocol
     CHString *description() const;
+    bool equalTo(id anObject) const override;
 protected:
     id copyWithZone(std::nullptr_t) const;
     id mutableCopyWithZone(std::nullptr_t) const;
@@ -69,5 +70,52 @@ private:
     static id allocateInstance();
 };
 
+class CHMutableArray : public CHArray
+{
+    __SUPPORTRUNTIME__(CHMutableArray);
+    explicit CHMutableArray();
+public:
+    ~CHMutableArray() override;
+
+    void addObject(id anObject);
+    void insertObjectAtIndex(id anObject, uint32_t index);
+    void removeLastObject();
+    void removeObjectAtIndex(uint32_t index);
+    void replaceObjectAtIndexWithObject(uint32_t index, id anObject);
+
+    void addObjectsFromArray(ARRAY_CONTAINS(id) otherArray);
+    void exchangeObjectAtIndexWithObjectAtIndex(uint32_t idx1, uint32_t idx2);
+
+    void removeAllObjects();
+    void removeObjectInRange(id anObject, CHRange range);
+    void removeObject(id anObject);
+
+    void removeObjectIdenticalToInRange(id anObject, CHRange range);
+    void removeObjectIdenticalTo(id anObject);
+
+    void removeObjectsInArray(ARRAY_CONTAINS(id) otherArray);
+    void removeObjectsInRange(CHRange range);
+
+    void setArray(ARRAY_CONTAINS(id) otherArray);
+    void sortUsingComparator(CHArraySortedComparator cmptr);
+
+    id& operator[](uint32_t index) throw();
+
+    // creation
+    static CHMutableArray *arrayWithCapacity(uint32_t capacity);
+    static CHMutableArray *arrayWithObject(id obj);
+    static CHMutableArray *arrayWithObjects(const id objects[], uint32_t count);
+    static CHMutableArray *arrayWithObjects(id object, ...) __attribute__((sentinel(0,1)));
+    static CHMutableArray *arrayWithArray(const CHArray *array);
+
+    // runtime
+    Class getClass() const override;
+    static Class getClass(std::nullptr_t);
+protected:
+    id copyWithZone(std::nullptr_t) const;
+    id mutableCopyWithZone(std::nullptr_t) const;
+private:
+    static id allocateInstance();
+};
 
 #endif /* CHArray_hpp */
