@@ -15,7 +15,7 @@ extern const uintptr_t MAX_CONSTANT_ADDRESS;
 #define TAG_MASK 0x8000000000000001ull
 #define ISTAGGEDPOINTER() (uintptr_t)this & TAG_MASK
 
-#define is_typeTaggedPointer(obj, typeFlag) ((((uintptr_t)obj) & typeFlag) == typeFlag)
+#define is_typeTaggedPointer(obj, typeFlag) ((((uintptr_t)obj) & 0xF000000000000001ull) == typeFlag)
 
 #define TAGGED_POINTER_NUMBER_FLAG TAG_MASK
 #define is_number(obj) is_typeTaggedPointer(obj, TAGGED_POINTER_NUMBER_FLAG)

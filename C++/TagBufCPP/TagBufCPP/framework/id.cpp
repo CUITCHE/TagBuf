@@ -179,7 +179,7 @@ bool CHObject::equalTo(id anObject) const
 
 CHString *CHObject::description() const
 {
-    if (this->isMemberOfClass(CHObject::getClass())) {
+    if (this->isMemberOfClass(CHObject::getClass(nullptr))) {
         return CHString::stringWithFormat("<%s:%p>", object_getClassName((id)this), this);
     }
 
