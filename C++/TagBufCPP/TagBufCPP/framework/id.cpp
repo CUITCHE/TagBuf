@@ -171,7 +171,15 @@ bool CHObject::equalTo(id anObject) const
 
 CHString *CHObject::description() const
 {
-    return CHString::stringWithFormat("<%s:%p>", object_getClassName((id)this), this);
+    if (this->isMemberOfClass(CHObject::getClass())) {
+        return CHString::stringWithFormat("<%s:%p>", object_getClassName((id)this), this);
+    }
+
+    if (this->respondsToSelector(selector(description))) {
+        CHString *str = methodInvoke<CHString *>((id)this, selector(description), object_getClass((id)this));
+        return str;
+    }
+    return nullptr;
 }
 
 uint64_t CHObject::hash() const
@@ -200,24 +208,7 @@ bool CHObject::isKindOfClass(Class aClass) const
     if (!aClass) {
         return false;
     }
-    Class cls = 0;
-    do {
-        if (isTaggedPointer()) {
-            if (is_data(this)) {
-                cls = CHData::getClass(nullptr);
-                break;
-            }
-            if (is_string(this)) {
-                cls = CHString::getClass(nullptr);
-                break;
-            }
-            if (is_number(this)) {
-                cls = CHNumber::getClass(nullptr);
-                break;
-            }
-        }
-        cls = this->getClass();
-    } while (0);
+    Class cls = object_getClass((id)this);
     while (cls && cls != aClass) {
         cls = cls->super_class;
     }
@@ -226,12 +217,16 @@ bool CHObject::isKindOfClass(Class aClass) const
 
 bool CHObject::isMemberOfClass(Class aClass) const
 {
-    return this->getClass() == aClass;
+    if (!aClass) {
+        return false;
+    }
+    auto cls = object_getClass((id)this);
+    return cls == aClass;
 }
 
 bool CHObject::respondsToSelector(SEL selector) const
 {
-    return runtime_lookup_method(this->getClass(), selector);
+    return runtime_lookup_method(object_getClass((id)this), selector);
 }
 
 id CHObject::allocateInstance()

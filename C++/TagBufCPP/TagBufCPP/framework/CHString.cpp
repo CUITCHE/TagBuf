@@ -786,8 +786,12 @@ ARRAY_CONTAINS_TYPE(CHArray *, CHString *) CHString::componentsSeparatedByString
 {
     vector<CHStringPrivate *> components;
     d_d(this, componentsSeparatedByString((const char *)d_d(separaotr, buffer), separaotr->length(), components));
-    // TODO: needs to implement CHMutableArray
-    CHArray *array = nullptr;
+    CHMutableArray *array = CHMutableArray::arrayWithCapacity((uint32_t)components.size());
+    for (auto d : components) {
+        CHString *string = new CHString();
+        string->setReserved(d);
+        array->addObject(string);
+    }
     return array;
 }
 
@@ -935,7 +939,9 @@ CHString *CHString::stringWithFormat(const char *format, va_list argList)
     uint32_t capacity = 0;
     uint32_t length = (uint32_t)tprintf_c(buffer, &capacity,format, argList, OUTPUT_FLAG_DESCRIPTION);
     CHString *str = CHString::stringWithBytesNoCopy(buffer, length);
-    d_d(str, capacity) = capacity;
+    if (!str->isTaggedPointer()) {
+        d_d(str, capacity) = capacity;
+    }
     return str;
 }
 

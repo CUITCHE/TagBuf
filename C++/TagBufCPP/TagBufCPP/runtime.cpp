@@ -10,8 +10,9 @@
 #include "cache.hpp"
 #include "CHNumber.hpp"
 #include "CHString.hpp"
+#include "CHData.hpp"
 #include <assert.h>
-
+#include "TaggedPointer.h"
 #include <unordered_map>
 
 using namespace::std;
@@ -397,10 +398,38 @@ Method *class_copyMethodList(const Class cls, unsigned int *outCount)
 
 const char *object_getClassName(const id object)
 {
+    if (object->isTaggedPointer()) {
+        if (is_number(object)) {
+            return CHNumber::getClass(nullptr)->name;
+        } else if (is_string(object)) {
+            return CHString::getClass(nullptr)->name;
+        } else if (is_data(object)) {
+            return CHData::getClass(nullptr)->name;
+        }
+        return nullptr;
+    }
     return object->getClass()->name;
 }
 
 Class object_getClass(const id object)
 {
-    return object->getClass();
+    Class cls = 0;
+    do {
+        if (object->isTaggedPointer()) {
+            if (is_data(object)) {
+                cls = CHData::getClass(nullptr);
+                break;
+            }
+            if (is_string(object)) {
+                cls = CHString::getClass(nullptr);
+                break;
+            }
+            if (is_number(object)) {
+                cls = CHNumber::getClass(nullptr);
+                break;
+            }
+        }
+        cls = object->getClass();
+    } while (0);
+    return cls;
 }

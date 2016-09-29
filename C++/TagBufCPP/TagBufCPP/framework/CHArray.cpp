@@ -336,6 +336,15 @@ uint32_t CHArray::count() const
     return d_d(this, _begin)[index];
 }
 
+const id CHArray::operator[](uint32_t index) const throw()
+{
+    if (index >= count()) {
+        throwException(CHRangeException, "Argument idnex(%u) is out of bounds(%u)", index, count());
+    }
+    id r = (d_d(this, _begin))[index];
+    return r;
+}
+
 // creation
 CHArray *CHArray::arrayWithObject(id obj)
 {

@@ -11,11 +11,8 @@
 #include "CHLog.hpp"
 
 int main(int argc, const char * argv[]) {
-    long long i = 1e5;
-    while (i-->0) {
-        CHString *str = tstr("r346457");
-        CHLog("%p@\t%d", str, str->isEqualToString(tstr("4325")));
-        str->release();
-    }
+    CHString *str = tstr("r346457");
+    id obj = dynamic_cast<id>(str);
+    CHLog("%p@", obj->description());
     return 0;
 }

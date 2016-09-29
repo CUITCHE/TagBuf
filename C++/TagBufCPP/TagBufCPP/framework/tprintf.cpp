@@ -131,7 +131,6 @@ uint64_t tprintf_error(const char *format, ...)
 
 uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_list ap, uint32_t objectOutputFlag)
 {
-    printf("static:%p\n", output_buffer);
     char c;
     unsigned char uc;
     const char *s;

@@ -33,6 +33,7 @@ public:
     uint32_t count() const;
 
     id objectAtIndex(uint32_t index) const;
+    const id operator[](uint32_t index) const throw();
 
     // creation
     static CHArray *arrayWithObject(id obj);
