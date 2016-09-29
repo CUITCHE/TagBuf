@@ -60,6 +60,14 @@ static class_t ClassNamed(CHObject) = {
 
 Class CHObject::getClass() const
 {
+    if (isTaggedPointer()) {
+        return object_getClass((id)this);
+    }
+    if (!this->isMemberOfClass(CHObject::getClass(nullptr))) {
+        if (this->respondsToSelector(selector(getClass))) {
+            return this->getClass();
+        }
+    }
     return &class_CHObject;
 }
 

@@ -135,7 +135,7 @@ Class class_getClass(const char *classname);
  */
 bool class_registerClass(Class cls, Class superClass = nullptr);
 
-IMP runtime_lookup_method(Class cls, SEL selector);
+IMP runtime_lookup_method(Class cls, SEL selector, IMP ignoreIMP = (IMP)-1);
 
 id allocateInstance(Class cls);
 
@@ -152,6 +152,11 @@ _T methodInvoke(id self, SEL selector, Class cls, Args... args)
         throwException(CHInvalidArgumentException, "Param must not be nil!(cls:%p\nselector:%p)", cls, selector);
     }
     struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls, selector));
+    if (!self) { // This is a static-member method
+        if (method->flag & __Member) {
+            ;
+        }
+    }
     if (!method) {
         throwException(CHInvalidArgumentException, "<Class:%s>Unrecognized selector:%s",cls->name ,selector);
     }

@@ -19,7 +19,7 @@ class CHTagBuf : public CHObject
 protected:
     CHTagBuf() :CHObject(){};
 public:
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
     void desctructor(CHTagBuf *obj);
 private:

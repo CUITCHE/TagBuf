@@ -33,7 +33,7 @@
                                     classname() :CHTagBuf(){};\
                                     ~classname();\
                                 public:\
-                                    Class getClass() const override; \
+                                    Class getClass() const; \
                                     static Class getClass(std::nullptr_t);\
                                 private:\
                                     static id allocateInstance();
@@ -48,7 +48,7 @@
 #endif
 
 #ifndef Implement
-#define Implement(classname) Class classname::getClass() const { return &ClassNamed(classname); } \
+#define Implement(classname) Class classname::getClass() const { if (isTaggedPointer()) { return object_getClass((id)this);} return &ClassNamed(classname); } \
     Class classname::getClass(std::nullptr_t) { return &ClassNamed(classname); } \
     id classname::allocateInstance() { return new classname; }
 #endif

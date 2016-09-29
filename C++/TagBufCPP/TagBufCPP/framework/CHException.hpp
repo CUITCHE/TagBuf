@@ -35,7 +35,7 @@ public:
     static void raise(CHString *exceptionName, const char *format, va_list argList) throw();
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 
     // protocol

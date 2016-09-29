@@ -35,7 +35,7 @@ public:
     ~CHNumber() override;
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 
     // protocol

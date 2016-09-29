@@ -58,7 +58,7 @@ public:
     ARRAY_CONTAINS(id) sortedArrayUsingComparator(CHArraySortedComparator cmptr) const;
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 
     // protocol
@@ -110,7 +110,7 @@ public:
     static CHMutableArray *arrayWithArray(const CHArray *array);
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 protected:
     id copyWithZone(std::nullptr_t) const;

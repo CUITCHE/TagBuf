@@ -74,7 +74,7 @@ public:
     id mutableCopy() const;
 
     // runtime
-    virtual Class getClass() const;
+    Class getClass() const;
     static Class getClass(std::nullptr_t);
 
     // protocol

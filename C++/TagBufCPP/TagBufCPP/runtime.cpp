@@ -77,7 +77,7 @@ bool class_registerClass(Class cls, Class superClass)
     return runtime_class_hashmap.emplace(cls->name, cls).second;
 }
 
-IMP runtime_lookup_method(Class cls, SEL selector)
+IMP runtime_lookup_method(Class cls, SEL selector, IMP ignoreIMP/* = (IMP)-1*/)
 {
     IMP imp = cache_lookup_method(cls, selector);
     if (imp == (IMP)0) {
@@ -86,12 +86,17 @@ IMP runtime_lookup_method(Class cls, SEL selector)
         ReTry:
             int outcount = _cls->methodCount;
             method_list_t *list = _cls->methodList;
+        occurIgnoreIMP:
             while (outcount --> 0) {
                 if (!strcmp(list->method[0].name, selector)) {
                     imp = reinterpret_cast<IMP>(&list->method);
                     break;
                 }
                 ++list;
+            }
+            if (imp == ignoreIMP) {
+                imp = 0;
+                goto occurIgnoreIMP;
             }
             if (imp != (IMP)0) {
                 cache_fill_method(cls, selector, imp);
@@ -399,14 +404,22 @@ Method *class_copyMethodList(const Class cls, unsigned int *outCount)
 const char *object_getClassName(const id object)
 {
     if (object->isTaggedPointer()) {
-        if (is_number(object)) {
-            return CHNumber::getClass(nullptr)->name;
-        } else if (is_string(object)) {
-            return CHString::getClass(nullptr)->name;
-        } else if (is_data(object)) {
-            return CHData::getClass(nullptr)->name;
-        }
-        return nullptr;
+        const char *name = nullptr;
+        do {
+            if (is_data(object)) {
+                name = CHData::getClass(nullptr)->name;
+                break;
+            }
+            if (is_string(object)) {
+                name = CHString::getClass(nullptr)->name;
+                break;
+            }
+            if (is_number(object)) {
+                name = CHNumber::getClass(nullptr)->name;
+                break;
+            }
+        } while (0);
+        return name;
     }
     return object->getClass()->name;
 }

@@ -13,6 +13,7 @@
 int main(int argc, const char * argv[]) {
     CHString *str = tstr("r346457");
     id obj = dynamic_cast<id>(str);
+    auto cls = obj->getClass();
     CHLog("%p@", obj->description());
     return 0;
 }

@@ -79,7 +79,7 @@ public:
     static CHString* stringWithFormat(const char *format, va_list argList);
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 
     // protocol
@@ -112,7 +112,7 @@ public:
     static CHMutableString* stringWithCapacity(uint32_t capacity);
 
     // runtime
-    Class getClass() const override;
+    Class getClass() const ;
     static Class getClass(std::nullptr_t);
 private:
     static id allocateInstance();
