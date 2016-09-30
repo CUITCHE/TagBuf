@@ -63,7 +63,7 @@ Class CHObject::getClass() const
     if (isTaggedPointer()) {
         return object_getClass((id)this);
     }
-    if (!this->isMemberOfClass(CHObject::getClass(nullptr))) {
+    if (!this->isMemberOfClass(&class_CHObject)) {
         if (this->respondsToSelector(selector(getClass))) {
             return this->getClass();
         }

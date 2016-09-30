@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include "TaggedPointer.h"
 
-extern char *output_buffer;
-
 void CHLog(const char *fmt, ...)
 {
     char *buffer = nullptr;
@@ -21,7 +19,5 @@ void CHLog(const char *fmt, ...)
     (void) tprintf_c(buffer, nullptr, fmt, ap, OUTPUT_FLAG_LOG);
     va_end(ap);
     puts(buffer);
-    if (buffer > output_buffer) {
-        free(buffer);
-    }
+    free(buffer);
 }

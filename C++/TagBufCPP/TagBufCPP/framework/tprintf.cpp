@@ -53,7 +53,6 @@
 #define OBJECTFLAG 0x00000800
 
 #define ALLOC_SIZE 512
-char output_buffer[ALLOC_SIZE];
 
 static char *tlonglong_to_string(char *buf, unsigned long long n, int len, uint flag)
 {
@@ -108,9 +107,7 @@ uint64_t tprintf(const char *format, ...)
     va_end(ap);
     puts(str);
     fflush(stdout);
-    if (str != output_buffer) {
-        free(str);
-    }
+    free(str);
     return n;
 }
 
@@ -123,9 +120,7 @@ uint64_t tprintf_error(const char *format, ...)
     va_end(ap);
     fprintf(stderr, "%s", str);
     fflush(stderr);
-    if (str != output_buffer) {
-        free(str);
-    }
+    free(str);
     return n;
 }
 
@@ -141,19 +136,14 @@ uint64_t tprintf_c(char *&outBuffer, uint32_t *capacity, const char *fmt, va_lis
     uint64_t chars_written = 0;
     id obj = nullptr;
     char num_buffer[32];
-    char *str = output_buffer;
+    char *str = (char *)malloc(ALLOC_SIZE);
     outBuffer = str;
     size_t len = ALLOC_SIZE;
 
     auto __realloc = [&](uint32_t lengthOfWillWrite){
         if (chars_written + lengthOfWillWrite > len) {
             len  = chars_written + lengthOfWillWrite;
-            if (output_buffer == outBuffer) {
-                outBuffer = (char *)malloc(len);
-                memcpy(outBuffer, output_buffer, chars_written);
-            } else {
-                outBuffer = (char *)realloc(outBuffer, len);
-            }
+            outBuffer = (char *)realloc(outBuffer, len);
             str = outBuffer;
             str += chars_written;
         }

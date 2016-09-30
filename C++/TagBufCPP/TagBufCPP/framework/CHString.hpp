@@ -79,7 +79,7 @@ public:
     static CHString* stringWithFormat(const char *format, va_list argList);
 
     // runtime
-    Class getClass() const ;
+    Class getClass() const override;
     static Class getClass(std::nullptr_t);
 
     // protocol

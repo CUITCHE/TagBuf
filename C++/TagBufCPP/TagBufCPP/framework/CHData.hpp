@@ -37,7 +37,7 @@ public:
     static CHData *dataWithBytesNoCopy(void *bytes, uint32_t length, bool freeWhenDone = false);
 
     // runtime
-    Class getClass() const ;
+    Class getClass() const override;
     static Class getClass(std::nullptr_t);
 private:
     static id allocateInstance();

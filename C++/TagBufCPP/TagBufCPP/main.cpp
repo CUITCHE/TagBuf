@@ -9,11 +9,13 @@
 #include <stdio.h>
 #include "CHString.hpp"
 #include "CHLog.hpp"
+#include "arc_ptr.hpp"
 
 int main(int argc, const char * argv[]) {
     CHString *str = tstr("r346457");
     id obj = dynamic_cast<id>(str);
-    auto cls = obj->getClass();
-    CHLog("%p@", obj->description());
+    str = obj->description();
+    CHLog("%p@", str);
+    arc_ptr<CHString> arc(str);
     return 0;
 }
