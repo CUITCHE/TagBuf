@@ -11,7 +11,7 @@
 
 #include <stdarg.h>
 
-#include "id.hpp"
+#include "CHObject.hpp"
 
 class CHString;
 class CHArray;

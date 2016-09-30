@@ -10,7 +10,7 @@
 #define CHBuffer_hpp
 
 #include <stdio.h>
-#include "id.hpp"
+#include "CHObject.hpp"
 #include <functional>
 
 using CHDataChunkCallback = std::function<void(const char *bytes, uint32_t byteLength, bool *stop)>;

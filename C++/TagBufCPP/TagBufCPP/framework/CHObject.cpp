@@ -6,7 +6,7 @@
 //  Copyright © 2016年 CHE. All rights reserved.
 //
 
-#include "id.hpp"
+#include "CHObject.hpp"
 #include "CHTagBuf.hpp"
 #include "TaggedPointer.h"
 #include "TagBufDefines.h"

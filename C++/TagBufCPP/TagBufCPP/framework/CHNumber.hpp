@@ -9,7 +9,7 @@
 #ifndef CHNumber_hpp
 #define CHNumber_hpp
 
-#include "id.hpp"
+#include "CHObject.hpp"
 
 class CHString;
 

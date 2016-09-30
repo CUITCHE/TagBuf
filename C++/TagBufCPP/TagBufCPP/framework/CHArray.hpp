@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <functional>
-#include "id.hpp"
+#include "CHObject.hpp"
 #include "CHRange.hpp"
 
 using CHArrayObjectCallback = std::function<void(const id obj, uint32_t index, bool *stop)>;

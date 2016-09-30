@@ -20,7 +20,7 @@
 		FBBBB62E1D8EAE98008DF84F /* CHData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB61A1D8EAE98008DF84F /* CHData.cpp */; };
 		FBBBB62F1D8EAE98008DF84F /* CHNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB61C1D8EAE98008DF84F /* CHNumber.cpp */; };
 		FBBBB6301D8EAE98008DF84F /* CHString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB61E1D8EAE98008DF84F /* CHString.cpp */; };
-		FBBBB6311D8EAE98008DF84F /* id.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6201D8EAE98008DF84F /* id.cpp */; };
+		FBBBB6311D8EAE98008DF84F /* CHObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6201D8EAE98008DF84F /* CHObject.cpp */; };
 		FBBBB6321D8EAE98008DF84F /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6221D8EAE98008DF84F /* main.cpp */; };
 		FBBBB6331D8EAE98008DF84F /* runtime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6231D8EAE98008DF84F /* runtime.cpp */; };
 		FBBBB6341D8EAE98008DF84F /* TagBufferBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBBBB6271D8EAE98008DF84F /* TagBufferBuilder.cpp */; };
@@ -69,8 +69,8 @@
 		FBBBB61D1D8EAE98008DF84F /* CHNumber.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHNumber.hpp; sourceTree = "<group>"; };
 		FBBBB61E1D8EAE98008DF84F /* CHString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHString.cpp; sourceTree = "<group>"; };
 		FBBBB61F1D8EAE98008DF84F /* CHString.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHString.hpp; sourceTree = "<group>"; };
-		FBBBB6201D8EAE98008DF84F /* id.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = id.cpp; sourceTree = "<group>"; };
-		FBBBB6211D8EAE98008DF84F /* id.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = id.hpp; sourceTree = "<group>"; };
+		FBBBB6201D8EAE98008DF84F /* CHObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CHObject.cpp; sourceTree = "<group>"; };
+		FBBBB6211D8EAE98008DF84F /* CHObject.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CHObject.hpp; sourceTree = "<group>"; };
 		FBBBB6221D8EAE98008DF84F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		FBBBB6231D8EAE98008DF84F /* runtime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = runtime.cpp; sourceTree = "<group>"; };
 		FBBBB6241D8EAE98008DF84F /* runtime.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = runtime.hpp; sourceTree = "<group>"; };
@@ -156,8 +156,8 @@
 				FB6A02BE1D8F8206009B62B7 /* TaggedPointer.h */,
 				FBBBB6181D8EAE98008DF84F /* cast.cpp */,
 				FBBBB6191D8EAE98008DF84F /* cast.hpp */,
-				FBBBB6201D8EAE98008DF84F /* id.cpp */,
-				FBBBB6211D8EAE98008DF84F /* id.hpp */,
+				FBBBB6201D8EAE98008DF84F /* CHObject.cpp */,
+				FBBBB6211D8EAE98008DF84F /* CHObject.hpp */,
 				FBBBB61A1D8EAE98008DF84F /* CHData.cpp */,
 				FBBBB61B1D8EAE98008DF84F /* CHData.hpp */,
 				FBBBB61C1D8EAE98008DF84F /* CHNumber.cpp */,
@@ -252,7 +252,7 @@
 				FB35B44E1D963F0E002F1ED9 /* Algorithm.cpp in Sources */,
 				FBBBB6331D8EAE98008DF84F /* runtime.cpp in Sources */,
 				FBE7BD351D991052009F4113 /* CHLog.cpp in Sources */,
-				FBBBB6311D8EAE98008DF84F /* id.cpp in Sources */,
+				FBBBB6311D8EAE98008DF84F /* CHObject.cpp in Sources */,
 				FB5CBE091D98F0F2002CE3AB /* CHException.cpp in Sources */,
 				FBBBB6321D8EAE98008DF84F /* main.cpp in Sources */,
 				FBBBB6301D8EAE98008DF84F /* CHString.cpp in Sources */,

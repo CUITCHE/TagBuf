@@ -9,7 +9,7 @@
 #ifndef CHString_hpp
 #define CHString_hpp
 
-#include "id.hpp"
+#include "CHObject.hpp"
 #include "CHRange.hpp"
 #include <stdarg.h>
 

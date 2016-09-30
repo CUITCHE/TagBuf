@@ -10,7 +10,7 @@
 #define CHTagBuf_hpp
 
 #include <stdio.h>
-#include "id.hpp"
+#include "CHObject.hpp"
 
 class CHTagBuf : public CHObject
 {

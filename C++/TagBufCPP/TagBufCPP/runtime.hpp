@@ -18,7 +18,7 @@
 #endif
 
 #include <stdio.h>
-#include "id.hpp"
+#include "CHObject.hpp"
 #include <stdlib.h>
 #include "CHException.hpp"
 

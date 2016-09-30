@@ -1,5 +1,5 @@
 //
-//  id.hpp
+//  CHObject.hpp
 //  TagBufCPP
 //
 //  Created by hejunqiu on 16/9/16.
