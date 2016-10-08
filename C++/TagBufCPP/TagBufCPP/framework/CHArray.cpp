@@ -58,6 +58,7 @@ struct runtimeclass(CHArray)
 };
 
 static class_t ClassNamed(CHArray) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHArray),
     runtimeclass(CHArray)::methods(),
@@ -261,7 +262,7 @@ struct CHArrayPrivate
         size = 0;
         if (other == nullptr) {
             if (capacity > STABLE_LENGTH_SET) {
-                _begin = (id *)realloc(_begin, sizeof(id *) * STABLE_LENGTH_SET);
+                _begin = (id *)realloc(_begin, sizeof(id) * STABLE_LENGTH_SET);
                 capacity = STABLE_LENGTH_SET;
             }
         } else {
@@ -562,6 +563,7 @@ struct runtimeclass(CHMutableArray)
 };
 
 static class_t ClassNamed(CHMutableArray) = {
+    0,
     CHArray::getClass(nullptr),
     selector(CHMutableArray),
     runtimeclass(CHMutableArray)::methods(),

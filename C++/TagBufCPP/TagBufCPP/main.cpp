@@ -10,12 +10,15 @@
 #include "CHString.hpp"
 #include "CHLog.hpp"
 #include "arc_ptr.hpp"
+#include <memory>
 
 int main(int argc, const char * argv[]) {
     CHString *str = tstr("r346457");
     id obj = dynamic_cast<id>(str);
     str = obj->description();
     CHLog("%p@", str);
-    arc_ptr<CHString> arc(str);
+    arc_ptr<CHMutableString> arc((CHMutableString *)str);
+    arc_ptr<CHString> arc2;
+    arc2 = arc;
     return 0;
 }

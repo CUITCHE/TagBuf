@@ -23,6 +23,7 @@ static ivar_list_t IvarListNamed(CHDemo2)[] = {
 RUNTIMECLASS(CHDemo2);
 
 static class_t ClassNamed(CHDemo2) = {
+    0,
     CHTagBuf::getClass(nullptr),
     selector(CHDemo2),
     runtimeclass(CHDemo2)::methods(),
@@ -51,6 +52,7 @@ static ivar_list_t IvarListNamed(CHDemo)[] = {
 RUNTIMECLASS(CHDemo);
 
 static class_t ClassNamed(CHDemo) = {
+    0,
     CHTagBuf::getClass(nullptr),
     selector(CHDemo),
     runtimeclass(CHDemo)::methods(),

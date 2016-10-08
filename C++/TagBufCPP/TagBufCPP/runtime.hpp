@@ -69,6 +69,7 @@ struct ivar_list_t
 
 struct class_t final
 {
+    Class isa;
     Class super_class;
     const char *const name;
     struct method_list_t *const methodList; // In this version, Not Implement.
@@ -152,19 +153,17 @@ _T methodInvoke(id self, SEL selector, Class cls, Args... args)
         throwException(CHInvalidArgumentException, "Param must not be nil!(cls:%p\nselector:%p)", cls, selector);
     }
     struct method_t *method = reinterpret_cast<struct method_t *>(runtime_lookup_method(cls, selector));
-    if (!self) { // This is a static-member method
-        if (method->flag & __Member) {
-            ;
-        }
-    }
     if (!method) {
         throwException(CHInvalidArgumentException, "<Class:%s>Unrecognized selector:%s",cls->name ,selector);
     }
     typedef _T(*Function)(Args...);
     Function f = (Function)method->imp;
-    if ((method->flag & __Static)) {
-        return f(std::forward<Args>(args)...);
+    if (!self) { // This is a static-member method
+        if (method->flag & __Static) {
+            return f(std::forward<Args>(args)...);
+        }
     }
+
     if (!self) {
         throwException(CHInvalidArgumentException, "self must not be nil!");
     }

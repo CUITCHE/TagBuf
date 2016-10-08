@@ -46,7 +46,14 @@ struct runtimeclass(CHObject)
     }
 };
 
+static class_t CHObject_isa_CHObject_meta = {
+    0,
+    0,
+    0
+};
+
 static class_t ClassNamed(CHObject) = {
+    &CHObject_isa_CHObject_meta,
     nullptr,
     selector(CHObject),
     runtimeclass(CHObject)::methods(),

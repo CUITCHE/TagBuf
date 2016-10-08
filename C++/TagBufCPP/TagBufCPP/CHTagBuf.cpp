@@ -19,6 +19,7 @@
 RUNTIMECLASS(CHTagBuf);
 
 static class_t ClassNamed(CHTagBuf) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHTagBuf),
     runtimeclass(CHTagBuf)::methods(),

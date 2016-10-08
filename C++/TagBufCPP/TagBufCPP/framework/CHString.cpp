@@ -79,6 +79,7 @@ struct runtimeclass(CHString)
 };
 
 static class_t ClassNamed(CHString) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHString),
     runtimeclass(CHString)::methods(),
@@ -1007,6 +1008,7 @@ struct runtimeclass(CHMutableString)
 };
 
 static class_t ClassNamed(CHMutableString) = {
+    0,
     CHString::getClass(nullptr),
     selector(CHMutableString),
     nullptr,

@@ -39,6 +39,7 @@ struct runtimeclass(CHData)
 };
 
 static class_t ClassNamed(CHData) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHData),
     runtimeclass(CHData)::methods(),
@@ -446,6 +447,7 @@ struct runtimeclass(CHMutableData)
 };
 
 static class_t ClassNamed(CHMutableData) = {
+    0,
     CHData::getClass(nullptr),
     selector(CHMutableData),
     runtimeclass(CHMutableData)::methods(),

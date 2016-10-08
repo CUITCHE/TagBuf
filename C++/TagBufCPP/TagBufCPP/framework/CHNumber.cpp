@@ -27,6 +27,7 @@ struct runtimeclass(CHNumber)
 };
 
 static class_t ClassNamed(CHNumber) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHNumber),
     runtimeclass(CHNumber)::methods(),

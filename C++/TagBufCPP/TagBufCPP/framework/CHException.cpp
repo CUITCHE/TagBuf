@@ -74,6 +74,7 @@ struct runtimeclass(CHException)
 };
 
 static class_t ClassNamed(CHException) = {
+    0,
     CHObject::getClass(nullptr),
     selector(CHString),
     runtimeclass(CHException)::methods(),
